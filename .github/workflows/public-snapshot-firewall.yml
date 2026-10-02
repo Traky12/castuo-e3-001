@@ -5,11 +5,23 @@ on:
     paths:
       - "public/status-snapshot.json"
       - "scripts/validate_public_snapshot_firewall.py"
+      - "README.md"
+      - "docs/CASTUO_ECOSYSTEM_INTEGRATION_2026-08-22.md"
+      - "docs/CASTUO_DEEP_AUDIT_2026-08-22.md"
+      - "docs/governance/CASTUO-ECOSYSTEM-SYNC-2026-08-22.md"
+      - "scripts/validate_public_snapshot.py"
+      - ".github/workflows/public-snapshot-firewall.yml"
   push:
     branches: [main]
     paths:
       - "public/status-snapshot.json"
       - "scripts/validate_public_snapshot_firewall.py"
+      - "README.md"
+      - "docs/CASTUO_ECOSYSTEM_INTEGRATION_2026-08-22.md"
+      - "docs/CASTUO_DEEP_AUDIT_2026-08-22.md"
+      - "docs/governance/CASTUO-ECOSYSTEM-SYNC-2026-08-22.md"
+      - "scripts/validate_public_snapshot.py"
+      - ".github/workflows/public-snapshot-firewall.yml"
   workflow_dispatch:
 
 permissions:
@@ -20,5 +32,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      # Unchanged gate, now skipped only when neither the snapshot nor its
+      # validator changed (documentation-only changes also trigger this
+      # workflow). Unknown base or workflow_dispatch: always validate.
       - name: Validate public snapshot claim boundary
-        run: python3 scripts/validate_public_snapshot_firewall.py public/status-snapshot.json
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          set -euo pipefail
+          watched="public/status-snapshot.json scripts/validate_public_snapshot_firewall.py"
+          if [ "$EVENT" != "workflow_dispatch" ] && [ -n "$BASE" ] \
+            && git cat-file -e "${BASE}^{commit}" 2>/dev/null \
+            && git diff --quiet "$BASE" HEAD -- $watched; then
+            echo "SKIP: public snapshot inputs unchanged"
+            exit 0
+          fi
+          python3 scripts/validate_public_snapshot_firewall.py public/status-snapshot.json
+
+  authority-boundaries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Self-test documentation gate
+        run: python3 scripts/validate_public_snapshot.py --self-test
+      - name: Validate E3 authority boundaries (README and historical records)
+        run: python3 scripts/validate_public_snapshot.py --root .
