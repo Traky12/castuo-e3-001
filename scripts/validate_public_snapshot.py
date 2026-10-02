@@ -214,6 +214,10 @@ def main() -> int:
     if args.self_test:
         return self_test()
     results = run(args.root)
+    authority_ok = not results[README]
+    historical_ok = not any(results[name] for name in HISTORICAL)
+    print("Authority boundary check: " + ("PASS — validated current public surfaces." if authority_ok else "BLOCKED"))
+    print("Historical document check: " + ("PASS — validated historical headers and no private references." if historical_ok else "BLOCKED"))
     blocked = {name: findings for name, findings in results.items() if findings}
     if blocked:
         print(json.dumps({"status": "BLOCKED", "findings": blocked}, indent=2, ensure_ascii=False))

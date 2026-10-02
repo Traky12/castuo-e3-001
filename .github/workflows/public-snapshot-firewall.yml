@@ -1,16 +1,8 @@
 name: Public snapshot claim firewall
 
 on:
+  # Every PR: authority-boundary validation always runs.
   pull_request:
-    paths:
-      - "public/status-snapshot.json"
-      - "scripts/validate_public_snapshot_firewall.py"
-      - "README.md"
-      - "docs/CASTUO_ECOSYSTEM_INTEGRATION_2026-08-22.md"
-      - "docs/CASTUO_DEEP_AUDIT_2026-08-22.md"
-      - "docs/governance/CASTUO-ECOSYSTEM-SYNC-2026-08-22.md"
-      - "scripts/validate_public_snapshot.py"
-      - ".github/workflows/public-snapshot-firewall.yml"
   push:
     branches: [main]
     paths:
@@ -34,23 +26,24 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      # Unchanged gate, now skipped only when neither the snapshot nor its
-      # validator changed (documentation-only changes also trigger this
-      # workflow). Unknown base or workflow_dispatch: always validate.
+      # Snapshot present: always validated. Snapshot absent: reported as
+      # NOT_APPLICABLE, never as PASS. Removing an existing snapshot: BLOCKED.
       - name: Validate public snapshot claim boundary
         env:
-          EVENT: ${{ github.event_name }}
           BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
           set -euo pipefail
-          watched="public/status-snapshot.json scripts/validate_public_snapshot_firewall.py"
-          if [ "$EVENT" != "workflow_dispatch" ] && [ -n "$BASE" ] \
-            && git cat-file -e "${BASE}^{commit}" 2>/dev/null \
-            && git diff --quiet "$BASE" HEAD -- $watched; then
-            echo "SKIP: public snapshot inputs unchanged"
+          snapshot="public/status-snapshot.json"
+          if [ -f "$snapshot" ]; then
+            python3 scripts/validate_public_snapshot_firewall.py "$snapshot"
+            echo "Public snapshot check: PASS — validated $snapshot." | tee -a "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-          python3 scripts/validate_public_snapshot_firewall.py public/status-snapshot.json
+          if [ -n "${BASE:-}" ] && git cat-file -e "${BASE}:${snapshot}" 2>/dev/null; then
+            echo "Public snapshot check: BLOCKED — $snapshot was removed by this change." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "Public snapshot check: NOT_APPLICABLE — $snapshot is absent." | tee -a "$GITHUB_STEP_SUMMARY"
 
   authority-boundaries:
     runs-on: ubuntu-latest
@@ -59,4 +52,7 @@ jobs:
       - name: Self-test documentation gate
         run: python3 scripts/validate_public_snapshot.py --self-test
       - name: Validate E3 authority boundaries (README and historical records)
-        run: python3 scripts/validate_public_snapshot.py --root .
+        run: |
+          set -euo pipefail
+          python3 scripts/validate_public_snapshot.py --root . | tee validation.txt
+          grep -E '^(Authority boundary|Historical document) check:' validation.txt >> "$GITHUB_STEP_SUMMARY"
