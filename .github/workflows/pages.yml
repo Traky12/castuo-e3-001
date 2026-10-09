@@ -54,6 +54,22 @@ jobs:
         run: for f in docs/demo/*.js docs/demo/tests/*.mjs; do node --check "$f"; done
       - name: Conformance with the v0.1.2 candidate CLI (8 scenarios + interop)
         run: node docs/demo/tests/conformance.mjs candidate/examples/bundles python candidate/scripts/e3bundle.py
+      - name: Record actual candidate manifest hash from CLI verification
+        run: |
+          python candidate/scripts/e3bundle.py verify candidate/examples/bundles/valid \
+            --min-signatures 2 \
+            --trusted-keys candidate/examples/bundles/trusted-keys.json \
+            > /tmp/e3bundle-candidate-report.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("/tmp/e3bundle-candidate-report.json").read_text(encoding="utf-8"))
+          assert report["status"] == "VERIFIED", report
+          assert report["files_verified"] == report["files_declared"], report
+          print("candidate_manifest_hash=" + report["manifest_hash"])
+          print("candidate_verification_status=" + report["status"])
+          print("candidate_files=" + str(report["files_verified"]) + "/" + str(report["files_declared"]))
+          PY
       - name: Local import rules (paths, limits, decoding)
         run: node docs/demo/tests/importer.mjs
       - name: Input conformance with the v0.1.2 candidate CLI (malformed inputs and unsafe paths)
