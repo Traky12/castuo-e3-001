@@ -50,15 +50,18 @@ class PackagingTests(unittest.TestCase):
     def test_version_is_listed_in_changelog(self):
         changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
         version = self.project["version"]
-        released_heading = re.search(rf"(?m)^## \\[{re.escape(version)}\\](?:\\s|$)", changelog)
-        if released_heading:
+        if f"## [{version}]" in changelog:
             return
 
-        unreleased = re.search(r"(?ms)^## \\[Unreleased\\]\\s*(.*?)(?=^## \\[|\\Z)", changelog)
-        self.assertIsNotNone(unreleased, "Changelog must have an Unreleased section before a version is tagged.")
+        section_start = changelog.find("## [Unreleased]")
+        self.assertGreaterEqual(section_start, 0, "Changelog must have an Unreleased section before a version is tagged.")
+        section_end = changelog.find("\n## [", section_start + len("## [Unreleased]"))
+        if section_end < 0:
+            section_end = len(changelog)
+        unreleased = changelog[section_start:section_end]
         self.assertIn(
             "**Candidate package version:** `" + version + "` (not tagged or released yet).",
-            unreleased.group(1),
+            unreleased,
         )
 
 
