@@ -1,6 +1,10 @@
-# E3-001 External Verification Protocol
+# E3-001 — External Evidence Bundle Verification
 
-E3-001 is the public, evidence-scoped protocol for independently replaying and reviewing the CASTÚO S-001A vertical slice. This repository is a protocol and verification surface. It is not a production certification, commercial proof, maturity claim or authorization service.
+[![Tests](https://github.com/Traky12/castuo-e3-001/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/Traky12/castuo-e3-001/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-informational.svg)](https://www.python.org/)
+
+E3-001 is a public protocol and Python verification tool for inspecting bounded evidence packages, artifact hashes, Ed25519 signatures and signed review records. Its purpose is to support controlled external replay and review of the CASTÚO S-001A scenario. It is not a production certification, commercial proof, maturity claim or authorization service.
 
 > **A local candidate never counts as independent verification.**
 
@@ -85,18 +89,27 @@ Requires Python 3.11+.
 ```bash
 python -m pip install -r requirements.txt
 
-# Build a valid synthetic bundle and validate it (exit code 0)
+# Build a valid synthetic DEMO bundle. Structural checks pass (exit code 0),
+# but the result must be labelled DEMO_VALIDATED, not external evidence.
 python examples/make_demo_bundle.py demo/ok
 python scripts/validate_external_evidence_bundle.py demo/ok --output demo/ok-validation.json
 
-# Build a tampered bundle and watch it fail (exit code 1, findings listed)
+# G2 must reject the demo (exit code 1 is expected here).
+if python scripts/evaluate_g2.py demo/ok-validation.json --output demo/ok-g2.json; then
+  echo "ERROR: demo-only bundle reached G2" >&2
+  exit 1
+else
+  echo "PASS: demo-only bundle correctly blocked at G2"
+fi
+
+# Build a tampered bundle and watch the validator fail (exit code 1).
 python examples/make_demo_bundle.py demo/bad --tamper result
 python scripts/validate_external_evidence_bundle.py demo/bad --output demo/bad-validation.json
 ```
 
 Available `--tamper` modes: `result`, `fixture`, `attestation-signature`, `reviewer-signature`, `reviewer-quorum`, `reviewer-duplicate`, `local-runner`, `production-claim`, `missing-envelope`.
 
-> **The demo bundle is not evidence.** Its keys are generated in memory and discarded, its runner and reviewers are fictional `DEMO-*` identities, and it contains no S-001A replay. The validator will report `VERIFIED_FOR_G2` for it because it checks hashes, signatures and declared predicates — not who signed. A passing demo shows that the validator works; it says nothing about CASTÚO-SYSTEM.
+> **The demo bundle is not evidence.** Its keys are generated in memory and discarded, its runner and reviewers are fictional `DEMO-*` identities, and it contains no S-001A replay. The validator reports `DEMO_VALIDATED`, with `g2_eligible: false`; the G2 evaluator must return `BLOCKED`. A passing integrity smoke test says nothing about the independence or identity of a runner or reviewer, the truth of a claim, or CASTÚO-SYSTEM.
 
 Run the test suite with `python -m pytest tests` (or `python -m unittest discover tests`).
 
@@ -135,3 +148,10 @@ Current authority and evidence boundaries are defined by the current README and 
 ## CASTÚO Deep Audit — 2026-08-22
 
 This repository received the second evidence-scoped ecosystem audit. The local audit record is [CASTUO_DEEP_AUDIT_2026-08-22.md](docs/CASTUO_DEEP_AUDIT_2026-08-22.md). This link records traceability only; it does not claim production readiness, certification, field validation or independent review.
+
+
+## Community and adoption
+
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for development and review expectations, and [docs/PUBLIC_ADOPTION_PLAN.md](docs/PUBLIC_ADOPTION_PLAN.md) for the adoption roadmap and measurable checkpoints.
+
+If this project is useful in your work, consider starring the repository or sharing a reproducible issue or improvement. Stars are a discovery signal, not evidence of technical validation.
