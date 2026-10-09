@@ -27,6 +27,11 @@ function cli(dir, min, keysFile) {
   catch (e) { return { report: JSON.parse(e.stdout), code: e.status }; }
 }
 
+// Choosing a folder through the file input once hung for 30 s in Firefox on CI (PR #59, run
+// 37996253918; passed on rerun). Folder tests get more time and one retry; a retried pass is
+// reported as "flaky" in the output, not hidden.
+test.describe.configure({ timeout: 60_000, retries: process.env.CI ? 1 : 0 });
+
 const norm = (f) => (f.startsWith('cannot read ') ? f.slice(0, f.indexOf(':')) : f);
 
 async function choose(page, dir, { keys, pin, min = 2 } = {}) {
