@@ -1,6 +1,6 @@
 name: Reproduction report
 description: You tried the quickstart or verified your own bundle — tell us how it went
-labels: [reproduction]
+labels: [reproduction, needs-triage]
 body:
   - type: dropdown
     id: what
