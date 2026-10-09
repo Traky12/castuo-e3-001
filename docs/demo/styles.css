@@ -137,3 +137,8 @@ footer.dark a { color: var(--brass-light); }
 .mt0 { margin-top: 0; }
 .muted-p { margin: 0; color: var(--ink-2); }
 .muted-p.grow { flex: 1 1 480px; }
+.phases { display: flex; flex-direction: column; gap: 22px; }
+.phases[hidden] { display: none; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.actions .btn { flex: 1 1 180px; }
+.status.ERROR { background: #6b5a1f; }

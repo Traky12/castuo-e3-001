@@ -53,10 +53,12 @@ jobs:
         run: for f in docs/demo/*.js docs/demo/tests/*.mjs; do node --check "$f"; done
       - name: Conformance with the released CLI (8 scenarios + interop)
         run: node docs/demo/tests/conformance.mjs release/examples/bundles python release/scripts/e3bundle.py
+      - name: Input conformance with the released CLI (malformed inputs)
+        run: node docs/demo/tests/input-conformance.mjs release/examples/bundles python release/scripts/e3bundle.py
       - name: Assemble site
         run: |
           mkdir -p _site/assets
-          cp docs/demo/index.html docs/demo/crear.html docs/demo/styles.css docs/demo/verifier.js docs/demo/demo.js docs/demo/crear.js _site/
+          cp docs/demo/index.html docs/demo/crear.html docs/demo/styles.css docs/demo/verifier.js docs/demo/demo.js docs/demo/crear.js docs/demo/input.js _site/
           cp docs/demo/assets/logo.jpg _site/assets/
           cp -r release/examples/bundles _site/bundles
           touch _site/.nojekyll

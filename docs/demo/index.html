@@ -80,7 +80,11 @@
         <p class="hint" id="csvNote">Cargando…</p>
       </div>
       <div class="field end">
-        <button class="btn" id="run" type="button">Verificar ahora</button>
+        <div class="actions">
+          <button class="btn" id="run" type="button">Verificar ahora</button>
+          <button class="btn secondary" id="reset" type="button" aria-describedby="resetNote">Reiniciar sesión</button>
+        </div>
+        <p class="hint" id="resetNote">Reiniciar vuelve al paquete original y descarta lo que has editado y el último informe. La página deja de guardarlo; el navegador libera la memoria cuando decide.</p>
         <p class="hint">Equivalente en terminal:</p>
         <pre class="terminal" id="cli"></pre>
       </div>
@@ -110,6 +114,7 @@
     </dl>
   </section>
 
+  <div id="phases" class="phases">
   <h2>Qué se ha comprobado, fase a fase</h2>
 
   <article class="card">
@@ -142,6 +147,7 @@
     <div class="phase-head"><h3><span class="num">05</span>Informe JSON, como el del CLI</h3><button class="btn secondary" type="button" id="copy">Copiar JSON</button></div>
     <pre class="terminal" id="report"></pre>
   </article>
+  </div>
 
   <section class="card" aria-labelledby="checks-title">
     <p class="kicker">Qué comprueba</p>
@@ -244,6 +250,7 @@ e3bundle verify examples/bundles/valid \
   <span>Responsable: Gregorio Jiménez Bodes (<a href="https://github.com/Traky12">@Traky12</a>). Sin cookies, sin analítica, sin peticiones a terceros. El logotipo identifica el proyecto; no implica certificación ni madurez operativa.</span>
 </div></footer>
 <script src="verifier.js"></script>
+<script src="input.js"></script>
 <script src="demo.js"></script>
 </body>
 </html>
