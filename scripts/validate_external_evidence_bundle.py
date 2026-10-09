@@ -187,16 +187,52 @@ def main() -> int:
     if len(identities) < args.min_reviewers:
         findings.append(f"independent reviewer quorum not met: {len(identities)} < {args.min_reviewers}")
 
+    # A synthetic demo is useful for exercising the checks, but it must never
+    # be represented as external replay or independent human review. Detect the
+    # explicit marker and DEMO identities independently so removing one marker
+    # alone cannot promote the demo output to VERIFIED_FOR_G2.
+    demo_only = (
+        envelope.get("claim_boundary") == "DEMO_ONLY"
+        or str(runner.get("runner_id", "")).startswith("DEMO-")
+        or (
+            isinstance(attestation, dict)
+            and str(attestation.get("attestation_id", "")).startswith("DEMO-")
+        )
+        or (
+            isinstance(reviewers, list)
+            and any(
+                isinstance(reviewer, dict)
+                and str(reviewer.get("reviewer_id", "")).startswith("DEMO-")
+                for reviewer in reviewers
+            )
+        )
+    )
+    verified_for_g2 = not findings and not demo_only
+    status = (
+        "DEMO_VALIDATED"
+        if demo_only and not findings
+        else "VERIFIED_FOR_G2"
+        if verified_for_g2
+        else "BLOCKED"
+    )
     output = {
         "scenario_id": "S-001A",
-        "status": "VERIFIED_FOR_G2" if not findings else "BLOCKED",
-        "foreign_replay_verified": not findings,
-        "human_review_verified": not findings,
-        "oneR": True if not findings else False,
-        "oneV": True if not findings else False,
+        "mode": "DEMO_ONLY" if demo_only else "EXTERNAL_EVIDENCE",
+        "g2_eligible": verified_for_g2,
+        "status": status,
+        "foreign_replay_verified": verified_for_g2,
+        "human_review_verified": verified_for_g2,
+        "oneR": verified_for_g2,
+        "oneV": verified_for_g2,
         "oneA": False,
         "promotion": "BLOCKED",
-        "claim_boundary": "EXTERNAL_REPLAY_AND_SIGNED_REVIEW_ONLY" if not findings else "NO_CLAIM",
+        "claim_boundary": (
+            "DEMO_ONLY"
+            if demo_only and not findings
+            else "EXTERNAL_REPLAY_AND_SIGNED_REVIEW_ONLY"
+            if verified_for_g2
+            else "NO_CLAIM"
+        ),
         "findings": findings,
     }
     output_path = args.output or package / "external-evidence-validation.json"
