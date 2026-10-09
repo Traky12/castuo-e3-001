@@ -142,14 +142,15 @@ The S-001A validator requires a frozen manifest, fixture, replay result, evidenc
 ```bash
 python -m pip install -r requirements.txt
 python examples/make_demo_bundle.py demo/ok
-python scripts/validate_external_evidence_bundle.py demo/ok --output demo/ok-validation.json        # exit 0
+python scripts/validate_external_evidence_bundle.py demo/ok --output demo/ok-validation.json        # exit 0, DEMO_VALIDATED
+python scripts/evaluate_g2.py demo/ok-validation.json --output demo/ok-g2.json                       # exit 1: G2 must block the demo
 python examples/make_demo_bundle.py demo/bad --tamper result
 python scripts/validate_external_evidence_bundle.py demo/bad --output demo/bad-validation.json      # exit 1
 ```
 
 `--tamper` modes: `result`, `fixture`, `attestation-signature`, `reviewer-signature`, `reviewer-quorum`, `reviewer-duplicate`, `local-runner`, `production-claim`, `missing-envelope`.
 
-> **The demo bundle is not evidence.** Its keys are generated in memory and discarded, its runner and reviewers are fictional `DEMO-*` identities, and it contains no S-001A replay. The validator reports `VERIFIED_FOR_G2` for it because it checks hashes, signatures and declared predicates — not who signed. A passing demo shows that the validator works; it says nothing about CASTÚO-SYSTEM.
+> **The demo bundle is not evidence.** Its keys are generated in memory and discarded, its runner and reviewers are fictional `DEMO-*` identities, and it contains no S-001A replay. The validator reports `DEMO_VALIDATED`, with `g2_eligible: false`; the G2 evaluator must return `BLOCKED`. A passing integrity smoke test says nothing about the independence or identity of a runner or reviewer, the truth of a claim, or CASTÚO-SYSTEM.
 
 ### Architectural identity
 
@@ -172,6 +173,12 @@ python scripts/validate_external_evidence_bundle.py demo/bad --output demo/bad-v
 
 - [Public profile and claim boundary](https://github.com/Traky12/Traky12) · `Castuo-system` *(private)*: canonical technical authority · `castuo-evolution` *(private)*: evolution and governance workspace, not an authority.
 - Historical records for their declared snapshot date only, not current state: [ecosystem integration record of 2026-08-22](docs/CASTUO_ECOSYSTEM_INTEGRATION_2026-08-22.md) and [deep audit of 2026-08-22](docs/CASTUO_DEEP_AUDIT_2026-08-22.md). They do not claim production readiness, certification, field validation or independent review.
+
+## Community and adoption
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development and review expectations, and [docs/PUBLIC_ADOPTION_PLAN.md](docs/PUBLIC_ADOPTION_PLAN.md) for the adoption roadmap and measurable checkpoints.
+
+If this project is useful in your work, consider starring the repository or sharing a reproducible issue or improvement. Stars are a discovery signal, not evidence of technical validation.
 
 ## License
 

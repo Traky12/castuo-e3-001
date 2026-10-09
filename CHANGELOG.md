@@ -4,6 +4,12 @@ All notable changes to this repository are documented here. Versions follow [Sem
 
 ## [Unreleased]
 
+### Changed
+- The S-001A validator labels synthetic `DEMO-*` bundles `DEMO_VALIDATED` (`mode: DEMO_ONLY`, `g2_eligible: false`) instead of `VERIFIED_FOR_G2`, and `evaluate_g2.py` blocks any demo-only validation.
+
+### Added
+- `docs/PUBLIC_ADOPTION_PLAN.md`: maintainer adoption roadmap with measurable checkpoints.
+
 ## [0.1.0] - 2026-10-09
 
 ### Added
