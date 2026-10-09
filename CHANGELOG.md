@@ -4,7 +4,11 @@ All notable changes to this repository are documented here. Versions follow [Sem
 
 ## [Unreleased]
 
-**Candidate package version:** `0.1.1` (not tagged or released yet).
+### Added
+- Reproduction report form: tested path (CLI or browser demo), version, environment, commands, exit codes, friction, evidence and an independence confirmation, for the five-tester gate in #30.
+- Browser demo in `docs/demo/`, published with GitHub Pages: verifies the `v0.1.1` example bundles with WebCrypto (SHA-256, Ed25519) under eight tampering scenarios, and creates and signs new bundles that the CLI verifies. The `pages.yml` workflow takes the bundles and CLI from the release tag and fails if the demo and the CLI disagree.
+
+## [0.1.1] - 2026-10-09
 
 ### Added
 - `e3bundle verify --format text`: human-readable summary on stdout; JSON stays the default, `--output` always writes JSON, exit codes unchanged. Without `--trusted-keys` the summary says `trust not checked`. Contributed by @AFLAHAFI (#32, closes #27).

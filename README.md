@@ -24,6 +24,12 @@ e3bundle --help
 
 Python 3.11 or newer. The unit/CLI suite is tested in CI on Ubuntu, macOS and Windows with Python 3.11–3.13; the composite Action and clean-wheel packaging job run on Ubuntu. Other OS/Python combinations are not currently part of the automated matrix. Latest release: [v0.1.1](https://github.com/Traky12/castuo-e3-001/releases/tag/v0.1.1) (alpha). Not yet published on PyPI. From a clone you can also run `python scripts/e3bundle.py`.
 
+## Try it in your browser
+
+Verify the signed example bundles without installing anything: **[open the browser demo](https://traky12.github.io/castuo-e3-001/)**.
+
+The demo uses the real `v0.1.1` example bundles and performs SHA-256 and Ed25519 verification locally with WebCrypto. You can tamper with the files in eight ways, or create and sign your own bundle and verify it later with the CLI. On every change, CI checks that the demo gives the same result as the `v0.1.1` CLI (`docs/demo/tests/conformance.mjs`). Data is synthetic; a successful verification does not certify that content is true.
+
 ## 30-second demo
 
 ![Terminal: the valid bundle verifies with exit code 0; the tampered bundle fails with hash mismatch: data/readings.csv and exit code 1](docs/assets/demo.svg)
@@ -61,7 +67,7 @@ unchanged. Input errors print `ERROR` and its findings in the selected format;
 as before, they do not write an output file. Without `--trusted-keys`, the text
 summary says `trust not checked` rather than implying signer identity was verified.
 
-**Release compatibility:** `--format text` is present in the current source for the next release candidate; it is **not available in the immutable `v0.1.0` tag**. The `v0.1.1` release has not been published yet. Users installing `@v0.1.0` should use JSON mode; do not treat this main-branch example as proof that the released tag supports text output.
+`--format text` is available from v0.1.1; `v0.1.0` supports JSON output only.
 
 ## Use it on your own files
 
@@ -85,14 +91,14 @@ What `verify` detects: modified, missing and undeclared files; path traversal an
 ## Use it in GitHub Actions
 
 ```yaml
-- uses: Traky12/castuo-e3-001@d68f0d788e8f991bfc3670353cc4912ece7456cb # v0.1.0 alpha (exact release commit)
+- uses: Traky12/castuo-e3-001@38e3c20ee2f37e957f81ba6e1ead6d90bc8a0c9a # v0.1.1 alpha (exact release commit)
   with:
     bundle: evidence/release-42
     min-signatures: "2"
     trusted-keys: .github/trusted-keys.json
 ```
 
-For supply-chain safety, use the full commit SHA shown on the [release page](https://github.com/Traky12/castuo-e3-001/releases), not a moving tag. The SHA above is the verified commit behind the existing `v0.1.0` alpha tag; do not reference `v0.1.1` until a matching tag/release exists.
+For supply-chain safety, use the full commit SHA shown on the [release page](https://github.com/Traky12/castuo-e3-001/releases), not a moving tag. The SHA above is the commit behind the published `v0.1.1` alpha tag.
 
 The step writes the JSON report (`report-path`, default `e3bundle-report.json`), adds the findings to the job summary and fails when verification does not pass. Set `fail-on-error: "false"` to keep the job going and branch on the `status` output (`VERIFIED`, `FAILED` or `ERROR`) instead; GitHub does not expose outputs of a failed step.
 
