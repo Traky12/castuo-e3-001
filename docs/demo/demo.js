@@ -140,7 +140,7 @@
     for (const s of r.phases.signatures) {
       const good = s.signatureOk && s.hashOk;
       const card = el('div', { class: 'sig' + (good ? '' : ' bad') });
-      const head = el('div', { style: 'display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap' });
+      const head = el('div', { class: 'sig-head' });
       head.append(el('span', { class: 'mono' }, s.signer), el('span', { class: 'hint' }, 'rol: ' + s.role));
       const l1 = el('span', {}, 'Firma criptográfica: '); l1.append(el('span', { class: s.signatureOk ? 'yes' : 'no' }, s.signatureOk ? 'válida' : 'inválida'));
       const l2 = el('span', {}, 'Firmó este manifiesto: '); l2.append(el('span', { class: s.hashOk ? 'yes' : 'no' }, s.hashOk ? 'sí' : 'no, firmó otra versión'));
@@ -153,11 +153,11 @@
       ? 'Con --trusted-keys solo cuentan las firmas hechas con las claves públicas que tú has fijado.'
       : 'Sin --trusted-keys, una firma válida solo prueba que alguien con esa clave firmó; no dice quién. Por eso el resultado puede ser VERIFIED con la confianza sin comprobar.';
     for (const s of r.phases.signatures) {
-      const li = el('li', { style: 'display:flex;gap:10px;flex-wrap:wrap' });
+      const li = el('li', { class: 'trust-item' });
       let cls = 'maybe'; let text = 'confianza no comprobada (sin claves fijadas)';
       if (inp.trusted && !s.counted) { cls = 'no'; text = 'no cuenta: la firma no es válida para este manifiesto'; }
       else if (inp.trusted) { cls = s.trusted ? 'yes' : 'no'; text = s.trusted ? 'clave fijada: cuenta' : 'clave no fijada: no cuenta'; }
-      li.append(el('span', { class: 'mono', style: 'min-width:160px' }, s.signer), el('span', { class: cls }, text)); tl.append(li);
+      li.append(el('span', { class: 'mono signer-col' }, s.signer), el('span', { class: cls }, text)); tl.append(li);
     }
     const trustOk = inp.trusted && r.phases.signatures.every((s) => s.trusted);
     setPill('p4', !inp.trusted ? 'warn' : (trustOk ? 'ok' : 'bad'), !inp.trusted ? 'no comprobada' : (trustOk ? 'correcto' : 'fallo detectado'));
