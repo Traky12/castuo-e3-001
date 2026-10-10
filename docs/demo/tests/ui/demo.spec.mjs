@@ -88,7 +88,7 @@ test.describe('unreadable input is ERROR, never VERIFIED', () => {
   const cases = [
     ['manifest.json is not JSON', '**/bundles/valid/manifest.json', '{"format":', 'cannot read manifest.json'],
     ['manifest.json is an array', '**/bundles/valid/manifest.json', '[]', 'manifest.json must be a JSON object'],
-    ['trusted keys are not an object', '**/bundles/trusted-keys.json', '["x"]', 'trusted keys must be a JSON object'],
+    ['trusted keys are not an object', '**/bundles/trusted-keys.json', '["x"]', 'invalid --trusted-keys file'],
   ];
   for (const [name, glob, body, finding] of cases) {
     test(name, async ({ page }) => {

@@ -120,7 +120,7 @@ test.describe('local bundle: same result as the CLI', () => {
     await page.getByLabel('Fijar solo las claves que marque').check();
     const got = await verifyAndRead(page);
     expect(got.status).toBe('ERROR');
-    expect(got.findings[0]).toContain('trusted keys must be a JSON object');
+    expect(got.findings[0]).toContain('invalid --trusted-keys file');
     sameAsCli(got, dir, 2, bad);
   });
 });
