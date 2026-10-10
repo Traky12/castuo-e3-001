@@ -61,6 +61,19 @@ Object.assign(cases, {
   'duplicate signature': { signatures: JSON.stringify([S[0], S[0], S[1]]) },
 });
 
+// Path aliases and NUL (v0.1.2): each must be an unsafe path, as in the CLI, so one file
+// cannot be declared twice under different spellings.
+const withExtraPath = (p) => withManifest({ files: [...M.files, { path: p, sha256: M.files[0].sha256 }] });
+Object.assign(cases, {
+  'path with empty segment': { manifest: withExtraPath('data//readings.csv') },
+  'path with trailing slash': { manifest: withExtraPath('data/') },
+  'path with leading slash': { manifest: withExtraPath('/data/readings.csv') },
+  'path with NUL': { manifest: withExtraPath('data/readings.csv\u0000') },
+  'path starting with ./': { manifest: withExtraPath('./report.md') },
+  'path with /./': { manifest: withExtraPath('data/./readings.csv') },
+  'path with ..': { manifest: withExtraPath('data/../report.md') },
+});
+
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'e3input-'));
 // Python's and JavaScript's JSON parse errors are worded differently; compare up to the file name.
 const norm = (f) => (f.startsWith('cannot read ') ? f.slice(0, f.indexOf(':')) : f);

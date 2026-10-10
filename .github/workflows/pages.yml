@@ -24,7 +24,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  RELEASE_TAG: v0.1.1
+  RELEASE_TAG: v0.1.2
   LOGO_SHA256: 54be9cdc29d888b6709478058800cbed31630f1aaca7abf578eec27896cdc78d
 
 jobs:

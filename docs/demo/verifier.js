@@ -1,6 +1,6 @@
 /*
  * e3.bundle.v1 verifier for the browser demo.
- * Mirrors scripts/e3bundle.py as released in v0.1.1. Equivalence with that CLI is
+ * Mirrors scripts/e3bundle.py as released in v0.1.2. Equivalence with that CLI is
  * checked on every change by docs/demo/tests/conformance.mjs (scenarios) and
  * docs/demo/tests/input-conformance.mjs (malformed input and content) in CI.
  * Uses only WebCrypto (SHA-256, Ed25519). No network, no storage.
@@ -105,9 +105,12 @@
     }
   }
 
+  // Same rule as is_safe_relpath in the v0.1.2 CLI: no backslash, colon or NUL, and no
+  // empty, "." or ".." segment. "a//b", "a/", "/a", "./a" and "a/./b" are all rejected,
+  // so one file cannot be declared under two spellings.
   function isSafePath(p) {
-    if (typeof p !== 'string' || !p || p.includes('\\') || p.includes(':') || p.startsWith('/')) return false;
-    return !p.split('/').some((part) => part === '..' || part === '.');
+    if (typeof p !== 'string' || !p || p.includes('\\') || p.includes(':') || p.includes('\0')) return false;
+    return !p.split('/').some((part) => part === '' || part === '.' || part === '..');
   }
 
   /**

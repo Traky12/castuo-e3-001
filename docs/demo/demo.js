@@ -10,7 +10,7 @@
     ['forged', 'Falsificar una firma'], ['manifest', 'Editar el manifiesto'], ['nopin', 'Sin claves fijadas'], ['untrusted', 'Una clave sin fijar'],
   ];
   const HELP = {
-    original: 'Original: el paquete firmado en v0.1.1, sin cambios. Debe verificarse correctamente.',
+    original: 'Original: el paquete de ejemplo de v0.1.2, sin cambios. Debe verificarse correctamente.',
     tampered: 'Cambiar una temperatura: un valor de data/readings.csv cambia después de firmar. El hash del fichero deja de coincidir.',
     extra: 'Añadir un fichero: aparece notes.txt, que el manifiesto firmado no declara.',
     missing: 'Borrar report.md: falta un fichero que el manifiesto firmado sí declara.',
@@ -114,7 +114,7 @@
     const next = $('next'); next.replaceChildren();
     if (rep.status === 'VERIFIED' && rep.trust_mode === 'pinned') {
       mean.append(el('li', {}, 'Los ficheros coinciden con el manifiesto firmado y las firmas de las claves que fijaste alcanzan el umbral. No dice que el contenido sea verdadero.'));
-      next.append(document.createTextNode('Ejecuta la misma verificación en tu terminal con e3bundle v0.1.1 y compara: '));
+      next.append(document.createTextNode('Ejecuta la misma verificación en tu terminal con e3bundle v0.1.2 y compara: '));
       next.append(el('a', { href: '#local' }, 'pruébalo en tu equipo'), document.createTextNode('.'));
     } else if (rep.status === 'VERIFIED') {
       mean.append(el('li', {}, 'Los ficheros están íntegros y hay firmas válidas suficientes, pero sin claves fijadas no sabes quién firmó: cualquiera puede generar una clave y firmar.'));
@@ -126,7 +126,7 @@
     $('scenarioHelp').textContent = edited ? EDITED_HELP : HELP[scenario];
     $('provCli').textContent = cliCommand(inp.trusted);
     $('cli').textContent = cliCommand(inp.trusted) + ' --format text';
-    $('provBundle').textContent = edited || scenario !== 'original' ? 'examples/bundles/valid @ v0.1.1, modificado en esta página' : 'examples/bundles/valid @ v0.1.1';
+    $('provBundle').textContent = edited || scenario !== 'original' ? 'examples/bundles/valid @ v0.1.2, modificado en esta página' : 'examples/bundles/valid @ v0.1.2';
 
     const tb = $('integrity'); tb.replaceChildren();
     const label = { ok: ['coincide', 'ok'], changed: ['no coincide', 'bad'], missing: ['falta', 'bad'], extra: ['no declarado', 'bad'], invalid: ['hash declarado no válido', 'bad'] };
@@ -180,7 +180,7 @@
     lastReport = rep;
     $('report').textContent = reportText();
     const original = dec.decode(data.files['data/readings.csv']);
-    $('csvNote').textContent = edited ? 'Has editado el fichero: el resultado de arriba usa tu versión.' : ($('csv').value === original ? 'Contenido idéntico al firmado en v0.1.1.' : 'Este contenido es distinto del que se firmó.');
+    $('csvNote').textContent = edited ? 'Has editado el fichero: el resultado de arriba usa tu versión.' : ($('csv').value === original ? 'Contenido idéntico al paquete de ejemplo de v0.1.2.' : 'Este contenido es distinto del que se firmó.');
   }
 
   function renderScenarios() {

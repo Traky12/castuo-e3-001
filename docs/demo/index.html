@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>e3bundle · Evidencia verificable para datos de campo</title>
-<meta name="description" content="Demo ejecutable de e3bundle: comprueba en tu navegador, con SHA-256 y Ed25519, que un paquete de evidencias no ha sido alterado. Datos sintéticos de la release v0.1.1.">
+<meta name="description" content="Demo ejecutable de e3bundle: comprueba en tu navegador, con SHA-256 y Ed25519, que un paquete de evidencias no ha sido alterado. Datos sintéticos de la release v0.1.2.">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -21,8 +21,10 @@
   </div></header>
   <section class="hero"><div class="wrap">
     <div class="text">
-      <p class="eyebrow">Demo ejecutable · e3bundle v0.1.1 · fase 1 de 2</p>
-      <h1>Evidencia verificable para datos de campo.</h1>
+      <p class="eyebrow">Demo ejecutable · e3bundle v0.1.2 · fase 1 de 2</p>
+      <p class="project">CASTÚO-SYSTEM</p>
+      <h1>e3bundle</h1>
+      <p class="subtitle">Evidencia verificable para datos de campo.</p>
       <p class="lede">Verifica que un paquete de evidencias no ha sido alterado, sin subirlo a ningún servidor.</p>
       <p class="value">Cuando un dato de campo se modifica, se pierde o una firma se falsifica, e3bundle lo detecta y explica por qué.</p>
       <div class="hero-actions">
@@ -31,6 +33,7 @@
         <a class="btn ghost" href="https://github.com/Traky12/castuo-e3-001">GitHub</a>
       </div>
       <p class="small-dark">Demo con datos sintéticos. Comprueba la verificación técnica; no valida CASTÚO-SYSTEM, no certifica un proceso ni confirma datos reales.</p>
+      <p class="phase-note">«Fase 1 de 2» se refiere a las dos pantallas de esta demo, no a las fases 0–3 del plan de adopción.</p>
     </div>
     <img src="assets/logo.jpg" alt="Logotipo oficial de CASTÚO-SYSTEM" width="190" height="190">
   </div></section>
@@ -108,8 +111,8 @@
       <p class="next" id="next"></p>
     </div>
     <dl class="provenance">
-      <dt>herramienta</dt><dd>e3bundle v0.1.1 (lógica equivalente, comprobada en CI)</dd>
-      <dt>paquete</dt><dd id="provBundle">examples/bundles/valid @ v0.1.1</dd>
+      <dt>herramienta</dt><dd>e3bundle v0.1.2 (lógica equivalente, comprobada en CI)</dd>
+      <dt>paquete</dt><dd id="provBundle">examples/bundles/valid @ v0.1.2</dd>
       <dt>verificación</dt><dd>WebCrypto del navegador (SHA-256, Ed25519)</dd>
       <dt>CLI equivalente</dt><dd id="provCli"></dd>
     </dl>
@@ -200,7 +203,8 @@
           <li>las claves no estén comprometidas;</li>
           <li>el paquete se firmara en una fecha determinada;</li>
           <li>el proceso de campo fuera correcto;</li>
-          <li>CASTÚO-SYSTEM esté certificado o validado comercialmente.</li>
+          <li>CASTÚO-SYSTEM esté certificado o validado comercialmente;</li>
+          <li>una contribución aceptada o una reproducción con éxito constituya respaldo institucional.</li>
         </ul>
       </div>
     </div>
@@ -212,7 +216,7 @@
       <h2 id="local-title">El mismo resultado, en tu terminal</h2>
       <ol class="steps">
         <li>Clona <a href="https://github.com/Traky12/castuo-e3-001">castuo-e3-001</a>.</li>
-        <li>Instala e3bundle v0.1.1.</li>
+        <li>Instala e3bundle v0.1.2.</li>
         <li>Verifica el paquete de ejemplo.</li>
         <li>Compara el resultado con esta demo.</li>
         <li>Si hay una discrepancia, <a href="https://github.com/Traky12/castuo-e3-001/issues/new?template=reproduction_report.yml">abre un informe de reproducción</a>.</li>
@@ -220,7 +224,7 @@
       </ol>
       <pre class="terminal">git clone https://github.com/Traky12/castuo-e3-001
 cd castuo-e3-001
-python -m pip install "git+https://github.com/Traky12/castuo-e3-001@v0.1.1"
+python -m pip install "git+https://github.com/Traky12/castuo-e3-001@v0.1.2"
 e3bundle verify examples/bundles/valid \
   --min-signatures 2 \
   --trusted-keys examples/bundles/trusted-keys.json \
@@ -245,12 +249,12 @@ e3bundle verify examples/bundles/valid \
     <h2 id="trace-title">De dónde sale cada dato</h2>
     <dl class="trace">
       <dt>Producto</dt><dd>e3bundle</dd>
-      <dt>Versión</dt><dd><a href="https://github.com/Traky12/castuo-e3-001/releases/tag/v0.1.1">v0.1.1</a></dd>
-      <dt>Commit</dt><dd><a class="mono" href="https://github.com/Traky12/castuo-e3-001/commit/38e3c20ee2f37e957f81ba6e1ead6d90bc8a0c9a">38e3c20e</a></dd>
-      <dt>Paquete</dt><dd><a class="mono" href="https://github.com/Traky12/castuo-e3-001/tree/v0.1.1/examples/bundles">examples/bundles/valid</a></dd>
+      <dt>Versión</dt><dd><a href="https://github.com/Traky12/castuo-e3-001/releases/tag/v0.1.2">v0.1.2</a></dd>
+      <dt>Commit</dt><dd><a class="mono" href="https://github.com/Traky12/castuo-e3-001/commit/50b2dde7309f147d39fbb1ac7e7fc9cf00310e4c">50b2dde7</a></dd>
+      <dt>Paquete</dt><dd><a class="mono" href="https://github.com/Traky12/castuo-e3-001/tree/v0.1.2/examples/bundles">examples/bundles/valid</a></dd>
       <dt>Datos</dt><dd>sintéticos, firmantes <span class="mono">example-*</span></dd>
       <dt>Verificación</dt><dd>local, con WebCrypto</dd>
-      <dt>Contraste</dt><dd>CLI de Python v0.1.1, 8 escenarios más la interoperabilidad de paquetes creados aquí; comparado en CI en cada cambio de la demo (<a href="https://github.com/Traky12/castuo-e3-001/blob/main/docs/demo/tests/conformance.mjs">conformance.mjs</a>), primera comparación el 2026-10-09</dd>
+      <dt>Contraste</dt><dd>CLI de Python v0.1.2, 8 escenarios más la interoperabilidad de paquetes creados aquí; comparado en CI en cada cambio de la demo (<a href="https://github.com/Traky12/castuo-e3-001/blob/main/docs/demo/tests/conformance.mjs">conformance.mjs</a> e <a href="https://github.com/Traky12/castuo-e3-001/blob/main/docs/demo/tests/input-conformance.mjs">input-conformance.mjs</a>); contraste con v0.1.1 desde el 2026-10-09 y con v0.1.2 desde la alineación de esta demo</dd>
       <dt>Resultado</dt><dd>idéntico en la demo y en el CLI</dd>
       <dt>Código</dt><dd><a href="https://github.com/Traky12/castuo-e3-001/tree/main/docs/demo">docs/demo</a></dd>
     </dl>
@@ -263,7 +267,7 @@ e3bundle verify examples/bundles/valid \
 </main>
 
 <footer class="dark"><div class="wrap">
-  <span>Datos: <a href="https://github.com/Traky12/castuo-e3-001/tree/v0.1.1/examples/bundles">examples/bundles en v0.1.1</a> · <a href="https://github.com/Traky12/castuo-e3-001/releases/tag/v0.1.1">release v0.1.1</a> · <a href="https://github.com/Traky12/castuo-e3-001">código de esta página</a></span>
+  <span>Datos: <a href="https://github.com/Traky12/castuo-e3-001/tree/v0.1.2/examples/bundles">examples/bundles en v0.1.2</a> · <a href="https://github.com/Traky12/castuo-e3-001/releases/tag/v0.1.2">release v0.1.2</a> · <a href="https://github.com/Traky12/castuo-e3-001">código de esta página</a></span>
   <span>Responsable: Gregorio Jiménez Bodes (<a href="https://github.com/Traky12">@Traky12</a>). Sin cookies, sin analítica, sin peticiones a terceros. El logotipo identifica el proyecto; no implica certificación ni madurez operativa.</span>
 </div></footer>
 <script src="verifier.js"></script>

@@ -4,6 +4,12 @@ All notable changes to this repository are documented here. Versions follow [Sem
 
 ## [Unreleased]
 
+### Fixed
+- Browser demo: `verifier.js` applies the v0.1.2 CLI path rule. Manifest paths with an empty segment (`a//b`, `a/`) or NUL were accepted in the browser and are rejected by the v0.1.2 CLI; with such a manifest the demo could say VERIFIED where the CLI says FAILED. Seven path cases added to `tests/input-conformance.mjs`; the `a/./b` difference documented in `THREAT-MODEL.md` is closed.
+
+### Changed
+- Browser demo aligned with `v0.1.2`: example bundles and CLI comparison taken from the `v0.1.2` tag (`pages.yml`), version references, commit `50b2dde7`, `e3bundle` as the heading under the CASTÚO-SYSTEM project mark, a note that "fase 1/2 de 2" names the demo's two pages and not the adoption plan phases, and "an accepted contribution or a successful reproduction is not institutional endorsement" in the VERIFIED limits.
+
 ## [0.1.2] - 2026-10-10
 
 ### Security

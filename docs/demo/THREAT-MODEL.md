@@ -1,7 +1,7 @@
 # Browser demo: threat model
 
 Scope: the static demo in `docs/demo/` served by GitHub Pages
-(<https://traky12.github.io/castuo-e3-001/>). It verifies the `v0.1.1` example
+(<https://traky12.github.io/castuo-e3-001/>). It verifies the `v0.1.2` example
 bundles and creates bundles in the browser. It has no backend. Vulnerabilities
 in the demo or the tool: report privately as described in [SECURITY.md](../../SECURITY.md).
 
@@ -13,7 +13,7 @@ in the demo or the tool: report privately as described in [SECURITY.md](../../SE
 | Text the visitor types (CSV, files, signer id) | Page memory only |
 | Files of a local bundle chosen on `paquete.html` | Read with `File.arrayBuffer()` into page memory only |
 | Verification reports | Page memory; copied only when the visitor presses a copy button |
-| Correctness of the verdict | `verifier.js` + `input.js`, kept equivalent to the `v0.1.1` CLI |
+| Correctness of the verdict | `verifier.js` + `input.js`, kept equivalent to the `v0.1.2` CLI |
 
 ## Threats and mitigations
 
@@ -41,12 +41,13 @@ in the demo or the tool: report privately as described in [SECURITY.md](../../SE
 - **Engines.** CI runs Chromium, Firefox and WebKit as shipped by Playwright on
   Linux. WebKit there is not Safari; Safari, Edge and mobile browsers need manual
   checks, recorded by whoever runs them.
-- **Known differences from the CLI.** Two remain, both on unusual manifests:
+- **Known differences from the CLI.** One remains, on unusual manifests:
   numbers written with a fraction or exponent (`1.0`, `1e5`) are re-serialised
-  differently by JavaScript and Python, so the manifest hash differs; and paths
-  with `.` segments (`a/./b`) are rejected as unsafe by the browser but
-  normalised by the CLI. The browser is stricter in the second case. Every other
-  malformed-content case in `tests/input-conformance.mjs` (23 cases) matches.
+  differently by JavaScript and Python, so the manifest hash differs. Since
+  v0.1.2 the browser and the CLI apply the same path rule: paths with an empty,
+  `.` or `..` segment (`a//b`, `a/`, `/a`, `./a`, `a/./b`), a backslash, a colon
+  or NUL are unsafe in both. Every other malformed-content case in
+  `tests/input-conformance.mjs` (30 cases) matches.
 - **Local folders.** The browser follows symbolic links and does not report
   them; the CLI rejects symlinks, so a folder with symlinks can verify in the
   browser and fail with the CLI. Whether hidden files are included depends on the

@@ -1,6 +1,6 @@
 /*
  * Input layer for the browser demo: turns the raw JSON texts of a bundle into the
- * objects verifier.js expects, following the input contract of the v0.1.1 CLI.
+ * objects verifier.js expects, following the input contract of the v0.1.2 CLI.
  * Unreadable or wrongly shaped manifest / trusted keys stop before any check
  * (status ERROR, exit 2, as `e3bundle verify` does). An unreadable or non-array
  * signatures.json is a finding (FAILED), not an error, as in the CLI.
