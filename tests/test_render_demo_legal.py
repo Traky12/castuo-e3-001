@@ -50,6 +50,13 @@ class RenderDemoLegalTests(unittest.TestCase):
         self.assertIn("Membrío pertenece al partido judicial de Valencia de Alcántara", output)
         self.assertIn("La aplicabilidad normativa no se ha evaluado formalmente", output)
 
+    def test_public_source_keeps_identity_as_markers_only(self):
+        template = (ROOT / "docs" / "demo" / "legal.html").read_text(encoding="utf-8")
+        for old_placeholder in ("[NIF]", "[DOMICILIO]", "[CORREO]", "[CIUDAD]"):
+            self.assertNotIn(old_placeholder, template)
+        for marker in ("{{LEGAL_NIF}}", "{{LEGAL_ADDRESS}}", "{{LEGAL_EMAIL}}", "{{LEGAL_EMAIL_HREF}}"):
+            self.assertIn(marker, template)
+
 
 if __name__ == "__main__":
     unittest.main()
