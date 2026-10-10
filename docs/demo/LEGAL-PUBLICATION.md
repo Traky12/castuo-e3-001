@@ -9,11 +9,14 @@ En GitHub, abre **Settings → Secrets and variables → Actions → New reposit
 - `DEMO_LEGAL_NIF`
 - `DEMO_LEGAL_ADDRESS`
 - `DEMO_LEGAL_EMAIL`
-- `DEMO_LEGAL_COURT_CITY`
 
 Los valores no se imprimen en logs y no se guardan en el repositorio. El workflow los inyecta en el artefacto de GitHub Pages únicamente durante una compilación que no sea de pull request. **El resultado publicado es una web pública** y mostrará esos datos; los secretos evitan que queden en el historial de Git, no que puedan verse o copiarse desde la página publicada.
 
 Si falta alguno, la puerta de publicación queda cerrada. No se debe rellenar un dato por inferencia ni activar Pages para saltarse el control.
+
+## Demarcación judicial
+
+El texto identifica que Membrío pertenece al partido judicial de Valencia de Alcántara, según el [mapa del Ministerio de Justicia, fechado el 24/06/2024](https://www.mjusticia.gob.es/es/JusticiaEspana/OrganizacionJusticia/InstLibraryCartographyJudProv/C%C3%A1ceres/Valencia%20de%20Alc%C3%A1ntara.pdf). La competencia en cada controversia se determinará conforme a la normativa aplicable. Esta referencia territorial no sustituye una revisión jurídica de la cláusula ni permite afirmar que un fuero sea válido para cualquier caso.
 
 ## Estado de release
 
