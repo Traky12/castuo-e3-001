@@ -11,14 +11,13 @@ import argparse
 import html
 import os
 import re
-from pathlib import Path
 from collections.abc import Mapping
+from pathlib import Path
 
 REQUIRED_FIELDS = (
     "DEMO_LEGAL_NIF",
     "DEMO_LEGAL_ADDRESS",
     "DEMO_LEGAL_EMAIL",
-    "DEMO_LEGAL_COURT_CITY",
 )
 
 TOKENS = {
@@ -26,7 +25,6 @@ TOKENS = {
     "{{LEGAL_ADDRESS}}": "DEMO_LEGAL_ADDRESS",
     "{{LEGAL_EMAIL}}": "DEMO_LEGAL_EMAIL",
     "{{LEGAL_EMAIL_HREF}}": "DEMO_LEGAL_EMAIL",
-    "{{LEGAL_COURT_CITY}}": "DEMO_LEGAL_COURT_CITY",
 }
 TOKEN_PATTERN = re.compile(r"\{\{LEGAL_[A-Z_]+\}\}")
 
@@ -44,7 +42,7 @@ def render(template: str, values: Mapping[str, str]) -> str:
             raise ValueError(f"template delimiters are not allowed in: {name}")
         clean[name] = value.strip()
 
-    if not re.fullmatch(r"[^@\s<>\"']+@[^@\s<>\"']+", clean["DEMO_LEGAL_EMAIL"]):
+    if not re.fullmatch(r"[^@\s<>\\"']+@[^@\s<>\\"']+", clean["DEMO_LEGAL_EMAIL"]):
         raise ValueError("DEMO_LEGAL_EMAIL must be a valid email address")
 
     expected_tokens = set(TOKENS)
