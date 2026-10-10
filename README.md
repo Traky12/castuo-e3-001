@@ -17,9 +17,15 @@ Test reports, datasets, audit exports and lab results are often shared as plain 
 
 ## Install
 
-**Release status (2026-10-10): no approved v0.1.2 or v0.1.3 release is available.** The v0.1.2 files on `main` are an unpublished candidate; the `v0.1.2` Git tag does not exist. Do not install or pin `@v0.1.2`, and do not use the current `main` candidate for security-sensitive verification while release review is pending. The last earlier tag is v0.1.1, but it is not represented as a fix for the pending release review. The hosted publication gate remains closed.
+**Release status (2026-10-11):** `v0.1.3` is published as a GitHub alpha prerelease at commit `3f622a2cfd5cf1826d22d9266b542710d8b0faf1`. The release's Linux tests and clean-wheel smoke test passed. The GitHub Actions container workflow also passed and published `ghcr.io/traky12/e3bundle:0.1.3` for `linux/amd64` and `linux/arm64`, with SBOM and build provenance ([run 38088766046](https://github.com/Traky12/castuo-e3-001/actions/runs/38088766046)).
 
-Python 3.11 or newer. The unit/CLI suite is intended for CI on Ubuntu, macOS and Windows with Python 3.11–3.13; that matrix must be green on the exact release commit before publication. PyPI availability is not claimed. For source inspection only, clone the repository and run `python scripts/e3bundle.py --help`; source checkout use is not a release or a production recommendation.
+**PyPI is still pending.** In [run 38088766020](https://github.com/Traky12/castuo-e3-001/actions/runs/38088766020), the build, tests and clean-venv smoke test passed, but publishing failed with OIDC `invalid-publisher`: no matching PyPI Trusted Publisher is registered. The maintainer must configure the publisher for project `e3bundle`, owner `Traky12`, repository `castuo-e3-001`, workflow `publish-pypi.yml`, environment `pypi`, then rerun the failed job.
+
+For testing the GitHub alpha only, install the pinned tag:
+```bash
+python -m pip install "git+https://github.com/Traky12/castuo-e3-001@v0.1.3"
+```
+This is not a substitute for a PyPI release, independent review, security advisory publication or production approval. The browser demo still serves the `v0.1.1` examples while the Pages publication gate remains closed. Python 3.11 or newer.
 
 ## Try it in your browser
 
