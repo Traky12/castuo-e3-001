@@ -125,7 +125,7 @@ def bundle_files(bundle: Path) -> list[str]:
     if bundle.is_symlink():
         raise InputError("bundle directory must not be a symlink")
     if not bundle.is_dir():
-        raise InputError(f"bundle directory not found: {bundle}; provide an existing bundle directory.")
+        raise InputError("bundle directory not found; provide an existing bundle directory.")
     for path in sorted(bundle.rglob("*")):
         relpath = path.relative_to(bundle).as_posix()
         if path.is_symlink():
@@ -183,7 +183,7 @@ def cmd_keygen(args: argparse.Namespace) -> int:
 def cmd_manifest(args: argparse.Namespace) -> int:
     bundle = args.bundle
     if not bundle.is_dir():
-        raise InputError(f"bundle directory not found: {bundle}; provide an existing bundle directory.")
+        raise InputError("bundle directory not found; provide an existing bundle directory.")
     if (bundle / SIGNATURES).exists():
         raise InputError(f"{SIGNATURES} exists; rewriting the manifest would invalidate it. Remove it first.")
     files = [{"path": relpath, "sha256": file_digest(bundle / relpath)} for relpath in bundle_files(bundle)]
@@ -222,7 +222,7 @@ def verify(bundle: Path, min_signatures: int, trusted: dict[str, str] | None, al
     if bundle.is_symlink():
         raise InputError("bundle directory must not be a symlink")
     if not bundle.is_dir():
-        raise InputError(f"bundle directory not found: {bundle}; provide an existing bundle directory.")
+        raise InputError("bundle directory not found; provide an existing bundle directory.")
     for reserved_name in RESERVED:
         if (bundle / reserved_name).is_symlink():
             raise InputError(f"symlinks are not allowed in a bundle: {reserved_name}")
