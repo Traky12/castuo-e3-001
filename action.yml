@@ -10,13 +10,17 @@ inputs:
     description: "Path to the bundle directory (must contain manifest.json)."
     required: true
   min-signatures:
-    description: "Minimum number of valid (and, with trusted-keys, pinned) signatures."
+    description: "Minimum number of pinned signatures, each from a distinct key. Ignored with integrity-only."
     required: false
-    default: "0"
+    default: "1"
   trusted-keys:
-    description: "Path to a JSON file {signer_id: public_key_b64}. Only these keys count when set."
+    description: "Path to a JSON file {signer_id: public_key_b64}. Required unless integrity-only is 'true'."
     required: false
     default: ""
+  integrity-only:
+    description: "Set to 'true' to check file hashes only, with no signature requirement. The status then reads VERIFIED_INTEGRITY_ONLY, never VERIFIED."
+    required: false
+    default: "false"
   allow-extra:
     description: "Set to 'true' to accept files that are not declared in the manifest."
     required: false
@@ -36,7 +40,7 @@ inputs:
 
 outputs:
   status:
-    description: "VERIFIED, FAILED or ERROR."
+    description: "VERIFIED, VERIFIED_INTEGRITY_ONLY, FAILED or ERROR."
     value: ${{ steps.verify.outputs.status }}
   report-path:
     description: "Path of the JSON verification report."
@@ -65,8 +69,22 @@ runs:
         TRUSTED_KEYS: ${{ inputs.trusted-keys }}
         ALLOW_EXTRA: ${{ inputs.allow-extra }}
         REPORT_PATH: ${{ inputs.report-path }}
+        INTEGRITY_ONLY: ${{ inputs.integrity-only }}
       run: |
         set -uo pipefail
+        # A green VERIFIED must mean pinned signatures. Without pinned keys the caller has to
+        # ask for integrity-only explicitly, and the status says so.
+        if [ "$INTEGRITY_ONLY" = "true" ]; then
+          MIN_SIGNATURES=0
+          TRUSTED_KEYS=""
+        elif [ -z "$TRUSTED_KEYS" ] || ! [[ "$MIN_SIGNATURES" =~ ^[0-9]+$ ]] || [ "$MIN_SIGNATURES" -lt 1 ]; then
+          echo "::error title=e3bundle::set trusted-keys and min-signatures >= 1, or integrity-only: 'true'"
+          echo "status=ERROR" >> "$GITHUB_OUTPUT"
+          echo "exit-code=2" >> "$GITHUB_OUTPUT"
+          echo "report-path=$REPORT_PATH" >> "$GITHUB_OUTPUT"
+          echo "### e3bundle verify: \`ERROR\` (no pinned keys and integrity-only not set)" >> "$GITHUB_STEP_SUMMARY"
+          exit 0
+        fi
         args=(verify "$BUNDLE" --min-signatures "$MIN_SIGNATURES" --output "$REPORT_PATH")
         if [ -n "$TRUSTED_KEYS" ]; then args+=(--trusted-keys "$TRUSTED_KEYS"); fi
         if [ "$ALLOW_EXTRA" = "true" ]; then args+=(--allow-extra); fi
@@ -78,6 +96,7 @@ runs:
         else
           status=ERROR
         fi
+        if [ "$INTEGRITY_ONLY" = "true" ] && [ "$status" = "VERIFIED" ]; then status=VERIFIED_INTEGRITY_ONLY; fi
         echo "status=$status" >> "$GITHUB_OUTPUT"
         echo "exit-code=$code" >> "$GITHUB_OUTPUT"
         echo "report-path=$REPORT_PATH" >> "$GITHUB_OUTPUT"

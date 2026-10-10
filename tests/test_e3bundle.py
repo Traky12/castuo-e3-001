@@ -99,6 +99,27 @@ class E3BundleTests(unittest.TestCase):
                             expected += "  - hash mismatch: data/readings.csv\n"
                         self.assertEqual(proc.stdout, expected)
 
+    def sign_as(self, key_owner: str, signer_id: str, role: str = "reviewer") -> None:
+        proc = run("sign", self.bundle, "--private-key", self.keys[key_owner], "--signer-id", signer_id, "--role", role)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+
+    def test_one_key_cannot_meet_threshold_under_two_pinned_signer_ids(self):
+        self.sign_as("alice", "alice", "runner")
+        self.sign_as("alice", "bob")
+        public = json.loads(self.keys["alice"].with_suffix(".pub.json").read_text(encoding="utf-8"))["public_key_b64"]
+        trusted = self.root / "same-key.json"
+        trusted.write_text(json.dumps({"alice": public, "bob": public}), encoding="utf-8")
+        self.assert_failed("signature threshold not met: 1 < 2", "--min-signatures", 2, "--trusted-keys", trusted)
+        _, report = self.verify("--min-signatures", 2, "--trusted-keys", trusted)
+        self.assertIn("signatures[1]: duplicate key: bob reuses the key of alice", report["findings"])
+        self.assertEqual(report["signatures_valid"], 1)
+        self.assertEqual(report["signatures_trusted"], 1)
+
+    def test_one_key_cannot_meet_threshold_without_pinned_keys(self):
+        self.sign_as("alice", "alice", "runner")
+        self.sign_as("alice", "bob")
+        self.assert_failed("signatures[1]: duplicate key: bob reuses the key of alice", "--min-signatures", 2)
+
     def test_text_without_pinned_keys_does_not_claim_trust(self):
         self.sign("alice")
         proc = run("verify", self.bundle, "--format", "text")

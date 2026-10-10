@@ -155,6 +155,7 @@
     const canonicalManifest = canonical(manifest);
     const manifestHash = await sha256(canonicalManifest);
     const valid = new Set();
+    const keyOwners = new Map();
     const trustedSigners = new Set();
     for (let i = 0; i < signatures.length; i++) {
       const r = signatures[i];
@@ -172,6 +173,9 @@
       if (!row.signatureOk) { findings.push(`${prefix}: invalid Ed25519 signature`); phases.signatures.push(row); continue; }
       if (!row.hashOk) { findings.push(`${prefix}: signed manifest_hash does not match the manifest`); phases.signatures.push(row); continue; }
       if (valid.has(r.signer_id)) { findings.push(`duplicate signer: ${r.signer_id}`); phases.signatures.push(row); continue; }
+      // The threshold counts keys, not names (same rule as the CLI).
+      if (keyOwners.has(r.public_key_b64)) { findings.push(`${prefix}: duplicate key: ${r.signer_id} reuses the key of ${keyOwners.get(r.public_key_b64)}`); phases.signatures.push(row); continue; }
+      keyOwners.set(r.public_key_b64, r.signer_id);
       valid.add(r.signer_id);
       row.counted = true;
       if (trusted) {

@@ -4,6 +4,10 @@ All notable changes to this repository are documented here. Versions follow [Sem
 
 ## [Unreleased]
 
+### Security
+- `e3bundle verify` and the browser verifier count signatures by distinct public key: one key signing under several `signer_id` values counts once and is reported as `signatures[i]: duplicate key: <id> reuses the key of <id>` (GHSA-55pc-7v4h-jf7c).
+- The GitHub Action no longer reports `VERIFIED` without pinned signatures. `min-signatures` defaults to `1` and `trusted-keys` is required; without them the status is `ERROR`. Hash-only checks need `integrity-only: "true"` and report `VERIFIED_INTEGRITY_ONLY`. **Breaking** for workflows that relied on the old defaults.
+
 ## [0.1.2] - 2026-10-10
 
 ### Security

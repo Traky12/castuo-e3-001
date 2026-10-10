@@ -264,6 +264,7 @@ def verify(bundle: Path, min_signatures: int, trusted: dict[str, str] | None, al
             findings.append(f"{SIGNATURES} must be an array")
             signatures = []
     valid_signers: set[str] = set()
+    key_owners: dict[str, str] = {}
     trusted_signers: set[str] = set()
     for index, record in enumerate(signatures):
         prefix = f"signatures[{index}]"
@@ -286,6 +287,13 @@ def verify(bundle: Path, min_signatures: int, trusted: dict[str, str] | None, al
         if signer in valid_signers:
             findings.append(f"duplicate signer: {signer}")
             continue
+        # The threshold counts keys, not names: one key signing under several
+        # signer_ids is still one signer.
+        public_key = record.get("public_key_b64")
+        if public_key in key_owners:
+            findings.append(f"{prefix}: duplicate key: {signer} reuses the key of {key_owners[public_key]}")
+            continue
+        key_owners[public_key] = signer
         valid_signers.add(signer)
         if trusted is not None:
             if trusted.get(signer) == record.get("public_key_b64"):

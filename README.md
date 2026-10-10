@@ -118,7 +118,9 @@ What `verify` detects: modified, missing and undeclared files; path traversal an
 
 For supply-chain safety, use the full commit SHA shown on the [release page](https://github.com/Traky12/castuo-e3-001/releases), not a moving tag. The SHA above is the commit behind the published `v0.1.2` alpha tag.
 
-The step writes the JSON report (`report-path`, default `e3bundle-report.json`), adds the findings to the job summary and fails when verification does not pass. Set `fail-on-error: "false"` to keep the job going and branch on the `status` output (`VERIFIED`, `FAILED` or `ERROR`) instead; GitHub does not expose outputs of a failed step.
+`trusted-keys` is required and `min-signatures` defaults to `1`; signatures count once per distinct key. To check file hashes only, set `integrity-only: "true"`: the status is then `VERIFIED_INTEGRITY_ONLY`, never `VERIFIED`.
+
+The step writes the JSON report (`report-path`, default `e3bundle-report.json`), adds the findings to the job summary and fails when verification does not pass. Set `fail-on-error: "false"` to keep the job going and branch on the `status` output (`VERIFIED`, `VERIFIED_INTEGRITY_ONLY`, `FAILED` or `ERROR`) instead; GitHub does not expose outputs of a failed step.
 
 ## Limits
 
