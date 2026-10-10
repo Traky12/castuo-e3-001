@@ -25,7 +25,7 @@ concurrency:
 
 env:
   # Immutable pre-release candidate source; do not claim a tag before publication.
-  CLI_REF: 50b2dde7309f147d39fbb1ac7e7fc9cf00310e4c
+  CLI_REF: aeb915b361d23d0449bff007c85813ff34e16332  # GHSA-55pc-7v4h-jf7c fix; keep reachable (merge commit, no squash)
   LOGO_SHA256: 54be9cdc29d888b6709478058800cbed31630f1aaca7abf578eec27896cdc78d
 
 jobs:
