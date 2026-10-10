@@ -1,6 +1,6 @@
 /*
  * e3.bundle.v1 verifier for the browser demo.
- * Mirrors scripts/e3bundle.py at candidate commit 50b2dde7309f147d39fbb1ac7e7fc9cf00310e4c (v0.1.2; release pending). Equivalence with that CLI is
+ * Mirrors scripts/e3bundle.py at candidate commit 55cba4500daf7b5cc803c63ccaff01985e4d965f (v0.1.3; release pending). Equivalence with that CLI is
  * checked on every change by docs/demo/tests/conformance.mjs (scenarios) and
  * docs/demo/tests/input-conformance.mjs (malformed input and content) in CI.
  * Uses only WebCrypto (SHA-256, Ed25519). No network, no storage.

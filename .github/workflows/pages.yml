@@ -26,7 +26,7 @@ concurrency:
 
 env:
   # Immutable candidate source; not a claim that this source has been released.
-  CLI_REF: aeb915b361d23d0449bff007c85813ff34e16332  # GHSA-55pc-7v4h-jf7c fix; keep reachable (merge commit, no squash)
+  CLI_REF: 55cba4500daf7b5cc803c63ccaff01985e4d965f  # v0.1.3 candidate: GHSA-55pc-7v4h-jf7c fix (#76) + #73
   LOGO_SHA256: 54be9cdc29d888b6709478058800cbed31630f1aaca7abf578eec27896cdc78d
 
 jobs:
@@ -53,7 +53,7 @@ jobs:
           git archive "$CLI_REF" examples/bundles scripts/e3bundle.py | tar -x -C candidate
       - name: JavaScript syntax
         run: for f in docs/demo/*.js docs/demo/tests/*.mjs; do node --check "$f"; done
-      - name: Conformance with the v0.1.2 candidate CLI (8 scenarios + interop)
+      - name: Conformance with the v0.1.3 candidate CLI (8 scenarios + interop)
         run: node docs/demo/tests/conformance.mjs candidate/examples/bundles python candidate/scripts/e3bundle.py
       - name: Record actual candidate manifest hash from CLI verification
         run: |
@@ -73,7 +73,7 @@ jobs:
           PY
       - name: Local import rules (paths, limits, decoding)
         run: node docs/demo/tests/importer.mjs
-      - name: Input conformance with the v0.1.2 candidate CLI (malformed inputs and unsafe paths)
+      - name: Input conformance with the v0.1.3 candidate CLI (malformed inputs and unsafe paths)
         run: node docs/demo/tests/input-conformance.mjs candidate/examples/bundles python candidate/scripts/e3bundle.py
       - name: Assemble site
         run: |
@@ -174,7 +174,7 @@ jobs:
 
   publication_gate:
     # PRs may build/test the candidate, but public deployment stays blocked until
-    # GitHub release v0.1.2, PyPI e3bundle 0.1.2 and GHCR image 0.1.2 are available.
+    # GitHub release v0.1.3, PyPI e3bundle 0.1.3 and GHCR image 0.1.3 are available.
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
@@ -201,7 +201,7 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
             echo "Legal field secrets are configured; their values are not logged."
           fi
-      - name: Check public v0.1.2 release, PyPI distribution and GHCR image
+      - name: Check public v0.1.3 release, PyPI distribution and GHCR image
         id: check
         env:
           GH_TOKEN: ${{ github.token }}
@@ -210,25 +210,25 @@ jobs:
             --header 'Accept: application/vnd.github+json' \
             --header "Authorization: Bearer ${GH_TOKEN}" \
             --header 'X-GitHub-Api-Version: 2022-11-28' \
-            https://api.github.com/repos/Traky12/castuo-e3-001/releases/tags/v0.1.2)
-          if [ "$release_code" != "200" ] || ! python -c 'import json; r=json.load(open("/tmp/e3-release.json")); raise SystemExit(0 if r.get("tag_name") == "v0.1.2" and not r.get("draft", True) and r.get("prerelease") is True else 1)'; then
+            https://api.github.com/repos/Traky12/castuo-e3-001/releases/tags/v0.1.3)
+          if [ "$release_code" != "200" ] || ! python -c 'import json; r=json.load(open("/tmp/e3-release.json")); raise SystemExit(0 if r.get("tag_name") == "v0.1.3" and not r.get("draft", True) and r.get("prerelease") is True else 1)'; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "v0.1.2 is not a published alpha release; Pages deployment remains blocked."
+            echo "v0.1.3 is not a published alpha release; Pages deployment remains blocked."
             exit 0
           fi
-          if ! curl --fail --silent --show-error https://pypi.org/pypi/e3bundle/0.1.2/json --output /tmp/e3-pypi.json ||
-             ! python -c 'import json; r=json.load(open("/tmp/e3-pypi.json")); raise SystemExit(0 if r.get("info", {}).get("version") == "0.1.2" else 1)'; then
+          if ! curl --fail --silent --show-error https://pypi.org/pypi/e3bundle/0.1.3/json --output /tmp/e3-pypi.json ||
+             ! python -c 'import json; r=json.load(open("/tmp/e3-pypi.json")); raise SystemExit(0 if r.get("info", {}).get("version") == "0.1.3" else 1)'; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "e3bundle 0.1.2 is not available on PyPI; Pages deployment remains blocked."
+            echo "e3bundle 0.1.3 is not available on PyPI; Pages deployment remains blocked."
             exit 0
           fi
-          if ! docker manifest inspect ghcr.io/traky12/e3bundle:0.1.2 >/dev/null 2>&1; then
+          if ! docker manifest inspect ghcr.io/traky12/e3bundle:0.1.3 >/dev/null 2>&1; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "GHCR image 0.1.2 is not available; Pages deployment remains blocked."
+            echo "GHCR image 0.1.3 is not available; Pages deployment remains blocked."
             exit 0
           fi
           echo "ready=true" >> "$GITHUB_OUTPUT"
-          echo "Publication gate passed: public release, PyPI 0.1.2 and GHCR image 0.1.2 are available."
+          echo "Publication gate passed: public release, PyPI 0.1.3 and GHCR image 0.1.3 are available."
 
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && needs.publication_gate.outputs.ready == 'true'

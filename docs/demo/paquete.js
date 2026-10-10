@@ -168,7 +168,7 @@
         $('progress').value = Math.round((done / total) * 100);
         $('progressText').textContent = `Leídos ${st.plan.accepted.indexOf(a) + 1} de ${st.plan.accepted.length} ficheros en esta pestaña.`;
       }
-      if (!('manifest.json' in bytes)) { show({ status: 'ERROR', findings: ['cannot read manifest.json: file not found'] }, 2, min, trusted); return; }
+      if (!('manifest.json' in bytes)) { show({ status: 'ERROR', findings: ['manifest.json is missing; run e3bundle manifest <bundle> --bundle-id <id> to create it.'] }, 2, min, trusted); return; }
       const m = E3Import.decodeText(bytes['manifest.json'], 'manifest.json');
       const findings = [];
       let signaturesText = null;

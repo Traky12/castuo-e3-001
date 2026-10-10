@@ -1,10 +1,10 @@
 # Browser demo: threat model
 
 Scope: the static demo in `docs/demo/` served by GitHub Pages
-(<https://traky12.github.io/castuo-e3-001/>). This draft targets the v0.1.2
-candidate CLI source at commit `50b2dde7309f147d39fbb1ac7e7fc9cf00310e4c`. That source commit is not itself
+(<https://traky12.github.io/castuo-e3-001/>). This draft targets the v0.1.3
+candidate CLI source at commit `55cba4500daf7b5cc803c63ccaff01985e4d965f`. That source commit is not itself
 a tag or published release. Production deployment remains gated on a public
-v0.1.2 GitHub release, the matching PyPI distribution and the GHCR image.
+v0.1.3 GitHub release, the matching PyPI distribution and the GHCR image.
 The demo has no backend. Report vulnerabilities privately as described in
 [SECURITY.md](../../SECURITY.md).
 
