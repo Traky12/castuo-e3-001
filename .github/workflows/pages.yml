@@ -20,7 +20,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: pages
+  # Keep PR UI validation independent from the main-branch publication pipeline.
+  group: pages-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 
 env:
