@@ -10,7 +10,7 @@ const SCENARIOS = [
   ['Borrar report.md', 'FAILED', 1],
   ['Falsificar una firma', 'FAILED', 1],
   ['Editar el manifiesto', 'FAILED', 1],
-  ['Sin claves fijadas', 'VERIFIED', 0],
+  ['Sin claves fijadas', 'VERIFIED_TRUST_NOT_CHECKED', 0],
   ['Una clave sin fijar', 'FAILED', 1],
 ];
 

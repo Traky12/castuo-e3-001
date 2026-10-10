@@ -118,9 +118,34 @@ class E3BundleTests(unittest.TestCase):
     def test_unsigned_bundle_verifies_integrity_only(self):
         code, report = self.verify()
         self.assertEqual(code, 0, report["findings"])
-        self.assertEqual(report["status"], "VERIFIED")
+        self.assertEqual(report["status"], "VERIFIED_INTEGRITY_ONLY")
         self.assertEqual(report["files_verified"], 2)
         self.assertEqual(report["signatures_valid"], 0)
+
+    def test_pinned_keys_with_minimum_zero_are_integrity_only(self):
+        self.sign("alice")
+        code, report = self.verify("--trusted-keys", self.trusted("alice"))
+        self.assertEqual(code, 0, report["findings"])
+        self.assertEqual(report["status"], "VERIFIED_INTEGRITY_ONLY")
+
+    def test_threshold_without_pinned_keys_is_trust_not_checked(self):
+        self.sign("alice")
+        self.sign("bob")
+        code, report = self.verify("--min-signatures", 2)
+        self.assertEqual(code, 0, report["findings"])
+        self.assertEqual(report["status"], "VERIFIED_TRUST_NOT_CHECKED")
+        self.assertEqual(report["trust_mode"], "none")
+
+    def test_strict_requires_pinned_keys_and_a_minimum(self):
+        self.sign("alice")
+        for extra in ((), ("--min-signatures", 1), ("--trusted-keys", self.trusted("alice"))):
+            with self.subTest(extra=extra):
+                code, report = self.verify("--strict", *extra)
+                self.assertEqual(code, 2, report)
+                self.assertEqual(report["status"], "ERROR")
+                self.assertIn("--strict requires --trusted-keys and --min-signatures >= 1", report["findings"][0])
+        code, report = self.verify("--strict", "--min-signatures", 1, "--trusted-keys", self.trusted("alice"))
+        self.assertEqual((code, report["status"]), (0, "VERIFIED"), report["findings"])
 
     def test_two_trusted_signatures_meet_threshold(self):
         self.sign("alice")
@@ -161,11 +186,32 @@ class E3BundleTests(unittest.TestCase):
                             expected += "  - hash mismatch: data/readings.csv\n"
                         self.assertEqual(proc.stdout, expected)
 
+    def sign_as(self, key_owner: str, signer_id: str, role: str = "reviewer") -> None:
+        proc = run("sign", self.bundle, "--private-key", self.keys[key_owner], "--signer-id", signer_id, "--role", role)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+
+    def test_one_key_cannot_meet_threshold_under_two_pinned_signer_ids(self):
+        self.sign_as("alice", "alice", "runner")
+        self.sign_as("alice", "bob")
+        public = json.loads(self.keys["alice"].with_suffix(".pub.json").read_text(encoding="utf-8"))["public_key_b64"]
+        trusted = self.root / "same-key.json"
+        trusted.write_text(json.dumps({"alice": public, "bob": public}), encoding="utf-8")
+        self.assert_failed("signature threshold not met: 1 < 2", "--min-signatures", 2, "--trusted-keys", trusted)
+        _, report = self.verify("--min-signatures", 2, "--trusted-keys", trusted)
+        self.assertIn("signatures[1]: duplicate key: bob reuses the key of alice", report["findings"])
+        self.assertEqual(report["signatures_valid"], 1)
+        self.assertEqual(report["signatures_trusted"], 1)
+
+    def test_one_key_cannot_meet_threshold_without_pinned_keys(self):
+        self.sign_as("alice", "alice", "runner")
+        self.sign_as("alice", "bob")
+        self.assert_failed("signatures[1]: duplicate key: bob reuses the key of alice", "--min-signatures", 2)
+
     def test_text_without_pinned_keys_does_not_claim_trust(self):
         self.sign("alice")
-        proc = run("verify", self.bundle, "--format", "text")
+        proc = run("verify", self.bundle, "--min-signatures", 1, "--format", "text")
         self.assertEqual(proc.returncode, 0, proc.stderr)
-        self.assertEqual(proc.stdout, "VERIFIED  demo-001  files 2/2  signatures trust not checked / 1 valid\n")
+        self.assertEqual(proc.stdout, "VERIFIED_TRUST_NOT_CHECKED  demo-001  files 2/2  signatures trust not checked / 1 valid\n")
 
     def test_text_lists_all_findings_and_distinguishes_untrusted_keys(self):
         self.sign("alice")

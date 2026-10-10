@@ -81,11 +81,15 @@ e3bundle verify   my-bundle --min-signatures 1 --trusted-keys trusted.json
 
 `trusted.json` maps signer ids to public keys, for example `{"alice": "<public_key_b64 from ~/keys/alice.pub.json>"}`. Keep private keys outside the bundle and outside any repository.
 
-| Exit code | Meaning |
-|---|---|
-| `0` | `VERIFIED` — files unchanged, nothing undeclared, signature threshold met |
-| `1` | `FAILED` — see `findings` |
-| `2` | `ERROR` — unreadable manifest or invalid input |
+| Exit code | Status | Meaning |
+|---|---|---|
+| `0` | `VERIFIED` | files unchanged, nothing undeclared, and at least `--min-signatures` (≥ 1) distinct keys **you pinned** with `--trusted-keys` signed this manifest |
+| `0` | `VERIFIED_TRUST_NOT_CHECKED` | the same, but without `--trusted-keys`: valid signatures, unknown signers |
+| `0` | `VERIFIED_INTEGRITY_ONLY` | files unchanged and nothing undeclared; no signature was required (`--min-signatures 0`) |
+| `1` | `FAILED` | see `findings` |
+| `2` | `ERROR` | unreadable manifest or invalid input, or `--strict` without `--trusted-keys` and `--min-signatures >= 1` |
+
+Only plain `VERIFIED` says who signed. In CI, add `--strict` so a missing key file or minimum is an error instead of a weaker pass.
 
 What `verify` detects: modified, missing and undeclared files; path traversal and symlinks; signatures that are forged, made over an older manifest, duplicated, or (with `--trusted-keys`) made with a key you did not pin.
 
@@ -93,7 +97,9 @@ What `verify` detects: modified, missing and undeclared files; path traversal an
 
 The composite Action is present in this repository, but the current main-branch candidate is **not a released version**. Do not pin the former v0.1.2 candidate SHA as a published release reference. Wait for the security review, corrected version tag, published artifacts and passing release checks before adopting a versioned Action example. Any consuming workflow should use a full 40-character commit SHA and provide an explicit trusted-key set with a positive signature threshold.
 
-The step writes the JSON report (`report-path`, default `e3bundle-report.json`), adds the findings to the job summary and fails when verification does not pass. Set `fail-on-error: "false"` to keep the job going and branch on the `status` output (`VERIFIED`, `FAILED` or `ERROR`) instead; GitHub does not expose outputs of a failed step.
+`trusted-keys` is required and `min-signatures` defaults to `1`; signatures count once per distinct key. To check file hashes only, set `integrity-only: "true"`: the status is then `VERIFIED_INTEGRITY_ONLY`, never `VERIFIED`.
+
+The step writes the JSON report (`report-path`, default `e3bundle-report.json`), adds the findings to the job summary and fails when verification does not pass. Set `fail-on-error: "false"` to keep the job going and branch on the `status` output (`VERIFIED`, `VERIFIED_INTEGRITY_ONLY`, `FAILED` or `ERROR`) instead; GitHub does not expose outputs of a failed step.
 
 ## Limits
 
