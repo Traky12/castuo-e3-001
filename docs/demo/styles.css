@@ -141,6 +141,8 @@ footer.dark a { color: var(--brass-light); }
 .actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .actions .btn { flex: 1 1 180px; }
 .status.ERROR { background: #6b5a1f; }
+/* Passing but weaker than VERIFIED: amber, and small enough not to overflow a 375 px screen. */
+.status.VERIFIED_TRUST_NOT_CHECKED, .status.VERIFIED_INTEGRITY_ONLY { background: var(--warn); font-size: 18px; overflow-wrap: anywhere; }
 /* The hidden attribute must win over component display rules (e.g. .result is flex). */
 [hidden] { display: none !important; }
 /* Guided / advanced switch. */

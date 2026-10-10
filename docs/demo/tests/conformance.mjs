@@ -100,5 +100,24 @@ const brokenOk = broken.code === 1 && broken.report.findings.includes('hash mism
 console.log(`${brokenOk ? 'ok  ' : 'FAIL'} edited after signing rejected by CLI: ${broken.report.status} exit ${broken.code}`);
 if (!brokenOk) failures++;
 
+// One key signing under two signer_ids counts once, in the browser and in the CLI.
+// Needs a CLI that includes the fix; older CLIs count it twice.
+if (process.env.E3_CONFORMANCE_KEY_REUSE === '1') {
+  const reuseSigs = [
+    await E3.signManifest(ownManifest, keyPair, 'yo', 'runner', publicKeyB64),
+    await E3.signManifest(ownManifest, keyPair, 'otro', 'reviewer', publicKeyB64),
+  ];
+  const reuseTrusted = { yo: publicKeyB64, otro: publicKeyB64 };
+  const reuseDir = path.join(tmp, 'key-reuse');
+  writeBundle(reuseDir, own, ownManifest, reuseSigs);
+  const js = await E3.verifyBundle({ files: own, manifest: ownManifest, signatures: reuseSigs, trusted: reuseTrusted, minSignatures: 2 });
+  const py = runCli(reuseDir, reuseTrusted, 2);
+  const diffs = FIELDS.filter((f) => JSON.stringify(js.report[f]) !== JSON.stringify(py.report[f]));
+  if (js.exitCode !== py.code) diffs.push(`exit ${js.exitCode} != ${py.code}`);
+  const counted = js.report.status === 'FAILED' && js.report.findings.includes('signatures[1]: duplicate key: otro reuses the key of yo');
+  console.log(`${!diffs.length && counted ? 'ok  ' : 'FAIL'} key-reuse  ${js.report.status} exit ${js.exitCode} ${JSON.stringify(js.report.findings)}${diffs.length ? '  differs: ' + diffs.join(', ') : ''}`);
+  if (diffs.length || !counted) failures++;
+}
+
 console.log(failures ? `\n${failures} conformance failure(s)` : '\nall scenarios match the CLI');
 process.exit(failures ? 1 : 0);

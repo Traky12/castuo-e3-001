@@ -1,6 +1,6 @@
 // Input conformance: malformed inputs (unreadable JSON, and well-formed JSON with malformed
 // content) must get the same status, exit code and findings in the browser
-// (input.js + verifier.js) as in the pinned v0.1.2 candidate CLI source.
+// (input.js + verifier.js) as in the pinned v0.1.3 candidate CLI source.
 // Kept separate from conformance.mjs, whose eight scenarios are unchanged.
 //
 // Usage: node docs/demo/tests/input-conformance.mjs <bundles-dir> <python> <e3bundle.py>

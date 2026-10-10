@@ -176,15 +176,47 @@ jobs:
           min-signatures: "2"
           trusted-keys: examples/bundles/trusted-keys.json
           report-path: reports/tampered-default.json
+      - name: Build an unsigned bundle
+        run: |
+          mkdir -p unsigned/data
+          printf 't,value\n0,21.5\n' > unsigned/data/readings.csv
+          python3 scripts/e3bundle.py manifest unsigned --bundle-id ci-unsigned
+      - name: Unsigned bundle without pinned keys reports ERROR, not VERIFIED
+        id: unsigned_status
+        uses: ./
+        with:
+          bundle: unsigned
+          report-path: reports/unsigned-status.json
+          fail-on-error: "false"
+      - name: Unsigned bundle with default inputs fails the step
+        id: unsigned_default
+        continue-on-error: true
+        uses: ./
+        with:
+          bundle: unsigned
+          report-path: reports/unsigned-default.json
+      - name: Integrity-only is explicit and labelled
+        id: unsigned_integrity
+        uses: ./
+        with:
+          bundle: unsigned
+          integrity-only: "true"
+          report-path: reports/unsigned-integrity.json
       - name: Assert outcomes
         env:
           VALID_STATUS: ${{ steps.valid.outputs.status }}
           TAMPERED_STATUS: ${{ steps.tampered.outputs.status }}
           DEFAULT_OUTCOME: ${{ steps.tampered_default.outcome }}
+          UNSIGNED_STATUS: ${{ steps.unsigned_status.outputs.status }}
+          UNSIGNED_DEFAULT_OUTCOME: ${{ steps.unsigned_default.outcome }}
+          INTEGRITY_STATUS: ${{ steps.unsigned_integrity.outputs.status }}
         run: |
           test "$VALID_STATUS" = VERIFIED
           test "$TAMPERED_STATUS" = FAILED
           test "$DEFAULT_OUTCOME" = failure
+          test "$UNSIGNED_STATUS" = ERROR
+          test "$UNSIGNED_DEFAULT_OUTCOME" = failure
+          test "$INTEGRITY_STATUS" = VERIFIED_INTEGRITY_ONLY
           grep -q 'hash mismatch: data/readings.csv' reports/tampered.json
           grep -q 'hash mismatch: data/readings.csv' reports/tampered-default.json
 

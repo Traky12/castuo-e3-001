@@ -17,9 +17,15 @@ Test reports, datasets, audit exports and lab results are often shared as plain 
 
 ## Install
 
-**Release status (2026-10-10): no approved v0.1.2 or v0.1.3 release is available.** The v0.1.2 files on `main` are an unpublished candidate; the `v0.1.2` Git tag does not exist. Do not install or pin `@v0.1.2`, and do not use the current `main` candidate for security-sensitive verification while release review is pending. The last earlier tag is v0.1.1, but it is not represented as a fix for the pending release review. The hosted publication gate remains closed.
+**Release status (2026-10-11):** `v0.1.3` is published as a GitHub alpha prerelease at commit `3f622a2cfd5cf1826d22d9266b542710d8b0faf1`. The release's Linux tests and clean-wheel smoke test passed. The GitHub Actions container workflow also passed and published `ghcr.io/traky12/e3bundle:0.1.3` for `linux/amd64` and `linux/arm64`, with SBOM and build provenance ([run 38088766046](https://github.com/Traky12/castuo-e3-001/actions/runs/38088766046)).
 
-Python 3.11 or newer. The unit/CLI suite is intended for CI on Ubuntu, macOS and Windows with Python 3.11–3.13; that matrix must be green on the exact release commit before publication. PyPI availability is not claimed. For source inspection only, clone the repository and run `python scripts/e3bundle.py --help`; source checkout use is not a release or a production recommendation.
+**PyPI is still pending.** In [run 38088766020](https://github.com/Traky12/castuo-e3-001/actions/runs/38088766020), the build, tests and clean-venv smoke test passed, but publishing failed with OIDC `invalid-publisher`: no matching PyPI Trusted Publisher is registered. The maintainer must configure the publisher for project `e3bundle`, owner `Traky12`, repository `castuo-e3-001`, workflow `publish-pypi.yml`, environment `pypi`, then rerun the failed job.
+
+For testing the GitHub alpha only, install the pinned tag:
+```bash
+python -m pip install "git+https://github.com/Traky12/castuo-e3-001@v0.1.3"
+```
+This is not a substitute for a PyPI release, independent review, security advisory publication or production approval. The browser demo still serves the `v0.1.1` examples while the Pages publication gate remains closed. Python 3.11 or newer.
 
 ## Try it in your browser
 
@@ -29,7 +35,16 @@ The demo uses the real `v0.1.1` example bundles and performs SHA-256 and Ed25519
 
 ## Run with Docker
 
-**Container publication is currently not claimed.** Do not pull or rely on a `0.1.2` image as a published release: the v0.1.2 tag and the corresponding release were not found during the 2026-10-10 repository audit. Versioned container instructions and attestation checks will be restored only after the corrected, approved release has been tagged, published and verified.
+The `v0.1.3` alpha image was published by GitHub Actions and attested with SBOM/build provenance. For reproducibility, pin the verified multi-platform image digest:
+
+```bash
+docker pull ghcr.io/traky12/e3bundle:0.1.3
+docker run --rm -v "$PWD:/data:ro" ghcr.io/traky12/e3bundle@sha256:0b491cf8e37247f4b71089b891ad6d77081398f64c02fc46d88a69818500f994 \
+  verify /data/examples/bundles/valid --min-signatures 2 \
+  --trusted-keys /data/examples/bundles/trusted-keys.json --format text
+```
+
+The image workflow's build-test and publish jobs both passed ([run 38088766046](https://github.com/Traky12/castuo-e3-001/actions/runs/38088766046)). This establishes the container artifact and its release workflow, not independent review, a public fixed-version advisory, or production authorization.
 
 ## 30-second demo
 
@@ -81,19 +96,25 @@ e3bundle verify   my-bundle --min-signatures 1 --trusted-keys trusted.json
 
 `trusted.json` maps signer ids to public keys, for example `{"alice": "<public_key_b64 from ~/keys/alice.pub.json>"}`. Keep private keys outside the bundle and outside any repository.
 
-| Exit code | Meaning |
-|---|---|
-| `0` | `VERIFIED` — files unchanged, nothing undeclared, signature threshold met |
-| `1` | `FAILED` — see `findings` |
-| `2` | `ERROR` — unreadable manifest or invalid input |
+| Exit code | Status | Meaning |
+|---|---|---|
+| `0` | `VERIFIED` | files unchanged, nothing undeclared, and at least `--min-signatures` (≥ 1) distinct keys **you pinned** with `--trusted-keys` signed this manifest |
+| `0` | `VERIFIED_TRUST_NOT_CHECKED` | the same, but without `--trusted-keys`: valid signatures, unknown signers |
+| `0` | `VERIFIED_INTEGRITY_ONLY` | files unchanged and nothing undeclared; no signature was required (`--min-signatures 0`) |
+| `1` | `FAILED` | see `findings` |
+| `2` | `ERROR` | unreadable manifest or invalid input, or `--strict` without `--trusted-keys` and `--min-signatures >= 1` |
+
+Only plain `VERIFIED` says who signed. In CI, add `--strict` so a missing key file or minimum is an error instead of a weaker pass.
 
 What `verify` detects: modified, missing and undeclared files; path traversal and symlinks; signatures that are forged, made over an older manifest, duplicated, or (with `--trusted-keys`) made with a key you did not pin.
 
 ## Use it in GitHub Actions
 
-The composite Action is present in this repository, but the current main-branch candidate is **not a released version**. Do not pin the former v0.1.2 candidate SHA as a published release reference. Wait for the security review, corrected version tag, published artifacts and passing release checks before adopting a versioned Action example. Any consuming workflow should use a full 40-character commit SHA and provide an explicit trusted-key set with a positive signature threshold.
+The composite Action source is included in the `v0.1.3` alpha tag, but no versioned Action example is promoted here while PyPI publication and advisory closeout remain pending. For any evaluation, use the full 40-character commit SHA for `v0.1.3` (`3f622a2cfd5cf1826d22d9266b542710d8b0faf1`) and provide an explicit trusted-key set with a positive signature threshold. Do not treat this alpha as independently reviewed or production-authorized.
 
-The step writes the JSON report (`report-path`, default `e3bundle-report.json`), adds the findings to the job summary and fails when verification does not pass. Set `fail-on-error: "false"` to keep the job going and branch on the `status` output (`VERIFIED`, `FAILED` or `ERROR`) instead; GitHub does not expose outputs of a failed step.
+`trusted-keys` is required and `min-signatures` defaults to `1`; signatures count once per distinct key. To check file hashes only, set `integrity-only: "true"`: the status is then `VERIFIED_INTEGRITY_ONLY`, never `VERIFIED`.
+
+The step writes the JSON report (`report-path`, default `e3bundle-report.json`), adds the findings to the job summary and fails when verification does not pass. Set `fail-on-error: "false"` to keep the job going and branch on the `status` output (`VERIFIED`, `VERIFIED_INTEGRITY_ONLY`, `FAILED` or `ERROR`) instead; GitHub does not expose outputs of a failed step.
 
 ## Limits
 
@@ -114,7 +135,7 @@ Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md). The
 
 ## Roadmap (proposed, not committed)
 
-- PyPI package (`pip install e3bundle`) once the `e3.bundle.v1` format is stable enough.
+- PyPI distribution (`pip install e3bundle`): pending owner-side Trusted Publisher registration and a successful rerun of the existing v0.1.3 publish workflow.
 - Detached signature export and key rotation guidance.
 - Optional RFC 3161 timestamping.
 

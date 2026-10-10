@@ -77,7 +77,7 @@ test.describe('local bundle: same result as the CLI', () => {
     await expect(page.getByRole('checkbox', { name: /^example-runner / })).toBeDisabled();
     await expect(page.getByRole('checkbox', { name: /^example-runner / })).not.toBeChecked();
     const got = await verifyAndRead(page);
-    expect(got.status).toBe('VERIFIED');
+    expect(got.status).toBe('VERIFIED_TRUST_NOT_CHECKED');
     await expect(page.locator('#summary')).toContainText('confianza no comprobada');
     sameAsCli(got, dir, 2, null);
   });
@@ -120,7 +120,7 @@ test.describe('local bundle: same result as the CLI', () => {
     await page.getByLabel('Fijar solo las claves que marque').check();
     const got = await verifyAndRead(page);
     expect(got.status).toBe('ERROR');
-    expect(got.findings[0]).toContain('trusted keys must be a JSON object');
+    expect(got.findings[0]).toContain('invalid --trusted-keys file');
     sameAsCli(got, dir, 2, bad);
   });
 });

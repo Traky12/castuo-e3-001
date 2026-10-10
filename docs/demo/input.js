@@ -30,10 +30,11 @@
   function parseTrusted(trustedText, trustedName) {
     if (trustedText === null || trustedText === undefined) return { trusted: null };
     const t = readJson(trustedText, trustedName || 'trusted-keys.json');
-    if (!t.ok) return inputError(t.finding);
+    // Same wording as the CLI (scripts/e3bundle.py, cmd_verify) since #73.
+    if (!t.ok) return inputError('cannot read --trusted-keys file; provide a readable UTF-8 file containing a JSON object mapping signer IDs to base64 public keys.');
     const v = t.value;
     if (v === null || typeof v !== 'object' || Array.isArray(v) || !Object.values(v).every((x) => typeof x === 'string')) {
-      return inputError('trusted keys must be a JSON object {signer_id: public_key_b64}');
+      return inputError('invalid --trusted-keys file; use a JSON object mapping signer IDs to base64 public keys (string values).');
     }
     return { trusted: v };
   }
