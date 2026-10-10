@@ -87,10 +87,8 @@ jobs:
           DEMO_LEGAL_NIF: ${{ secrets.DEMO_LEGAL_NIF }}
           DEMO_LEGAL_ADDRESS: ${{ secrets.DEMO_LEGAL_ADDRESS }}
           DEMO_LEGAL_EMAIL: ${{ secrets.DEMO_LEGAL_EMAIL }}
-          DEMO_LEGAL_COURT_CITY: ${{ secrets.DEMO_LEGAL_COURT_CITY }}
         run: |
           set -euo pipefail
-          if [[ -n "${DEMO_LEGAL_NIF:-}" && -n "${DEMO_LEGAL_ADDRESS:-}" && -n "${DEMO_LEGAL_EMAIL:-}" && -n "${DEMO_LEGAL_COURT_CITY:-}" ]]; then
             python scripts/render_demo_legal.py _site/legal.html _site/legal.html
           else
             echo "Legal fields are not configured; the template remains and the publication gate will block deployment."
@@ -188,14 +186,12 @@ jobs:
           DEMO_LEGAL_NIF: ${{ secrets.DEMO_LEGAL_NIF }}
           DEMO_LEGAL_ADDRESS: ${{ secrets.DEMO_LEGAL_ADDRESS }}
           DEMO_LEGAL_EMAIL: ${{ secrets.DEMO_LEGAL_EMAIL }}
-          DEMO_LEGAL_COURT_CITY: ${{ secrets.DEMO_LEGAL_COURT_CITY }}
         run: |
           set -euo pipefail
           missing=()
           [[ -n "${DEMO_LEGAL_NIF:-}" ]] || missing+=("DEMO_LEGAL_NIF")
           [[ -n "${DEMO_LEGAL_ADDRESS:-}" ]] || missing+=("DEMO_LEGAL_ADDRESS")
           [[ -n "${DEMO_LEGAL_EMAIL:-}" ]] || missing+=("DEMO_LEGAL_EMAIL")
-          [[ -n "${DEMO_LEGAL_COURT_CITY:-}" ]] || missing+=("DEMO_LEGAL_COURT_CITY")
           if (( ${#missing[@]} > 0 )); then
             echo "ready=false" >> "$GITHUB_OUTPUT"
             printf 'Pages deployment blocked; configure the required repository Actions secrets: %s\n' "${missing[*]}"
