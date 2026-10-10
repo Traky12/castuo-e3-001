@@ -75,11 +75,11 @@ def load_json(path: Path) -> Any:
 
 def load_manifest(bundle: Path) -> Any:
     if not bundle.is_dir():
-        raise InputError(f"bundle directory not found: {bundle}; provide an existing bundle directory.")
+        raise InputError("bundle directory not found; provide an existing bundle directory.")
     path = bundle / MANIFEST
     if not path.exists():
         raise InputError(
-            f"{MANIFEST} is missing from {bundle}; "
+            f"{MANIFEST} is missing; "
             "run e3bundle manifest <bundle> --bundle-id <id> to create it."
         )
     return load_json(path)
@@ -143,7 +143,7 @@ def load_private_key(path: Path) -> Ed25519PrivateKey:
         return Ed25519PrivateKey.from_private_bytes(raw)
     except OSError as exc:
         raise InputError(
-            f"cannot read private key {path}; check the --private-key path and read permissions."
+            "cannot read private key file; check the --private-key path and read permissions."
         ) from exc
     except ValueError as exc:
         raise InputError(f"cannot load private key {path.name}: {exc}") from exc
@@ -359,12 +359,12 @@ def cmd_verify(args: argparse.Namespace) -> int:
             trusted = load_json(args.trusted_keys)
         except InputError as exc:
             raise InputError(
-                f"cannot read --trusted-keys file {args.trusted_keys}; provide a readable UTF-8 "
+                "cannot read --trusted-keys file; provide a readable UTF-8 "
                 "file containing a JSON object mapping signer IDs to base64 public keys."
             ) from exc
         if not isinstance(trusted, dict) or not all(isinstance(v, str) for v in trusted.values()):
             raise InputError(
-                f"invalid --trusted-keys file {args.trusted_keys}; use a JSON object mapping "
+                "invalid --trusted-keys file; use a JSON object mapping "
                 "signer IDs to base64 public keys (string values)."
             )
     report = verify(args.bundle, args.min_signatures, trusted, args.allow_extra)
