@@ -26,26 +26,6 @@ All notable changes to this repository are documented here. Versions follow [Sem
 - Browser verifier now matches the v0.1.1 CLI on malformed manifest and signature content (#55): `manifest files must be an array`, per-entry `sha256:<64 lowercase hex>` check, non-object file entries and signatures, non-string `signer_id`, strict base64 for keys and signatures, CLI wording for missing values (`None`), and no prototype-property paths such as `constructor`. Before the fix a `null` signature made the verifier throw. 14 new cases in `tests/input-conformance.mjs`; the 8 scenarios are unchanged. Two known differences remain (see `docs/demo/THREAT-MODEL.md`).
 - Create page: the empty result box was visible before any verification (`.result` display overrode `hidden`).
 
-## [0.1.2] - 2026-10-10
-
-### Security
-- `e3bundle verify` rejects manifest paths that alias the same file under another name (`./file`, `a//b`, `a/./b`, trailing `/`) and paths containing NUL, so one file cannot be declared twice under different names.
-- `e3bundle verify` rejects a symlinked bundle directory and symlinked `manifest.json` / `signatures.json` before reading them, and reports symlinks inside the bundle even with `--allow-extra`.
-- `e3bundle verify` refuses `--output` inside the bundle directory (verification must not modify the bundle) and a negative `--min-signatures` (exit 2).
-
-### Added
-- Browser demo, local bundles (`paquete.html`): verify a folder from your device in the tab. `importer.js` checks names and sizes before reading anything (≤200 files, ≤10 MiB each, ≤50 MiB total, safe unambiguous paths ≤255 chars / 16 levels; no ZIP) and verifies nothing if any entry is rejected. Imported public keys are not trusted until you select them; the selection can be downloaded as a keys file. Input order and decoding follow the CLI; the UI suite compares 13 local folders with `e3bundle verify` from the tag. Known difference: symlinks (see `docs/demo/THREAT-MODEL.md`).
-- Browser demo, advanced mode: a Guided / Advanced switch (`#avanzado` deep link) over the same verification. Advanced shows the exact verifier data and answers four separate questions per signature (valid Ed25519, covers this manifest, key pinned by you, counts for the threshold) plus the threshold count, and downloads `e3bundle-report.json` built in the page (sorted keys and `limitations`, as the CLI writes it; no keys or file contents). Guided is the default.
-- Browser demo hardening: restrictive Content-Security-Policy (`<meta>`; GitHub Pages cannot send headers), an input layer (`docs/demo/input.js`) that follows the CLI's input contract so unreadable input is `ERROR` (exit 2) and never a verdict, a "Reiniciar sesión" control on both pages, and a Playwright suite run in CI on Chromium, Firefox and WebKit (scenarios, malformed input, reset, same-origin-only requests, CSP enforcement, keyboard, no overflow at 375/768/1440). `tests/input-conformance.mjs` compares nine malformed inputs with the v0.1.1 CLI. Threat model in `docs/demo/THREAT-MODEL.md`. `verifier.js` is unchanged.
-- Browser demo, guided journey: the problem it addresses, how it works, a per-scenario explanation, a result summary with what each finding means and the next step, a checks table with consequences, the limits of VERIFIED, local CLI steps, contribution and private vulnerability reporting, and a traceability block. Verification logic (`verifier.js`) is unchanged; a long manifest hash no longer overflows on phones.
-- Container image `ghcr.io/traky12/e3bundle` for `linux/amd64` and `linux/arm64` (non-root, no `latest` tag), built from the release tag by `container.yml` with SBOM, build provenance and a GitHub artifact attestation. Pull requests that touch the image are built and smoke-tested (valid bundle exit 0, tampered bundle exit 1).
-- Reproduction report form: tested path (CLI or browser demo), version, environment, commands, exit codes, friction, evidence and an independence confirmation, for the five-tester gate in #30.
-- Browser demo in `docs/demo/`, published with GitHub Pages: verifies the `v0.1.1` example bundles with WebCrypto (SHA-256, Ed25519) under eight tampering scenarios, and creates and signs new bundles that the CLI verifies. The `pages.yml` workflow takes the bundles and CLI from the release tag and fails if the demo and the CLI disagree.
-
-### Fixed
-- Browser verifier now matches the v0.1.1 CLI on malformed manifest and signature content (#55): `manifest files must be an array`, per-entry `sha256:<64 lowercase hex>` check, non-object file entries and signatures, non-string `signer_id`, strict base64 for keys and signatures, CLI wording for missing values (`None`), and no prototype-property paths such as `constructor`. Before the fix a `null` signature made the verifier throw. 14 new cases in `tests/input-conformance.mjs`; the 8 scenarios are unchanged. Two known differences remain (see `docs/demo/THREAT-MODEL.md`).
-- Create page: the empty result box was visible before any verification (`.result` display overrode `hidden`).
-
 ## [0.1.1] - 2026-10-09
 
 ### Added
