@@ -13,12 +13,10 @@ class RenderDemoLegalTests(unittest.TestCase):
             "DEMO_LEGAL_NIF": "12345678Z",
             "DEMO_LEGAL_ADDRESS": '<Avenida & "Falsa" 12>',
             "DEMO_LEGAL_EMAIL": "demo@example.test",
-            "DEMO_LEGAL_COURT_CITY": "Ciudad de prueba",
         }
         self.template = (
             '<p>{{LEGAL_NIF}}</p><p>{{LEGAL_ADDRESS}}</p>'
             '<a href="mailto:{{LEGAL_EMAIL_HREF}}">{{LEGAL_EMAIL}}</a>'
-            '<p>{{LEGAL_COURT_CITY}}</p>'
         )
 
     def test_renders_all_fields_and_escapes_html(self):
@@ -26,7 +24,6 @@ class RenderDemoLegalTests(unittest.TestCase):
         self.assertIn("12345678Z", output)
         self.assertIn("&lt;Avenida &amp; &quot;Falsa&quot; 12&gt;", output)
         self.assertIn('href="mailto:demo@example.test">demo@example.test</a>', output)
-        self.assertIn("Ciudad de prueba", output)
         self.assertNotIn("{{LEGAL_", output)
 
     def test_missing_field_fails_closed(self):
@@ -45,11 +42,12 @@ class RenderDemoLegalTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "missing required markers"):
             render("<p>{{LEGAL_NIF}}</p>", self.values)
 
-    def test_committed_template_has_markers_but_no_identity_values(self):
+    def test_committed_template_is_renderable_without_real_identity_values(self):
         template = (ROOT / "docs" / "demo" / "legal.html").read_text(encoding="utf-8")
         output = render(template, self.values)
         self.assertNotIn("{{LEGAL_", output)
         self.assertIn("mailto:demo@example.test", output)
+        self.assertIn("Membrío pertenece al partido judicial de Valencia de Alcántara", output)
         self.assertIn("La aplicabilidad normativa no se ha evaluado formalmente", output)
 
 
