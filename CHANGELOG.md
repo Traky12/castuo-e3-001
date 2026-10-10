@@ -9,7 +9,9 @@ All notable changes to this repository are documented here. Versions follow [Sem
 - The GitHub Action no longer reports `VERIFIED` without pinned signatures. `min-signatures` defaults to `1` and `trusted-keys` is required; without them the status is `ERROR`. Hash-only checks need `integrity-only: "true"` and report `VERIFIED_INTEGRITY_ONLY`. **Breaking** for workflows that relied on the old defaults.
 - Plain `VERIFIED` now always means pinned keys and a minimum of at least 1, in the CLI, the browser demo and the Action. Without `--trusted-keys` a passing result is `VERIFIED_TRUST_NOT_CHECKED`; with `--min-signatures 0` it is `VERIFIED_INTEGRITY_ONLY`. Both still exit 0. New `--strict` flag: without `--trusted-keys` and `--min-signatures >= 1` it exits 2 (`ERROR`); the Action always uses it unless `integrity-only` is set. **Breaking** for scripts that compare the status string with `VERIFIED`.
 
-## [0.1.2] - 2026-10-10
+**Candidate package version:** `0.1.2` (not tagged or released yet).
+
+### Candidate v0.1.2 changes (not released)
 
 ### Security
 - `e3bundle verify` rejects manifest paths that alias the same file under another name (`./file`, `a//b`, `a/./b`, trailing `/`) and paths containing NUL, so one file cannot be declared twice under different names.
@@ -57,7 +59,6 @@ All notable changes to this repository are documented here. Versions follow [Sem
 - README reorganised product-first (problem, install, demo, limits, security, roadmap); the E3-001 protocol, authority boundary and history follow below, unchanged in substance.
 - `PROTOCOL.md` states that `scripts/run_s001a_foreign_replay.py` is not published in this repository.
 
-[Unreleased]: https://github.com/Traky12/castuo-e3-001/compare/v0.1.2...HEAD
-[0.1.2]: https://github.com/Traky12/castuo-e3-001/compare/v0.1.1...v0.1.2
+[Unreleased]: https://github.com/Traky12/castuo-e3-001/compare/v0.1.1...HEAD
 [0.1.1]: https://github.com/Traky12/castuo-e3-001/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Traky12/castuo-e3-001/releases/tag/v0.1.0
