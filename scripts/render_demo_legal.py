@@ -42,7 +42,7 @@ def render(template: str, values: Mapping[str, str]) -> str:
             raise ValueError(f"template delimiters are not allowed in: {name}")
         clean[name] = value.strip()
 
-    if not re.fullmatch(r"[^@\s<>\\"']+@[^@\s<>\\"']+", clean["DEMO_LEGAL_EMAIL"]):
+    if not re.fullmatch(r"""[^@\s<>"']+@[^@\s<>"']+""", clean["DEMO_LEGAL_EMAIL"]):
         raise ValueError("DEMO_LEGAL_EMAIL must be a valid email address")
 
     expected_tokens = set(TOKENS)
