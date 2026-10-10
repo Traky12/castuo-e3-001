@@ -110,7 +110,7 @@ What `verify` detects: modified, missing and undeclared files; path traversal an
 
 ## Use it in GitHub Actions
 
-The composite Action is present in this repository, but the current main-branch candidate is **not a released version**. Do not pin the former v0.1.2 candidate SHA as a published release reference. Wait for the security review, corrected version tag, published artifacts and passing release checks before adopting a versioned Action example. Any consuming workflow should use a full 40-character commit SHA and provide an explicit trusted-key set with a positive signature threshold.
+The composite Action source is included in the `v0.1.3` alpha tag, but no versioned Action example is promoted here while PyPI publication and advisory closeout remain pending. For any evaluation, use the full 40-character commit SHA for `v0.1.3` (`3f622a2cfd5cf1826d22d9266b542710d8b0faf1`) and provide an explicit trusted-key set with a positive signature threshold. Do not treat this alpha as independently reviewed or production-authorized.
 
 `trusted-keys` is required and `min-signatures` defaults to `1`; signatures count once per distinct key. To check file hashes only, set `integrity-only: "true"`: the status is then `VERIFIED_INTEGRITY_ONLY`, never `VERIFIED`.
 
