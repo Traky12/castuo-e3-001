@@ -35,7 +35,16 @@ The demo uses the real `v0.1.1` example bundles and performs SHA-256 and Ed25519
 
 ## Run with Docker
 
-**Container publication is currently not claimed.** Do not pull or rely on a `0.1.2` image as a published release: the v0.1.2 tag and the corresponding release were not found during the 2026-10-10 repository audit. Versioned container instructions and attestation checks will be restored only after the corrected, approved release has been tagged, published and verified.
+The `v0.1.3` alpha image was published by GitHub Actions and attested with SBOM/build provenance. For reproducibility, pin the verified multi-platform image digest:
+
+```bash
+docker pull ghcr.io/traky12/e3bundle:0.1.3
+docker run --rm -v "$PWD:/data:ro" ghcr.io/traky12/e3bundle@sha256:0b491cf8e37247f4b71089b891ad6d77081398f64c02fc46d88a69818500f994 \
+  verify /data/examples/bundles/valid --min-signatures 2 \
+  --trusted-keys /data/examples/bundles/trusted-keys.json --format text
+```
+
+The image workflow's build-test and publish jobs both passed ([run 38088766046](https://github.com/Traky12/castuo-e3-001/actions/runs/38088766046)). This establishes the container artifact and its release workflow, not independent review, a public fixed-version advisory, or production authorization.
 
 ## 30-second demo
 
