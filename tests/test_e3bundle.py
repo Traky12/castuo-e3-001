@@ -55,7 +55,10 @@ class E3BundleTests(unittest.TestCase):
 
     def assert_actionable_error(self, proc, problem, action, json_output=False):
         self.assertEqual(proc.returncode, 2, proc.stdout + proc.stderr)
-        self.assertNotIn("Traceback", proc.stdout + proc.stderr)
+        output = proc.stdout + proc.stderr
+        self.assertNotIn("Traceback", output)
+        # Actionable diagnostics must not disclose local absolute paths.
+        self.assertNotIn(str(self.root.resolve()), output)
         if json_output:
             self.assertEqual(proc.stderr, "")
             report = json.loads(proc.stdout)
