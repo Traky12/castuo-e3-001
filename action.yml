@@ -87,6 +87,7 @@ runs:
         fi
         args=(verify "$BUNDLE" --min-signatures "$MIN_SIGNATURES" --output "$REPORT_PATH")
         if [ -n "$TRUSTED_KEYS" ]; then args+=(--trusted-keys "$TRUSTED_KEYS"); fi
+        if [ "$INTEGRITY_ONLY" != "true" ]; then args+=(--strict); fi
         if [ "$ALLOW_EXTRA" = "true" ]; then args+=(--allow-extra); fi
         # Actions runs bash with -e: capture the exit code instead of aborting.
         code=0

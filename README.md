@@ -98,11 +98,15 @@ e3bundle verify   my-bundle --min-signatures 1 --trusted-keys trusted.json
 
 `trusted.json` maps signer ids to public keys, for example `{"alice": "<public_key_b64 from ~/keys/alice.pub.json>"}`. Keep private keys outside the bundle and outside any repository.
 
-| Exit code | Meaning |
-|---|---|
-| `0` | `VERIFIED` — files unchanged, nothing undeclared, signature threshold met |
-| `1` | `FAILED` — see `findings` |
-| `2` | `ERROR` — unreadable manifest or invalid input |
+| Exit code | Status | Meaning |
+|---|---|---|
+| `0` | `VERIFIED` | files unchanged, nothing undeclared, and at least `--min-signatures` (≥ 1) distinct keys **you pinned** with `--trusted-keys` signed this manifest |
+| `0` | `VERIFIED_TRUST_NOT_CHECKED` | the same, but without `--trusted-keys`: valid signatures, unknown signers |
+| `0` | `VERIFIED_INTEGRITY_ONLY` | files unchanged and nothing undeclared; no signature was required (`--min-signatures 0`) |
+| `1` | `FAILED` | see `findings` |
+| `2` | `ERROR` | unreadable manifest or invalid input, or `--strict` without `--trusted-keys` and `--min-signatures >= 1` |
+
+Only plain `VERIFIED` says who signed. In CI, add `--strict` so a missing key file or minimum is an error instead of a weaker pass.
 
 What `verify` detects: modified, missing and undeclared files; path traversal and symlinks; signatures that are forged, made over an older manifest, duplicated, or (with `--trusted-keys`) made with a key you did not pin.
 

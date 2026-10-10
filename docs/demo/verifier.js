@@ -187,9 +187,9 @@
     }
     const counted = trusted ? trustedSigners.size : valid.size;
     if (counted < minSignatures) findings.push(`signature threshold not met: ${counted} < ${minSignatures}`);
-    const status = findings.length ? 'FAILED' : 'VERIFIED';
+    const status = findings.length ? 'FAILED' : passingStatus(!!trusted, minSignatures);
     return {
-      exitCode: status === 'VERIFIED' ? 0 : 1,
+      exitCode: PASSING.includes(status) ? 0 : 1,
       canonicalManifest,
       phases,
       report: {
@@ -207,6 +207,13 @@
         trust_mode: trusted ? 'pinned' : 'none',
       },
     };
+  }
+
+  // Same names as the CLI: plain VERIFIED needs pinned keys and a minimum of at least 1.
+  const PASSING = ['VERIFIED', 'VERIFIED_TRUST_NOT_CHECKED', 'VERIFIED_INTEGRITY_ONLY'];
+  function passingStatus(pinned, minSignatures) {
+    if (minSignatures < 1) return 'VERIFIED_INTEGRITY_ONLY';
+    return pinned ? 'VERIFIED' : 'VERIFIED_TRUST_NOT_CHECKED';
   }
 
   /** Same manifest shape and ordering as `e3bundle manifest`. */
@@ -236,7 +243,7 @@
     return { keyPair, publicKeyB64 };
   }
 
-  const api = { canonical, sha256, verifyBundle, createManifest, signManifest, generateKey, ed25519Supported, isSafePath };
+  const api = { canonical, sha256, verifyBundle, createManifest, signManifest, generateKey, ed25519Supported, isSafePath, PASSING };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.E3 = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

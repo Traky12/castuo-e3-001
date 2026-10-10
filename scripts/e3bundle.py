@@ -200,6 +200,16 @@ def cmd_sign(args: argparse.Namespace) -> int:
     return 0
 
 
+PASSING = ("VERIFIED", "VERIFIED_TRUST_NOT_CHECKED", "VERIFIED_INTEGRITY_ONLY")
+
+
+def passing_status(pinned: bool, min_signatures: int) -> str:
+    """Name what a clean result actually proves. Plain VERIFIED needs pinned keys and a minimum."""
+    if min_signatures < 1:
+        return "VERIFIED_INTEGRITY_ONLY"
+    return "VERIFIED" if pinned else "VERIFIED_TRUST_NOT_CHECKED"
+
+
 def verify(bundle: Path, min_signatures: int, trusted: dict[str, str] | None, allow_extra: bool) -> dict[str, Any]:
     # Do not follow a symlinked bundle root or reserved metadata files before
     # scanning. The manifest/signatures are trust-boundary inputs themselves.
@@ -309,7 +319,7 @@ def verify(bundle: Path, min_signatures: int, trusted: dict[str, str] | None, al
         "format": FORMAT,
         "bundle_id": manifest.get("bundle_id"),
         "manifest_hash": expected_hash,
-        "status": "VERIFIED" if not findings else "FAILED",
+        "status": passing_status(trusted is not None, min_signatures) if not findings else "FAILED",
         "files_declared": len(entries),
         "files_verified": verified,
         "signatures_present": len(signatures),
@@ -337,6 +347,8 @@ def format_text_report(report: dict[str, Any]) -> str:
 def cmd_verify(args: argparse.Namespace) -> int:
     if args.min_signatures < 0:
         raise InputError("--min-signatures must be >= 0")
+    if args.strict and (args.trusted_keys is None or args.min_signatures < 1):
+        raise InputError("--strict requires --trusted-keys and --min-signatures >= 1")
     if args.output is not None:
         bundle_root = args.bundle.resolve()
         output_path = args.output.resolve()
@@ -356,7 +368,7 @@ def cmd_verify(args: argparse.Namespace) -> int:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(text + "\n", encoding="utf-8")
     print(format_text_report(report) if args.format == "text" else text)
-    return 0 if report["status"] == "VERIFIED" else 1
+    return 0 if report["status"] in PASSING else 1
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -385,6 +397,7 @@ def build_parser() -> argparse.ArgumentParser:
     check.add_argument("--min-signatures", type=int, default=0)
     check.add_argument("--trusted-keys", type=Path, default=None, help="JSON {signer_id: public_key_b64}; only these keys count")
     check.add_argument("--allow-extra", action="store_true", help="do not fail on files absent from the manifest")
+    check.add_argument("--strict", action="store_true", help="require --trusted-keys and --min-signatures >= 1 (exit 2 otherwise); use this in CI")
     check.add_argument("--output", type=Path, default=None, help="also write the JSON report to this path")
     check.add_argument("--format", choices=("json", "text"), default="json", help="stdout format (default: json); --output always writes JSON")
     check.set_defaults(handler=cmd_verify)

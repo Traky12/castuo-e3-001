@@ -137,11 +137,11 @@
       sum.append(el('li', { class: report.signatures_valid === report.signatures_present ? 'ok' : 'bad' }, `${report.signatures_valid}/${report.signatures_present} firmas válidas`));
       if (report.trust_mode === 'pinned') sum.append(el('li', { class: report.signatures_trusted >= min ? 'ok' : 'bad' }, `${report.signatures_trusted} firmas con claves que has fijado`));
       else sum.append(el('li', { class: 'warn' }, 'sin claves fijadas: confianza no comprobada'));
-      $('meaning').textContent = report.status === 'VERIFIED'
-        ? (report.trust_mode === 'pinned'
-          ? 'Los ficheros coinciden con el manifiesto firmado y las firmas de las claves que fijaste alcanzan el umbral. No dice que el contenido sea verdadero.'
-          : 'Los ficheros están íntegros y hay firmas válidas suficientes, pero sin claves fijadas no sabes quién firmó.')
-        : 'Al menos una comprobación no se cumple: mira los hallazgos. No trates este paquete como íntegro.';
+      $('meaning').textContent = {
+        VERIFIED: 'Los ficheros coinciden con el manifiesto firmado y las firmas de las claves que fijaste alcanzan el umbral. No dice que el contenido sea verdadero.',
+        VERIFIED_TRUST_NOT_CHECKED: 'Los ficheros están íntegros y hay firmas válidas suficientes, pero sin claves fijadas no sabes quién firmó. Por eso no es VERIFIED.',
+        VERIFIED_INTEGRITY_ONLY: 'Los ficheros coinciden con el manifiesto, pero no se ha exigido ninguna firma (mínimo 0): no se comprueba quién lo respalda.',
+      }[report.status] || 'Al menos una comprobación no se cumple: mira los hallazgos. No trates este paquete como íntegro.';
     }
     $('cli').textContent = cliCommand(min, trusted);
     $('resBox').hidden = false;

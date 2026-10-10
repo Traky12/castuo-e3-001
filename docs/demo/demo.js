@@ -116,9 +116,12 @@
       mean.append(el('li', {}, 'Los ficheros coinciden con el manifiesto firmado y las firmas de las claves que fijaste alcanzan el umbral. No dice que el contenido sea verdadero.'));
       next.append(document.createTextNode('Ejecuta la misma verificación en tu terminal con e3bundle v0.1.1 y compara: '));
       next.append(el('a', { href: '#local' }, 'pruébalo en tu equipo'), document.createTextNode('.'));
-    } else if (rep.status === 'VERIFIED') {
-      mean.append(el('li', {}, 'Los ficheros están íntegros y hay firmas válidas suficientes, pero sin claves fijadas no sabes quién firmó: cualquiera puede generar una clave y firmar.'));
-      next.append(document.createTextNode('Fija las claves públicas que esperas con --trusted-keys antes de confiar en este resultado.'));
+    } else if (rep.status === 'VERIFIED_TRUST_NOT_CHECKED') {
+      mean.append(el('li', {}, 'Los ficheros están íntegros y hay firmas válidas suficientes, pero sin claves fijadas no sabes quién firmó: cualquiera puede generar una clave y firmar. Por eso el resultado no es VERIFIED.'));
+      next.append(document.createTextNode('Fija las claves públicas que esperas con --trusted-keys, y usa --strict en CI, antes de confiar en este resultado.'));
+    } else if (rep.status === 'VERIFIED_INTEGRITY_ONLY') {
+      mean.append(el('li', {}, 'Los ficheros coinciden con el manifiesto, pero no se ha exigido ninguna firma: no se comprueba quién lo respalda.'));
+      next.append(document.createTextNode('Pide al menos una firma de una clave fijada (--min-signatures 1 --trusted-keys) si necesitas saber quién respalda el paquete.'));
     } else {
       for (const text of new Set(rep.findings.map(meaningOf))) mean.append(el('li', {}, text));
       next.append(document.createTextNode('Revisa el fichero, el manifiesto o el origen del paquete. No trates esta evidencia como íntegra.'));
@@ -166,7 +169,7 @@
     const tl = $('trust'); tl.replaceChildren();
     $('trustExplain').textContent = inp.trusted
       ? 'Con --trusted-keys solo cuentan las firmas hechas con las claves públicas que tú has fijado.'
-      : 'Sin --trusted-keys, una firma válida solo prueba que alguien con esa clave firmó; no dice quién. Por eso el resultado puede ser VERIFIED con la confianza sin comprobar.';
+      : 'Sin --trusted-keys, una firma válida solo prueba que alguien con esa clave firmó; no dice quién. Por eso el resultado es VERIFIED_TRUST_NOT_CHECKED, nunca VERIFIED.';
     for (const s of r.phases.signatures) {
       const li = el('li', { class: 'trust-item' });
       let cls = 'maybe'; let text = 'confianza no comprobada (sin claves fijadas)';

@@ -77,7 +77,7 @@ test.describe('local bundle: same result as the CLI', () => {
     await expect(page.getByRole('checkbox', { name: /^example-runner / })).toBeDisabled();
     await expect(page.getByRole('checkbox', { name: /^example-runner / })).not.toBeChecked();
     const got = await verifyAndRead(page);
-    expect(got.status).toBe('VERIFIED');
+    expect(got.status).toBe('VERIFIED_TRUST_NOT_CHECKED');
     await expect(page.locator('#summary')).toContainText('confianza no comprobada');
     sameAsCli(got, dir, 2, null);
   });
