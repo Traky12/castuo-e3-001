@@ -135,7 +135,7 @@ Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md). The
 
 ## Roadmap (proposed, not committed)
 
-- PyPI package (`pip install e3bundle`) once the `e3.bundle.v1` format is stable enough.
+- PyPI distribution (`pip install e3bundle`): pending owner-side Trusted Publisher registration and a successful rerun of the existing v0.1.3 publish workflow.
 - Detached signature export and key rotation guidance.
 - Optional RFC 3161 timestamping.
 
