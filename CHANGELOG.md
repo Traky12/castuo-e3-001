@@ -4,7 +4,6 @@ All notable changes to this repository are documented here. Versions follow [Sem
 
 ## [Unreleased]
 
-
 **Candidate package version:** `0.1.2` (not tagged or released yet).
 
 ### Candidate v0.1.2 changes (not released)
