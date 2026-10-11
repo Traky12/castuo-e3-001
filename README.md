@@ -89,6 +89,12 @@ unchanged. Input errors print `ERROR` and its findings in the selected format;
 as before, they do not write an output file. Without `--trusted-keys`, the text
 summary says `trust not checked` rather than implying signer identity was verified.
 
+The [verify report JSON Schema](schemas/e3bundle-report.schema.json) (draft 2020-12)
+describes current JSON output, including all three success statuses, `FAILED`,
+and the minimal `ERROR` report (`status`, `findings`, `limitations`).
+It validates report structure, not evidence or trust. `bundle_id` is passed
+through from the manifest without type validation and is `null` when absent.
+
 `--format text` is available from v0.1.1; `v0.1.0` supports JSON output only.
 
 ## Use it on your own files

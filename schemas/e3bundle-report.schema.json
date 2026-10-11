@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Traky12/castuo-e3-001/blob/main/schemas/e3bundle-report.schema.json",
+  "title": "e3bundle verify JSON report",
+  "description": "Describes current CLI output, not the truth of bundle contents or signer identity.",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "e3.bundle.v1"
+    },
+    "bundle_id": {
+      "description": "Passed through from manifest.bundle_id without type validation; null when absent."
+    },
+    "manifest_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "minLength": 71,
+      "maxLength": 71
+    },
+    "status": {
+      "enum": [
+        "VERIFIED",
+        "VERIFIED_TRUST_NOT_CHECKED",
+        "VERIFIED_INTEGRITY_ONLY",
+        "FAILED",
+        "ERROR"
+      ]
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limitations": {
+      "type": "string"
+    },
+    "files_declared": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "files_verified": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "signatures_present": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "signatures_valid": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "min_signatures": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "signatures_trusted": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "trust_mode": {
+      "enum": [
+        "pinned",
+        "none"
+      ]
+    }
+  },
+  "required": [
+    "status",
+    "findings",
+    "limitations"
+  ],
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "properties": {
+        "status": {
+          "const": "ERROR"
+        }
+      },
+      "maxProperties": 3
+    },
+    {
+      "properties": {
+        "status": {
+          "enum": [
+            "VERIFIED",
+            "VERIFIED_TRUST_NOT_CHECKED",
+            "VERIFIED_INTEGRITY_ONLY",
+            "FAILED"
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "bundle_id",
+        "manifest_hash",
+        "status",
+        "findings",
+        "limitations",
+        "files_declared",
+        "files_verified",
+        "signatures_present",
+        "signatures_valid",
+        "min_signatures",
+        "signatures_trusted",
+        "trust_mode"
+      ],
+      "if": {
+        "properties": {
+          "trust_mode": {
+            "const": "none"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "signatures_trusted": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "signatures_trusted": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  ]
+}

@@ -41,7 +41,7 @@ Never report a vulnerability in a public issue. Use [Security → Report a vulne
 ## Development setup
 
 ```bash
-python -m pip install -e . pytest
+python -m pip install -e ".[test]"
 python -m pytest tests -v
 ```
 
