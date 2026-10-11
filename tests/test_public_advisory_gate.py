@@ -106,6 +106,10 @@ class PublicAdvisoryGateTests(unittest.TestCase):
         self.assertIn("advisory_ready", workflow)
         self.assertIn('echo "ready=true" >> "$GITHUB_OUTPUT"', workflow)
         self.assertIn('echo "ready=false" >> "$GITHUB_OUTPUT"', workflow)
+        start = workflow.index("if advisory_code=$(curl")
+        end = workflow.index('echo "Gate summary:', start)
+        advisory_block = workflow[start:end]
+        self.assertNotIn("Authorization: Bearer", advisory_block)
 
 
 if __name__ == "__main__":
