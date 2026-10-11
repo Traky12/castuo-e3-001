@@ -4,6 +4,10 @@ All notable changes to this repository are documented here. Versions follow [Sem
 
 ## [Unreleased]
 
+No unreleased changes are recorded.
+
+## [0.1.3] - 2026-10-10
+
 ### Security
 - `e3bundle verify` and the browser verifier count signatures by distinct public key: one key signing under several `signer_id` values counts once and is reported as `signatures[i]: duplicate key: <id> reuses the key of <id>` (GHSA-55pc-7v4h-jf7c).
 - The GitHub Action no longer reports `VERIFIED` without pinned signatures. `min-signatures` defaults to `1` and `trusted-keys` is required; without them the status is `ERROR`. Hash-only checks need `integrity-only: "true"` and report `VERIFIED_INTEGRITY_ONLY`. **Breaking** for workflows that relied on the old defaults.
@@ -12,9 +16,9 @@ All notable changes to this repository are documented here. Versions follow [Sem
 ### Changed
 - CLI errors for common input mistakes say what to fix and no longer include local filesystem paths. Contributed via #72, integrated in #73 (closes #34).
 
-**Candidate package version:** `0.1.3` (not tagged or released yet). It supersedes the withdrawn, never-released v0.1.2 candidate and includes the GHSA-55pc-7v4h-jf7c fix.
+**Release status:** GitHub alpha prerelease `v0.1.3` is published from commit `3f622a2cfd5cf1826d22d9266b542710d8b0faf1`. It supersedes the withdrawn, never-released `v0.1.2` candidate. PyPI publication failed with `invalid-publisher`; the GHCR publication workflow succeeded. The public security-advisory fixed-version metadata and deployment of this CLI in the live browser demo remain unconfirmed. This release is not promoted for production or as independently validated.
 
-### Changes carried over from the withdrawn v0.1.2 candidate (not released)
+### Changes carried over from the withdrawn v0.1.2 candidate
 
 ### Security
 - `e3bundle verify` rejects manifest paths that alias the same file under another name (`./file`, `a//b`, `a/./b`, trailing `/`) and paths containing NUL, so one file cannot be declared twice under different names.
@@ -28,7 +32,7 @@ All notable changes to this repository are documented here. Versions follow [Sem
 - Browser demo, guided journey: the problem it addresses, how it works, a per-scenario explanation, a result summary with what each finding means and the next step, a checks table with consequences, the limits of VERIFIED, local CLI steps, contribution and private vulnerability reporting, and a traceability block. Verification logic (`verifier.js`) is unchanged; a long manifest hash no longer overflows on phones.
 - Container image `ghcr.io/traky12/e3bundle` for `linux/amd64` and `linux/arm64` (non-root, no `latest` tag), built from the release tag by `container.yml` with SBOM, build provenance and a GitHub artifact attestation. Pull requests that touch the image are built and smoke-tested (valid bundle exit 0, tampered bundle exit 1).
 - Reproduction report form: tested path (CLI or browser demo), version, environment, commands, exit codes, friction, evidence and an independence confirmation, for the five-tester gate in #30.
-- Browser demo in `docs/demo/`, published with GitHub Pages: verifies the `v0.1.1` example bundles with WebCrypto (SHA-256, Ed25519) under eight tampering scenarios, and creates and signs new bundles that the CLI verifies. The `pages.yml` workflow takes the bundles and CLI from the release tag and fails if the demo and the CLI disagree.
+- Browser demo source in `docs/demo/` verifies the `v0.1.1` example bundles with WebCrypto (SHA-256, Ed25519) under eight tampering scenarios, and creates/signs bundles that the CLI can verify. The Pages workflow now tests against the exact `v0.1.3` source commit; its publication gate remains closed, so this changelog does not claim that the live public URL serves the `v0.1.3` demo.
 
 ### Fixed
 - Browser verifier now matches the v0.1.1 CLI on malformed manifest and signature content (#55): `manifest files must be an array`, per-entry `sha256:<64 lowercase hex>` check, non-object file entries and signatures, non-string `signer_id`, strict base64 for keys and signatures, CLI wording for missing values (`None`), and no prototype-property paths such as `constructor`. Before the fix a `null` signature made the verifier throw. 14 new cases in `tests/input-conformance.mjs`; the 8 scenarios are unchanged. Two known differences remain (see `docs/demo/THREAT-MODEL.md`).
@@ -62,6 +66,7 @@ All notable changes to this repository are documented here. Versions follow [Sem
 - README reorganised product-first (problem, install, demo, limits, security, roadmap); the E3-001 protocol, authority boundary and history follow below, unchanged in substance.
 - `PROTOCOL.md` states that `scripts/run_s001a_foreign_replay.py` is not published in this repository.
 
-[Unreleased]: https://github.com/Traky12/castuo-e3-001/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/Traky12/castuo-e3-001/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/Traky12/castuo-e3-001/compare/v0.1.1...v0.1.3
 [0.1.1]: https://github.com/Traky12/castuo-e3-001/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Traky12/castuo-e3-001/releases/tag/v0.1.0
