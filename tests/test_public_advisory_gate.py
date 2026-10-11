@@ -104,7 +104,8 @@ class PublicAdvisoryGateTests(unittest.TestCase):
         self.assertIn("https://api.github.com/advisories/GHSA-55pc-7v4h-jf7c", workflow)
         self.assertIn("python scripts/check_public_advisory.py /tmp/e3-advisory.json", workflow)
         self.assertIn("advisory_ready", workflow)
-        self.assertIn("ready=$ready", workflow)
+        self.assertIn('echo "ready=true" >> "$GITHUB_OUTPUT"', workflow)
+        self.assertIn('echo "ready=false" >> "$GITHUB_OUTPUT"', workflow)
 
 
 if __name__ == "__main__":
