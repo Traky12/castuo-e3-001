@@ -63,10 +63,33 @@ Esto es una **pista de compatibilidad que se debe investigar, no una causa raíz
 2. Verificar la fila guardada en la página **Publishing**. Comparar, carácter por carácter, project, owner, repository, workflow filename y environment con la tabla anterior.
 3. Comparar los claims no secretos del log con los campos del publisher. No copiar ni solicitar tokens OIDC, API tokens, códigos de recuperación, cookies o valores de secretos.
 4. Si hay una diferencia, corregir únicamente ese campo en PyPI y registrar la evidencia antes de reintentar.
-5. Si la fila ya coincide exactamente y reaparece `invalid-publisher`, **detener reintentos**. Abrir una consulta de soporte PyPI/reproducible con el run URL, workflow name, repository IDs y claims no secretos; señalar el formato inmutable de `sub`. No afirmar que el publisher está mal configurado hasta descartar la incompatibilidad.
-6. No migrar a una API token `twine`, no guardar una credencial larga en GitHub y no desactivar salvaguardas de identidad como solución automática. Cualquier excepción de publicación manual requiere revisión explícita, alcance mínimo, almacenamiento en un secret manager y revocación documentada al terminar.
+5. Si la fila ya coincide exactamente, **detener los reintentos OIDC**. Escalar a PyPI (`admin@pypi.org`) con el run URL, nombre del workflow, IDs del repo/owner, claims no secretos y referencia a warehouse #19347. No enviar API tokens, tokens OIDC, códigos de recuperación ni otros secretos.
+6. Si urge publicar `0.1.3` antes de que PyPI acepte el nuevo formato, la única contingencia operativa disponible en este proceso es una primera subida manual controlada por el titular con Twine. Como el proyecto aún no existe en PyPI, el token tendrá que tener alcance de cuenta; es una excepción de riesgo superior y debe revocarse inmediatamente después de verificar la subida. No compartirlo en chat, ni guardarlo en GitHub, ni añadirlo como secret permanente. Este paso requiere que el titular autentique la cuenta y pegue el token en su propia terminal; el agente no puede hacerlo sin credenciales.
+7. No cambiar el `sub` de GitHub ni reducir la protección OIDC automáticamente. Cualquier ajuste de seguridad debe pasar por una evaluación de compatibilidad y por la evidencia de la configuración real.
 
 **Regla de reintento:** máximo un reintento después de una corrección identificada y registrada. Un nuevo fallo debe producir diagnóstico/escalado, no más repeticiones.
+
+### Contingencia Twine: subida manual única (solo con autorización consciente del titular)
+
+El build ya produjo artefactos para el tag `v0.1.3` en [run 38088766020](https://github.com/Traky12/castuo-e3-001/actions/runs/38088766020). El artefacto `dist` contiene estos dos ficheros y hashes, calculados sobre los bytes descargados en esta sesión:
+
+| Fichero | SHA-256 |
+|---|---|
+| `e3bundle-0.1.3-py3-none-any.whl` | `6b15d476480104d9448e6b9601ca14f4f346ebe70a40dfec5c2f9b1fc24450a6` |
+| `e3bundle-0.1.3.tar.gz` | `e41fac7ab62ffb527cdf25818d5e5e3329cf3736f74eddd0bc30a880b57eea91` |
+
+1. Descarga el artefacto `dist` del run anterior y comprueba ambos SHA-256 antes de subir.
+2. En la cuenta PyPI, crea una API token con alcance de cuenta únicamente para esta subida inicial. No copies el valor a Issues, chat, Git o logs. Introduce el token de forma interactiva en una terminal local.
+3. En PowerShell, desde la carpeta que contiene los dos artefactos:
+
+```powershell
+py -m venv .venv-pypi-upload
+.\.venv-pypi-upload\Scripts\python.exe -m pip install --upgrade pip twine
+.\.venv-pypi-upload\Scripts\python.exe -m twine check .\e3bundle-0.1.3.tar.gz .\e3bundle-0.1.3-py3-none-any.whl
+.\.venv-pypi-upload\Scripts\python.exe -m twine upload .\e3bundle-0.1.3.tar.gz .\e3bundle-0.1.3-py3-none-any.whl
+```
+
+Cuando Twine lo solicite, usa el usuario `__token__` y pega la API token en el prompt de contraseña. No actives `--verbose` para evitar trazas innecesarias. Después de una subida con éxito, revoca la token de cuenta inmediatamente en PyPI. Esto publica los artefactos pero **no arregla el Trusted Publisher** ni permite declarar resueltas futuras publicaciones automáticas. Si `twine check`, la comparación de hashes o el upload falla, detente y registra el error saneado; no repitas subidas a ciegas.
 
 ## 6. Verificación posterior a la primera publicación
 
