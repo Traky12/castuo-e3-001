@@ -17,15 +17,21 @@ Test reports, datasets, audit exports and lab results are often shared as plain 
 
 ## Install
 
-**Release status (2026-10-11):** `v0.1.3` is published as a GitHub alpha prerelease at commit `3f622a2cfd5cf1826d22d9266b542710d8b0faf1`. The release's Linux tests and clean-wheel smoke test passed. The GitHub Actions container workflow also passed and published `ghcr.io/traky12/e3bundle:0.1.3` for `linux/amd64` and `linux/arm64`, with SBOM and build provenance ([run 38088766046](https://github.com/Traky12/castuo-e3-001/actions/runs/38088766046)).
+**Release status (2026-10-11):** `v0.1.3` is published as a GitHub alpha prerelease at source commit `3f622a2cfd5cf1826d22d9266b542710d8b0faf1`. The release's Linux tests and clean-wheel smoke test passed. The GitHub Actions container workflow also passed and published `ghcr.io/traky12/e3bundle:0.1.3` for `linux/amd64` and `linux/arm64`, with SBOM and build provenance ([run 38088766046](https://github.com/Traky12/castuo-e3-001/actions/runs/38088766046)).
+
+**Important: the README inside the `v0.1.3` tag is a historical snapshot.** It was committed before publication and still contains the earlier pre-release notice. We are not rewriting the release tag; use this `main` README and the linked run records for current release state. The release remains an alpha: PyPI publication is blocked, public security-advisory fixed-version metadata has not been confirmed here, and the public Pages URL has not been verified as serving this release. No production or independent-validation claim is made.
 
 **PyPI publication is blocked.** In [run 38088766020](https://github.com/Traky12/castuo-e3-001/actions/runs/38088766020), build, tests and clean-venv smoke test passed, but PyPI returned `invalid-publisher` even after the maintainer reported registering a pending publisher. The repository was created after GitHub's 15 July 2026 rollout and its OIDC `sub` contains immutable owner/repository IDs. This is now the leading explanation: PyPI still has an open [Warehouse issue about generic/custom OIDC subjects](https://github.com/pypi/warehouse/issues/19347). It is not an official root-cause confirmation. Compare the persisted publisher row, stop repeat attempts if it matches, and escalate with the non-secret claims. If a first upload is urgent, the runbook documents a tightly controlled manual Twine contingency; the trusted publisher remains unresolved.
 
-For testing the GitHub alpha only, install the pinned tag:
+For controlled source-level evaluation only, the immutable source commit for the GitHub alpha is `3f622a2cfd5cf1826d22d9266b542710d8b0faf1`. The published tag is an alpha prerelease, not a production recommendation. The command below is intentionally not presented as a general installation recommendation while the public advisory, PyPI and Pages gates remain open.
+
 ```bash
-python -m pip install "git+https://github.com/Traky12/castuo-e3-001@v0.1.3"
+git clone --branch v0.1.3 --depth 1 https://github.com/Traky12/castuo-e3-001
+cd castuo-e3-001
+python -m pip install .
 ```
-This is not a substitute for a PyPI release, independent review, security advisory publication or production approval. The browser demo still serves the `v0.1.1` examples while the Pages publication gate remains closed. Python 3.11 or newer.
+
+The tag's README contains a stale pre-publication statement; this current `main` README is the release-status source of record. PyPI availability, independent review, public advisory fixed-version metadata and deployment of a matching browser demo remain unconfirmed. Python 3.11 or newer.
 
 ## Try it in your browser
 
@@ -83,13 +89,13 @@ unchanged. Input errors print `ERROR` and its findings in the selected format;
 as before, they do not write an output file. Without `--trusted-keys`, the text
 summary says `trust not checked` rather than implying signer identity was verified.
 
-The [verify report JSON Schema](schemas/e3bundle-report.schema.json) (draft 2020-12)
-describes current JSON output, including all three success statuses, `FAILED`,
-and the minimal `ERROR` report (`status`, `findings`, `limitations`).
-It validates report structure, not evidence or trust. `bundle_id` is passed
-through from the manifest without type validation and is `null` when absent.
-
 `--format text` is available from v0.1.1; `v0.1.0` supports JSON output only.
+
+The [verify report JSON Schema](schemas/e3bundle-report.schema.json) (draft 2020-12)
+describes current JSON output, including the success statuses, `FAILED`, and the minimal
+`ERROR` report (`status`, `findings`, `limitations`). It validates report structure,
+not evidence truth or signer trust. `bundle_id` is passed through from the manifest
+without type validation and is `null` when absent.
 
 ## Use it on your own files
 
