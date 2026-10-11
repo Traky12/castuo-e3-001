@@ -19,7 +19,7 @@ Test reports, datasets, audit exports and lab results are often shared as plain 
 
 **Release status (2026-10-11):** `v0.1.3` is published as a GitHub alpha prerelease at commit `3f622a2cfd5cf1826d22d9266b542710d8b0faf1`. The release's Linux tests and clean-wheel smoke test passed. The GitHub Actions container workflow also passed and published `ghcr.io/traky12/e3bundle:0.1.3` for `linux/amd64` and `linux/arm64`, with SBOM and build provenance ([run 38088766046](https://github.com/Traky12/castuo-e3-001/actions/runs/38088766046)).
 
-**PyPI is still pending.** In [run 38088766020](https://github.com/Traky12/castuo-e3-001/actions/runs/38088766020), the build, tests and clean-venv smoke test passed, but publishing failed with OIDC `invalid-publisher`: no matching PyPI Trusted Publisher is registered. The maintainer must configure the publisher for project `e3bundle`, owner `Traky12`, repository `castuo-e3-001`, workflow `publish-pypi.yml`, environment `pypi`, then rerun the failed job.
+**PyPI publication is blocked.** In [run 38088766020](https://github.com/Traky12/castuo-e3-001/actions/runs/38088766020), build, tests and clean-venv smoke test passed, but PyPI rejected Trusted Publishing with `invalid-publisher` even after the maintainer reported registering a pending publisher. The log's OIDC subject contains immutable owner/repository IDs; because this repository was created after GitHub's 15 July 2026 rollout, that format is a diagnostic lead—not a confirmed root cause. Do not retry until the saved PyPI publisher row has been compared exactly and, if it matches, the OIDC compatibility question has been escalated. See the [PyPI release runbook](docs/PYPI-RELEASE-RUNBOOK.es.md) for the recovery procedure and closure gates.
 
 For testing the GitHub alpha only, install the pinned tag:
 ```bash
@@ -135,7 +135,7 @@ Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md). The
 
 ## Roadmap (proposed, not committed)
 
-- PyPI distribution (`pip install e3bundle`): pending owner-side Trusted Publisher registration and a successful rerun of the existing v0.1.3 publish workflow.
+- PyPI distribution (`pip install e3bundle`): blocked at OIDC Trusted Publishing; follow [the release runbook](docs/PYPI-RELEASE-RUNBOOK.es.md), confirm the saved publisher row and resolve `invalid-publisher` before a single controlled retry.
 - Detached signature export and key rotation guidance.
 - Optional RFC 3161 timestamping.
 
