@@ -50,9 +50,13 @@ def validate_advisory(document: Any) -> tuple[bool, str]:
         package = vulnerability.get("package")
         if not isinstance(package, dict):
             continue
-        if package.get("ecosystem", "").lower() != EXPECTED_ECOSYSTEM:
+        ecosystem = package.get("ecosystem")
+        package_name = package.get("name")
+        if not isinstance(ecosystem, str) or not isinstance(package_name, str):
             continue
-        if package.get("name", "").lower() != EXPECTED_PACKAGE:
+        if ecosystem.lower() != EXPECTED_ECOSYSTEM:
+            continue
+        if package_name.lower() != EXPECTED_PACKAGE:
             continue
         fixed = _version_identifier(vulnerability.get("first_patched_version"))
         if fixed == EXPECTED_FIXED_VERSION:
