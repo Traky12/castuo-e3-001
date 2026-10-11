@@ -87,6 +87,18 @@ class PublicAdvisoryGateTests(unittest.TestCase):
                 passed, _ = validate_advisory(document)
                 self.assertFalse(passed)
 
+    def test_non_string_package_fields_fail_closed_without_raising(self):
+        document = dict(self.advisory)
+        document["vulnerabilities"] = [
+            {
+                "package": {"ecosystem": None, "name": ["e3bundle"]},
+                "first_patched_version": {"identifier": "0.1.3"},
+            }
+        ]
+        passed, reason = validate_advisory(document)
+        self.assertFalse(passed)
+        self.assertIn("does not list e3bundle 0.1.3", reason)
+
     def test_pages_publication_gate_uses_advisory_helper(self):
         workflow = (ROOT / ".github" / "workflows" / "pages.yml").read_text(encoding="utf-8")
         self.assertIn("https://api.github.com/advisories/GHSA-55pc-7v4h-jf7c", workflow)
