@@ -118,7 +118,7 @@ e3bundle verify   my-bundle --min-signatures 1 --trusted-keys trusted.json
 
 Only plain `VERIFIED` says who signed. In CI, add `--strict` so a missing key file or minimum is an error instead of a weaker pass.
 
-What `verify` detects: modified, missing and undeclared files; path traversal and symlinks; signatures that are forged, made over an older manifest, duplicated, or (with `--trusted-keys`) made with a key you did not pin.
+What `verify` detects: modified, missing and undeclared files; path traversal and symlinks; forged, stale or duplicate signatures; and non-canonical Base64 encodings of cryptographic fields. Signature thresholds count distinct decoded public keys, not signer IDs or their textual encodings. With `--trusted-keys`, signatures from keys you did not pin are rejected.
 
 ## Use it in GitHub Actions
 
