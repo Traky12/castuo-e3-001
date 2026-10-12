@@ -117,6 +117,32 @@ if (process.env.E3_CONFORMANCE_KEY_REUSE === '1') {
   const counted = js.report.status === 'FAILED' && js.report.findings.includes('signatures[1]: duplicate key: otro reuses the key of yo');
   console.log(`${!diffs.length && counted ? 'ok  ' : 'FAIL'} key-reuse  ${js.report.status} exit ${js.exitCode} ${JSON.stringify(js.report.findings)}${diffs.length ? '  differs: ' + diffs.join(', ') : ''}`);
   if (diffs.length || !counted) failures++;
+
+  // Alternate Base64 pad bits must not make one Ed25519 key look like two distinct keys.
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  const lastIndex = alphabet.indexOf(publicKeyB64.at(-2));
+  const aliasedKeyB64 = publicKeyB64.slice(0, -2) + alphabet[lastIndex | 1] + '=';
+  if (aliasedKeyB64 === publicKeyB64 || !Buffer.from(aliasedKeyB64, 'base64').equals(Buffer.from(publicKeyB64, 'base64'))) {
+    console.log('FAIL key-reuse-base64-alias: unable to construct an equivalent Base64 encoding');
+    failures++;
+  } else {
+    const aliasSigs = [
+      await E3.signManifest(ownManifest, keyPair, 'yo', 'runner', publicKeyB64),
+      await E3.signManifest(ownManifest, keyPair, 'otro', 'reviewer', aliasedKeyB64),
+    ];
+    const aliasTrusted = { yo: publicKeyB64, otro: aliasedKeyB64 };
+    const aliasDir = path.join(tmp, 'key-reuse-base64-alias');
+    writeBundle(aliasDir, own, ownManifest, aliasSigs);
+    const aliasJs = await E3.verifyBundle({ files: own, manifest: ownManifest, signatures: aliasSigs, trusted: aliasTrusted, minSignatures: 2 });
+    const aliasPy = runCli(aliasDir, aliasTrusted, 2);
+    const aliasDiffs = FIELDS.filter((f) => JSON.stringify(aliasJs.report[f]) !== JSON.stringify(aliasPy.report[f]));
+    if (aliasJs.exitCode !== aliasPy.code) aliasDiffs.push(`exit ${aliasJs.exitCode} != ${aliasPy.code}`);
+    const aliasRefused = aliasJs.report.status === 'FAILED'
+      && aliasJs.report.findings.includes('signatures[1]: invalid Ed25519 signature')
+      && aliasJs.report.findings.includes('signature threshold not met: 1 < 2');
+    console.log(`${!aliasDiffs.length && aliasRefused ? 'ok  ' : 'FAIL'} key-reuse-base64-alias ${aliasJs.report.status} exit ${aliasJs.exitCode} ${JSON.stringify(aliasJs.report.findings)}${aliasDiffs.length ? '  differs: ' + aliasDiffs.join(', ') : ''}`);
+    if (aliasDiffs.length || !aliasRefused) failures++;
+  }
 }
 
 console.log(failures ? `\n${failures} conformance failure(s)` : '\nall scenarios match the CLI');
