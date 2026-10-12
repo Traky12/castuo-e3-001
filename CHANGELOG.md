@@ -4,9 +4,27 @@ All notable changes to this repository are documented here. Versions follow [Sem
 
 ## [Unreleased]
 
+No additional changes beyond the prepared v0.1.4 candidate are recorded on this branch.
+
+## [0.1.4] — CANDIDATE PREPARATION (NOT RELEASED)
+
 ### Security
-- Compare signature-threshold identities by decoded Ed25519 public-key bytes and reject non-canonical Base64 encodings of public keys and signatures. This closes a key-reuse bypass using alternate unused Base64 pad bits and keeps the CLI and browser verifier aligned.
-- Add Python and browser/CLI regression coverage for a single Ed25519 key presented under two signer IDs through an equivalent Base64 encoding; run the distinct-key conformance scenarios in the existing Pages workflow.
+- Proposed on PR #85: harden Ed25519 verification and canonical Base64 handling for public keys and signatures.
+- Proposed on PR #85: enforce signature-threshold counting by distinct decoded Ed25519 public-key bytes, not signer labels or alternate Base64 spellings.
+- Add Python and browser/CLI regression coverage for alternate Base64 encodings, distinct-key threshold bypass attempts, and verifier consistency.
+
+### Evidence gate — pending; these are requirements, not completed claims
+- [ ] Independent security review recorded against PR #85 head `930e1d72e4821b07fbe84ce1d833194b53fc49b4`.
+- [ ] CP-3 independent OVS-01 reproduction completed by a second operator with attributable evidence.
+- [ ] PR #85 approved and merged after review.
+- [ ] CI completed with PASS on the final release branch commit.
+- [ ] Candidate artifacts built and verified independently.
+
+### Notes
+- This is a preparation branch only. No v0.1.4 tag, GitHub release, PyPI publish, GHCR publish, or advisory update is authorized by this changelog entry.
+- PR #85 remains proposed and unmerged at the time this candidate was prepared; its correction must not be described as released.
+- v0.1.3 does not contain this additional canonical-encoding hardening.
+- Update GHSA-55pc-7v4h-jf7c only after the corrected release has been published and the published artifacts are verified.
 
 ## [0.1.3] - 2026-10-10
 
