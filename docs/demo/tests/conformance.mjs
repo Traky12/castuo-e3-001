@@ -143,6 +143,35 @@ if (process.env.E3_CONFORMANCE_KEY_REUSE === '1') {
     console.log(`${!aliasDiffs.length && aliasRefused ? 'ok  ' : 'FAIL'} key-reuse-base64-alias ${aliasJs.report.status} exit ${aliasJs.exitCode} ${JSON.stringify(aliasJs.report.findings)}${aliasDiffs.length ? '  differs: ' + aliasDiffs.join(', ') : ''}`);
     if (aliasDiffs.length || !aliasRefused) failures++;
   }
+
+  // An alternate Base64 spelling of the same 64-byte signature must be rejected
+  // identically by the browser verifier and the CLI.
+  const canonicalSignatureB64 = ownSig.signature_b64;
+  const signatureAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  const signatureLastIndex = signatureAlphabet.indexOf(canonicalSignatureB64.at(-3));
+  const aliasedSignatureB64 = canonicalSignatureB64.slice(0, -3) + signatureAlphabet[signatureLastIndex | 1] + '==';
+  if (aliasedSignatureB64 === canonicalSignatureB64
+      || !Buffer.from(aliasedSignatureB64, 'base64').equals(Buffer.from(canonicalSignatureB64, 'base64'))) {
+    console.log('FAIL signature-base64-alias: unable to construct an equivalent Base64 encoding');
+    failures++;
+  } else {
+    const signatureAliasSigs = [{ ...ownSig, signature_b64: aliasedSignatureB64 }];
+    const signatureAliasTrusted = { yo: publicKeyB64 };
+    const signatureAliasDir = path.join(tmp, 'signature-base64-alias');
+    writeBundle(signatureAliasDir, own, ownManifest, signatureAliasSigs);
+    const signatureAliasJs = await E3.verifyBundle({
+      files: own, manifest: ownManifest, signatures: signatureAliasSigs,
+      trusted: signatureAliasTrusted, minSignatures: 1,
+    });
+    const signatureAliasPy = runCli(signatureAliasDir, signatureAliasTrusted, 1);
+    const signatureAliasDiffs = FIELDS.filter((f) => JSON.stringify(signatureAliasJs.report[f]) !== JSON.stringify(signatureAliasPy.report[f]));
+    if (signatureAliasJs.exitCode !== signatureAliasPy.code) signatureAliasDiffs.push(`exit ${signatureAliasJs.exitCode} != ${signatureAliasPy.code}`);
+    const signatureAliasRefused = signatureAliasJs.report.status === 'FAILED'
+      && signatureAliasJs.report.findings.includes('signatures[0]: invalid Ed25519 signature')
+      && signatureAliasJs.report.findings.includes('signature threshold not met: 0 < 1');
+    console.log(`${!signatureAliasDiffs.length && signatureAliasRefused ? 'ok  ' : 'FAIL'} signature-base64-alias ${signatureAliasJs.report.status} exit ${signatureAliasJs.exitCode} ${JSON.stringify(signatureAliasJs.report.findings)}${signatureAliasDiffs.length ? '  differs: ' + signatureAliasDiffs.join(', ') : ''}`);
+    if (signatureAliasDiffs.length || !signatureAliasRefused) failures++;
+  }
 }
 
 console.log(failures ? `\n${failures} conformance failure(s)` : '\nall scenarios match the CLI');

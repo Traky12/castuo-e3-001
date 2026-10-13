@@ -250,6 +250,36 @@ class E3BundleTests(unittest.TestCase):
         self.assertEqual(report["signatures_valid"], 1)
         self.assertEqual(report["signatures_trusted"], 1)
 
+    def test_noncanonical_signature_base64_alias_is_rejected(self):
+        self.sign("alice", "runner")
+        signatures_path = self.bundle / "signatures.json"
+        signatures = json.loads(signatures_path.read_text(encoding="utf-8"))
+        record = signatures[0]
+        canonical_signature = record["signature_b64"]
+        self.assertTrue(canonical_signature.endswith("=="))
+
+        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+        last_index = alphabet.index(canonical_signature[-3])
+        alias_signature = canonical_signature[:-3] + alphabet[last_index | 1] + "=="
+        self.assertNotEqual(alias_signature, canonical_signature)
+        self.assertEqual(
+            base64.b64decode(alias_signature, validate=True),
+            base64.b64decode(canonical_signature, validate=True),
+        )
+
+        # These are the same 64 signature bytes. Only the Base64 spelling differs.
+        record["signature_b64"] = alias_signature
+        signatures_path.write_text(json.dumps(signatures), encoding="utf-8")
+        code, report = self.verify(
+            "--min-signatures", "1", "--trusted-keys", self.trusted("alice")
+        )
+        self.assertEqual(code, 1, report)
+        self.assertEqual(report["status"], "FAILED")
+        self.assertIn("signatures[0]: invalid Ed25519 signature", report["findings"])
+        self.assertIn("signature threshold not met: 0 < 1", report["findings"])
+        self.assertEqual(report["signatures_valid"], 0)
+        self.assertEqual(report["signatures_trusted"], 0)
+
     def test_text_without_pinned_keys_does_not_claim_trust(self):
         self.sign("alice")
         proc = run("verify", self.bundle, "--min-signatures", 1, "--format", "text")
