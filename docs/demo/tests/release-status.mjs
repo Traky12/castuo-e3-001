@@ -35,6 +35,8 @@ assert.ok(!createPage.includes('v0.1.1'), 'create/sign page must not present out
 assert.ok(!folderPage.includes('v0.1.1'), 'local folder page must not present outdated CLI version as current');
 assert.ok(conformance.includes('v0.1.3 alpha CLI source'), 'conformance instructions must state the current CLI release');
 assert.ok(workflow.includes('node docs/demo/tests/release-status.mjs'), 'Pages workflow must execute this contract');
+assert.ok(!workflow.includes('GitHub release v0.1.3, PyPI e3bundle 0.1.3 and GHCR image 0.1.3 are available.'), 'workflow comments must not imply all publication gates have passed');
+assert.ok(!workflow.includes('not a claim that this source has been released'), 'workflow must not call the pinned alpha source unreleased');
 for (const stale of [
   'CANDIDATO v0.1.3 · BORRADOR NO PUBLICADO',
   'No se afirma que la release v0.1.3, el paquete PyPI ni la imagen GHCR estén publicados.',
