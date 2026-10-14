@@ -57,6 +57,11 @@ jobs:
         run: node docs/demo/tests/release-status.mjs
       - name: Conformance with the pinned v0.1.3 alpha CLI (8 scenarios + interop)
         run: node docs/demo/tests/conformance.mjs candidate/examples/bundles python candidate/scripts/e3bundle.py
+
+      - name: Source conformance for distinct-key and Base64-alias regressions
+        env:
+          E3_CONFORMANCE_KEY_REUSE: "1"
+        run: node docs/demo/tests/conformance.mjs examples/bundles python scripts/e3bundle.py
       - name: Record actual candidate manifest hash from CLI verification
         run: |
           python candidate/scripts/e3bundle.py verify candidate/examples/bundles/valid \
