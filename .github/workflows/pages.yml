@@ -25,7 +25,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # Immutable candidate source; not a claim that this source has been released.
+  # Pin the source used for reproducible browser/CLI comparison; publication gates stay independent.
   CLI_REF: 3f622a2cfd5cf1826d22d9266b542710d8b0faf1  # exact v0.1.3 alpha release source commit
   LOGO_SHA256: 54be9cdc29d888b6709478058800cbed31630f1aaca7abf578eec27896cdc78d
 
@@ -159,7 +159,7 @@ jobs:
         run: npx playwright install --with-deps ${{ matrix.browser }}
       - name: Run UI tests (${{ matrix.browser }})
         # The site is downloaded to <repo>/_site, the config's default location. paquete.spec
-        # compares each local folder with `e3bundle verify` from the pinned candidate source commit.
+        # compares each local folder with `e3bundle verify` from the pinned v0.1.3 alpha source commit.
         env:
           E3_CLI: ${{ github.workspace }}/candidate/scripts/e3bundle.py
           E3_PYTHON: python
@@ -176,7 +176,7 @@ jobs:
 
   publication_gate:
     # PRs may build/test the candidate, but public deployment stays blocked until
-    # GitHub release v0.1.3, PyPI e3bundle 0.1.3 and GHCR image 0.1.3 are available.
+    # Check the GitHub alpha, package distribution, GHCR artifact, public advisory and legal inputs independently.
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
