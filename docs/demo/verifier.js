@@ -93,13 +93,27 @@
 
   const strictB64 = (s) => typeof s === 'string' && s.length % 4 === 0 && B64_RE.test(s);
 
+  // Standard Base64 also requires zero unused pad bits. Round-tripping rejects aliases
+  // that decode to the same cryptographic bytes but have different text.
+  function canonicalB64Bytes(s) {
+    if (!strictB64(s)) return null;
+    try {
+      const bytes = b64ToBytes(s);
+      return bytesToB64(bytes) === s ? bytes : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   async function verifySignature(record) {
-    if (!strictB64(record.public_key_b64) || !strictB64(record.signature_b64)) return false;
+    const publicKey = canonicalB64Bytes(record.public_key_b64);
+    const signature = canonicalB64Bytes(record.signature_b64);
+    if (!publicKey || publicKey.length !== 32 || !signature || signature.length !== 64) return false;
     try {
       const payload = Object.assign({}, record);
       delete payload.signature_b64;
-      const key = await crypto.subtle.importKey('raw', b64ToBytes(record.public_key_b64), { name: 'Ed25519' }, false, ['verify']);
-      return await crypto.subtle.verify({ name: 'Ed25519' }, key, b64ToBytes(record.signature_b64), enc.encode(canonical(payload)));
+      const key = await crypto.subtle.importKey('raw', publicKey, { name: 'Ed25519' }, false, ['verify']);
+      return await crypto.subtle.verify({ name: 'Ed25519' }, key, signature, enc.encode(canonical(payload)));
     } catch (e) {
       return false;
     }
@@ -173,9 +187,12 @@
       if (!row.signatureOk) { findings.push(`${prefix}: invalid Ed25519 signature`); phases.signatures.push(row); continue; }
       if (!row.hashOk) { findings.push(`${prefix}: signed manifest_hash does not match the manifest`); phases.signatures.push(row); continue; }
       if (valid.has(r.signer_id)) { findings.push(`duplicate signer: ${r.signer_id}`); phases.signatures.push(row); continue; }
-      // The threshold counts keys, not names (same rule as the CLI).
-      if (keyOwners.has(r.public_key_b64)) { findings.push(`${prefix}: duplicate key: ${r.signer_id} reuses the key of ${keyOwners.get(r.public_key_b64)}`); phases.signatures.push(row); continue; }
-      keyOwners.set(r.public_key_b64, r.signer_id);
+      // Normalize decoded key bytes before identity comparison; signer ids are labels only.
+      const decodedKey = canonicalB64Bytes(r.public_key_b64);
+      if (!decodedKey) { findings.push(`${prefix}: invalid Ed25519 signature`); phases.signatures.push(row); continue; }
+      const keyIdentity = bytesToB64(decodedKey);
+      if (keyOwners.has(keyIdentity)) { findings.push(`${prefix}: duplicate key: ${r.signer_id} reuses the key of ${keyOwners.get(keyIdentity)}`); phases.signatures.push(row); continue; }
+      keyOwners.set(keyIdentity, r.signer_id);
       valid.add(r.signer_id);
       row.counted = true;
       if (trusted) {
