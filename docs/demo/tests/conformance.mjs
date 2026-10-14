@@ -3,7 +3,7 @@
 //
 // Usage: node docs/demo/tests/conformance.mjs <bundles-dir> <python> <e3bundle.py>
 //   <bundles-dir>  examples/bundles as released (valid/, tampered/, trusted-keys.json)
-//   <e3bundle.py>  the CLI source of the same release (e.g. extracted from tag v0.1.1)
+//   <e3bundle.py>  the exact v0.1.3 alpha CLI source commit pinned by the Pages workflow
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
