@@ -9,6 +9,9 @@ const releaseCommit = '3f622a2cfd5cf1826d22d9266b542710d8b0faf1';
 const pkg = read('pyproject.toml');
 const readme = read('README.md');
 const page = read('docs/demo/index.html');
+const createPage = read('docs/demo/crear.html');
+const folderPage = read('docs/demo/paquete.html');
+const threatModel = read('docs/demo/THREAT-MODEL.md');
 const demo = read('docs/demo/demo.js');
 const input = read('docs/demo/input.js');
 const conformance = read('docs/demo/tests/conformance.mjs');
@@ -21,6 +24,15 @@ assert.ok(page.includes(releaseCommit), 'demo page must expose the exact source 
 assert.ok(page.includes('La release <code>v0.1.3</code> existe como alpha de GitHub'), 'demo page must distinguish a published GitHub alpha');
 assert.ok(page.includes('la distribución PyPI'), 'PyPI must remain a separate distribution gate');
 assert.ok(page.includes('Resultado de CI'), 'CI state must be tied to a specific workflow rather than a stale previous run');
+assert.ok(createPage.includes('v0.1.3 alpha'), 'create/sign page must show current alpha version');
+assert.ok(createPage.includes('/releases/tag/v0.1.3'), 'create/sign page release link must target the current GitHub alpha');
+assert.ok(folderPage.includes('v0.1.3 alpha'), 'local folder verification page must show current alpha version');
+assert.ok(folderPage.includes('/releases/tag/v0.1.3'), 'local folder page release link must target the current GitHub alpha');
+assert.ok(threatModel.includes(releaseCommit), 'threat model must reference the exact pinned CLI source');
+assert.ok(threatModel.includes('PyPI distribution'), 'threat model must keep package publishing as a separate gate');
+assert.ok(!threatModel.includes('55cba4500daf7b5cc803c63ccaff01985e4d965f'), 'threat model must not refer to stale candidate source');
+assert.ok(!createPage.includes('v0.1.1'), 'create/sign page must not present outdated CLI version as current');
+assert.ok(!folderPage.includes('v0.1.1'), 'local folder page must not present outdated CLI version as current');
 assert.ok(conformance.includes('v0.1.3 alpha CLI source'), 'conformance instructions must state the current CLI release');
 assert.ok(workflow.includes('node docs/demo/tests/release-status.mjs'), 'Pages workflow must execute this contract');
 for (const stale of [
