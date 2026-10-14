@@ -4,7 +4,9 @@ All notable changes to this repository are documented here. Versions follow [Sem
 
 ## [Unreleased]
 
-No unreleased changes are recorded.
+### Security
+- Compare signature-threshold identities by decoded Ed25519 public-key bytes and reject non-canonical Base64 encodings of public keys and signatures. This closes a key-reuse bypass using alternate unused Base64 pad bits and keeps the CLI and browser verifier aligned.
+- Add Python and browser/CLI regression coverage for a single Ed25519 key presented under two signer IDs through an equivalent Base64 encoding; run the distinct-key conformance scenarios in the existing Pages workflow.
 
 ## [0.1.3] - 2026-10-10
 
