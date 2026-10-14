@@ -171,8 +171,15 @@ test.describe('privacy: nothing leaves the page', () => {
     const atLoad = w.requests.length;
     await page.locator('#f1').fill('secret-user-data-456');
     await page.getByRole('button', { name: 'Generar clave Ed25519' }).click();
+    // WebKit completes WebCrypto key generation asynchronously. Wait for the
+    // public key before creating the manifest, avoiding a race in UI state.
+    await expect(page.locator('#pub')).not.toBeEmpty();
     await page.getByRole('button', { name: /crear manifest\.json/ }).click();
+    await expect(page.locator('#mh')).toContainText('sha256:');
+    await expect(page.getByRole('button', { name: 'Firmar con Ed25519' })).toBeEnabled();
     await page.getByRole('button', { name: 'Firmar con Ed25519' }).click();
+    await expect(page.locator('#sigs')).toContainText('signature_b64');
+    await expect(page.getByRole('button', { name: 'Verificar ahora' })).toBeEnabled();
     await page.getByRole('button', { name: 'Verificar ahora' }).click();
     await expect(page.locator('#status')).toHaveText('VERIFIED');
     const origin = new URL(baseURL).origin;
