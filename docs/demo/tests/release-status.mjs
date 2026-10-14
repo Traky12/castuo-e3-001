@@ -18,7 +18,7 @@ assert.match(pkg, /^version\s*=\s*"0\.1\.3"$/m, 'project version must match the 
 assert.ok(readme.includes(releaseCommit), 'README release source must point at the pinned commit');
 assert.ok(workflow.includes('CLI_REF: ' + releaseCommit), 'Pages workflow must use the same immutable CLI source');
 assert.ok(page.includes(releaseCommit), 'demo page must expose the exact source commit');
-assert.ok(page.includes('la release <code>v0.1.3</code> existe como alpha de GitHub'), 'demo page must distinguish a published GitHub alpha');
+assert.ok(page.includes('La release <code>v0.1.3</code> existe como alpha de GitHub'), 'demo page must distinguish a published GitHub alpha');
 assert.ok(page.includes('la distribución PyPI'), 'PyPI must remain a separate distribution gate');
 assert.ok(page.includes('Resultado de CI'), 'CI state must be tied to a specific workflow rather than a stale previous run');
 assert.ok(conformance.includes('v0.1.3 alpha CLI source'), 'conformance instructions must state the current CLI release');
