@@ -15,6 +15,7 @@ const threatModel = read('docs/demo/THREAT-MODEL.md');
 const demo = read('docs/demo/demo.js');
 const input = read('docs/demo/input.js');
 const conformance = read('docs/demo/tests/conformance.mjs');
+const inputConformance = read('docs/demo/tests/input-conformance.mjs');
 const workflow = read('.github/workflows/pages.yml');
 
 assert.match(pkg, /^version\s*=\s*"0\.1\.3"$/m, 'project version must match the pinned release source');
@@ -35,6 +36,8 @@ assert.ok(!createPage.includes('v0.1.1'), 'create/sign page must not present out
 assert.ok(!folderPage.includes('v0.1.1'), 'local folder page must not present outdated CLI version as current');
 assert.ok(conformance.includes('v0.1.3 alpha CLI source'), 'conformance instructions must state the current CLI release');
 assert.ok(workflow.includes('node docs/demo/tests/release-status.mjs'), 'Pages workflow must execute this contract');
+assert.ok(!workflow.includes('candidate CLI'), 'workflow labels must refer to the pinned alpha release source');
+assert.ok(!inputConformance.includes('candidate CLI'), 'input conformance docs must refer to the pinned alpha release source');
 assert.ok(!workflow.includes('GitHub release v0.1.3, PyPI e3bundle 0.1.3 and GHCR image 0.1.3 are available.'), 'workflow comments must not imply all publication gates have passed');
 assert.ok(!workflow.includes('not a claim that this source has been released'), 'workflow must not call the pinned alpha source unreleased');
 for (const stale of [
