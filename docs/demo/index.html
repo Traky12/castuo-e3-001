@@ -221,7 +221,7 @@
       </ol>
       <pre class="terminal">git clone https://github.com/Traky12/castuo-e3-001
 cd castuo-e3-001
-git checkout 55cba4500daf7b5cc803c63ccaff01985e4d965f
+git checkout 3f622a2cfd5cf1826d22d9266b542710d8b0faf1
 python -m pip install .
 e3bundle verify examples/bundles/valid \
   --min-signatures 2 \
@@ -254,20 +254,20 @@ e3bundle verify examples/bundles/valid \
     <dl class="trace">
       <dt>Producto</dt><dd>e3bundle</dd>
       <dt>Estado de fuente</dt><dd>demo de e3bundle v0.1.3 alpha; la release de GitHub está publicada, la URL web se verifica aparte.</dd>
-      <dt>Commit fuente</dt><dd><a class="mono" href="https://github.com/Traky12/castuo-e3-001/commit/55cba4500daf7b5cc803c63ccaff01985e4d965f">55cba4500daf7b5cc803c63ccaff01985e4d965f</a></dd>
-      <dt>Paquete</dt><dd><a class="mono" href="https://github.com/Traky12/castuo-e3-001/tree/55cba4500daf7b5cc803c63ccaff01985e4d965f/examples/bundles">examples/bundles/valid</a></dd>
+      <dt>Commit CLI fuente</dt><dd><a class="mono" href="https://github.com/Traky12/castuo-e3-001/commit/3f622a2cfd5cf1826d22d9266b542710d8b0faf1">3f622a2cfd5cf1826d22d9266b542710d8b0faf1</a></dd>
+      <dt>Paquete de ejemplo</dt><dd><a class="mono" href="https://github.com/Traky12/castuo-e3-001/tree/3f622a2cfd5cf1826d22d9266b542710d8b0faf1/examples/bundles">examples/bundles/valid · fixtures sintéticos</a></dd>
       <dt>Datos</dt><dd>sintéticos, firmantes <span class="mono">example-*</span></dd>
       <dt>Verificación</dt><dd>local, con WebCrypto</dd>
       <dt>Contraste</dt><dd>La workflow Pages usa el CLI fuente de v0.1.3 fijado en <a href="https://github.com/Traky12/castuo-e3-001/commit/3f622a2cfd5cf1826d22d9266b542710d8b0faf1">3f622a2c</a>. Los tests de conformidad comparan escenarios, entradas malformadas y salida de la CLI; los tests UI cubren la página ensamblada. No se infiere que esta URL pública sirva ese mismo contenido sin una comprobación separada. <a href="https://github.com/Traky12/castuo-e3-001/blob/main/docs/demo/tests/conformance.mjs">conformance.mjs</a> · <a href="https://github.com/Traky12/castuo-e3-001/blob/main/docs/demo/tests/input-conformance.mjs">input-conformance.mjs</a></dd>
-      <dt>Hash manifiesto de ejemplo</dt><dd><code>sha256:3791f139670d65d3de9c6fccbca4f9021b06551361d5eb492802379c5402c9f1</code> — CLI candidato: VERIFIED, archivos 2/2; salida real del workflow <a href="https://github.com/Traky12/castuo-e3-001/actions/runs/38004180074">38004180074</a>, 2026-10-09T23:23:42Z.</dd>
+      <dt>Resultado de CI</dt><dd>Debe consultarse el workflow asociado al SHA de esta revisión; el historial de un candidato anterior no se reutiliza como PASS para otro commit.</dd>
       <dt>Imagen GHCR v0.1.3</dt><dd>La existencia/publicación de imagen se sigue por separado en el README y el run de release; comprueba el digest inmutable antes de consumirla.</dd>
-      <dt>Resultado</dt><dd>La revisión anterior superó CI; esta revisión requiere la nueva ejecución antes de promocionarse.</dd>
+      <dt>Estado del resultado</dt><dd>Esta página no declara CI PASS. Consulta el workflow asociado al SHA exacto antes de promover o confiar en el despliegue.</dd>
       <dt>Código</dt><dd><a href="https://github.com/Traky12/castuo-e3-001/tree/main/docs/demo">docs/demo</a></dd>
     </dl>
   </section>
 
   <section class="card closing">
-    <p class="closing-text">La demo demuestra que la verificación funciona. El siguiente paso es demostrar que funciona en un caso real, con datos autorizados, personas independientes y criterios definidos.</p>
+    <p class="closing-text">La demo permite explorar la verificación técnica con datos sintéticos. El siguiente paso es comprobar su utilidad en un caso real, con datos autorizados, personas independientes y criterios definidos.</p>
     <a class="btn brass" href="crear.html">Fase 2: crea y firma el tuyo</a>
   </section>
 </main>
