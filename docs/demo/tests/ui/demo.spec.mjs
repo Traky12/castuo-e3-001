@@ -182,12 +182,12 @@ test.describe('privacy: nothing leaves the page', () => {
 });
 
 test.describe('content security policy', () => {
-  test('all demo pages disable network APIs, frames, workers and object embeds', async ({ page }) => {
-    for (const file of ['index.html', 'crear.html', 'paquete.html']) {
+  test('demo pages allow only same-origin connections and deny frames, workers and object embeds', async ({ page }) => {
+    for (const file of ['index.html', 'crear.html', 'paquete.html', 'legal.html']) {
       await page.goto(file);
       const policy = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
       expect(policy).toContain("default-src 'none'");
-      expect(policy).toContain("connect-src 'none'");
+      expect(policy).toContain("connect-src 'self'");
       expect(policy).toContain("frame-src 'none'");
       expect(policy).toContain("worker-src 'none'");
       expect(policy).toContain("object-src 'none'");
