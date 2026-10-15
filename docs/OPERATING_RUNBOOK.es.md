@@ -72,7 +72,7 @@ Para una ejecución real, la identidad y el dispositivo de firma deben estar apr
 
 Al menos dos revisores independientes deben inspeccionar fixture, comandos, salida, casos negativos, recuperación, hashes, runtime y limitaciones. Cada entrada de `reviewers.json` debe declarar `independence: true`, `decision: APPROVE`, el mismo `source_commit`, el mismo `evidence_hash`, el mismo `replay_result_hash`, su clave pública y su firma Ed25519 sobre la entrada canónica.
 
-No basta con producir dos firmas: la revisión debe ser sustantiva, trazable y realizada fuera del camino de autoría.
+No basta con producir dos firmas: la revisión debe ser sustantiva, trazable y realizada fuera del camino de autoría. Además, cada clave pública debe estar inscrita en `trust/e3-001-trust-store.json` con rol, identidad, responsable y referencia de aprobación. El registro vacío bloquea deliberadamente toda evidencia externa; no rellenes identidades con valores de demostración.
 
 ## 5. Crear y validar el Evidence Envelope
 
@@ -95,10 +95,11 @@ Calcula los hashes y completa `manifest.json` después de cerrar el envelope. Ej
 cd /ruta/al/e3-001-external-verification
 python3 scripts/validate_external_evidence_bundle.py "$BUNDLE" \
   --min-reviewers 2 \
-  --output "$BUNDLE/external-evidence-validation.json"
+  --trusted-key-store trust/e3-001-trust-store.json \
+  --output /tmp/external-evidence-validation.json
 ```
 
-La salida válida debe terminar con código 0 y `status: VERIFIED_FOR_G2`. Si el validador devuelve `BLOCKED`, `NO_CLAIM` o cualquier finding, detén la cadena.
+Sólo puede terminar con código 0 y `status: VERIFIED_FOR_G2` cuando el paquete tenga firmas válidas y las claves de runner y revisores coincidan con entradas activas del trust store. Un trust store vacío, una identidad desconocida o una clave revocada deben devolver `BLOCKED`; no continúes. Los informes deben escribirse fuera de `$BUNDLE`: el validador es de sólo lectura.
 
 ## 6. Evaluar G2 localmente
 
@@ -106,8 +107,8 @@ La evaluación G2 es de sólo lectura y no autoriza producción:
 
 ```bash
 python3 scripts/evaluate_g2.py \
-  "$BUNDLE/external-evidence-validation.json" \
-  --output "$BUNDLE/g2-decision.json"
+  /tmp/external-evidence-validation.json \
+  --output /tmp/g2-decision.json
 ```
 
 La salida sólo es elegible si `status: PASS`; debe conservar `oneA: false` y `promotion: BLOCKED`.
@@ -119,8 +120,8 @@ La prueba local debe usar una clave de prueba o un dispositivo de firma controla
 ```bash
 export CASTUO_SNAPSHOT_SIGNING_KEY_B64=<valor-protegido-en-la-sesión-local>
 python3 scripts/publish_public_snapshot.py \
-  --validation "$BUNDLE/external-evidence-validation.json" \
-  --g2-decision "$BUNDLE/g2-decision.json" \
+  --validation /tmp/external-evidence-validation.json \
+  --g2-decision /tmp/g2-decision.json \
   --source-commit "$SOURCE_COMMIT" \
   --workflow-run-id LOCAL-SIMULATION \
   --output /tmp/status-snapshot.json \
@@ -198,12 +199,13 @@ La salida `READY` sólo significa que las precondiciones estructurales están pr
 
 ## 11. Ejecutar el workflow real
 
-Sólo después de que el bundle pase localmente y el secreto esté configurado:
+Sólo después de que el bundle pase localmente, el trust store contenga claves autorizadas y el secreto esté configurado. La entrada `bundle_path` es una ruta relativa dentro del checkout del workflow; no carga una carpeta arbitraria del disco local. No incluyas datos privados en un repositorio público.
 
 ```bash
+# Sólo si el paquete público está en el checkout autorizado de main:
 gh workflow run public-snapshot.yml \
   --repo Traky12/castuo-e3-001 \
-  -f bundle_path="$BUNDLE" \
+  -f bundle_path="evidence-bundle" \
   -f source_commit="$SOURCE_COMMIT"
 gh run list --repo Traky12/castuo-e3-001 \
   --workflow public-snapshot.yml --limit 5
