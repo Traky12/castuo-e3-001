@@ -30,6 +30,31 @@ Los validadores rechazan identidades no inscritas, claves que no coinciden, clav
 
 La entrada en el trust store es una decisión de confianza, no un resultado de CI. El commit que la incorpora y su revisión constituyen parte de la procedencia de esa decisión.
 
+## Inscripción de la clave publicadora
+
+La clave publicadora debe registrarse bajo `role: publisher` con `subject_id` igual al `key_id` publicado (por defecto, `CASTUO-E3-SNAPSHOT-SIGNER-1`). No añadas esa entrada hasta que la clave privada real haya sido provisionada por el propietario y la huella pública se haya comprobado por un canal distinto del snapshot.
+
+Para derivar únicamente la clave pública en un entorno controlado donde el gestor de secretos ya haya expuesto el secreto a una variable de entorno, este patrón no imprime la clave privada:
+
+```python
+import base64
+import os
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+raw = base64.b64decode(os.environ["CASTUO_SNAPSHOT_SIGNING_KEY_B64"], validate=True)
+if len(raw) == 32:
+    private_key = Ed25519PrivateKey.from_private_bytes(raw)
+else:
+    private_key = serialization.load_pem_private_key(raw, password=None)
+public_key = private_key.public_key().public_bytes(
+    serialization.Encoding.Raw, serialization.PublicFormat.Raw
+)
+print(base64.b64encode(public_key).decode("ascii"))
+```
+
+La salida es material público. Comprueba su huella con el custodio y la referencia de aprobación antes de añadir la entrada al trust store mediante una propuesta revisada por otra persona. No uses una clave generada dentro de una demo, no copies la clave del snapshot candidato para confiar en ella y no guardes el valor privado en comandos, logs ni historial de shell. Si todavía no existe una clave aprobada, deja la lista vacía y mantén el firewall bloqueado.
+
 ## Rotación y revocación
 
 - **Rotación normal:** generar una clave nueva fuera del repositorio; verificar su titularidad; añadir una entrada nueva con nuevo `key_id`; aprobarla mediante revisión; y marcar como `revoked` la anterior en un cambio auditado. No se reutilizan IDs ni se reescribe el historial.
