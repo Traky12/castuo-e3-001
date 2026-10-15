@@ -27,6 +27,7 @@ TAMPERS = (
     "reviewer-signature",
     "reviewer-quorum",
     "reviewer-duplicate",
+    "reviewer-key-reuse",
     "local-runner",
     "production-claim",
     "missing-envelope",
@@ -46,8 +47,8 @@ def write(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def sign(record: dict[str, Any]) -> dict[str, Any]:
-    key = Ed25519PrivateKey.generate()
+def sign(record: dict[str, Any], key: Ed25519PrivateKey | None = None) -> dict[str, Any]:
+    key = key or Ed25519PrivateKey.generate()
     public = key.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
     payload = {**record, "public_key_b64": base64.b64encode(public).decode()}
     return {**payload, "signature_b64": base64.b64encode(key.sign(canonical(payload))).decode()}
@@ -97,6 +98,7 @@ def build(output: Path, tamper: str | None = None) -> Path:
         "source_commit": DEMO_COMMIT,
         "result_hash": result_hash,
     })
+    shared_reviewer_key = Ed25519PrivateKey.generate() if tamper == "reviewer-key-reuse" else None
     reviewers = [
         sign({
             "review_id": f"DEMO-REVIEW-{label}",
@@ -106,7 +108,7 @@ def build(output: Path, tamper: str | None = None) -> Path:
             "source_commit": DEMO_COMMIT,
             "evidence_hash": envelope_hash,
             "replay_result_hash": result_hash,
-        })
+        }, key=shared_reviewer_key)
         for label in ("A", "B")
     ]
 
