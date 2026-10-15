@@ -25,15 +25,17 @@ The key must be generated and stored by the approved external operator or signin
 
 The snapshot workflow passes `trust/e3-001-trust-store.json` to the evidence validator. This registry is deliberately empty at present. Consequently, an external bundle cannot qualify for G2 merely by carrying self-signed runner/reviewer records: it remains `BLOCKED` until the public keys are verified out of band, approved through a separate reviewed change, and enrolled with explicit role and identity. The registry must retain revocation records; revoked keys never satisfy validation. This is an additional gate independent of the publication signing secret.
 
-## Dashboard contract
+## Dashboard verification contract — not yet demonstrated
 
-The dashboard reads:
+Intended public source URL:
 
 ```text
 https://raw.githubusercontent.com/Traky12/castuo-e3-001/main/public/status-snapshot.json
 ```
 
-The embedded public key is **not a trust root**. The publishing firewall checks the canonical unsigned payload digest and Ed25519 signature, and also requires `public_verification.key_id` plus its public key to match an active `role: publisher` entry in `trust/e3-001-trust-store.json`. The dashboard itself must pin the expected publisher key independently of the fetched snapshot; verifying only with the key embedded in the same untrusted JSON would allow an attacker to replace both the payload and key. Until a separate reviewed change enrolls the real publisher public key and the consuming dashboard verifies that pin, public snapshot publication remains blocked and dashboard-side authenticity is not claimed. A missing artifact, invalid signature or unsupported browser crypto implementation falls back to the local declared snapshot and keeps promotion blocked.
+The embedded public key is **not a trust root**. The publishing firewall checks the canonical unsigned payload digest and Ed25519 signature, and also requires `public_verification.key_id` plus its public key to match an active `role: publisher` entry in `trust/e3-001-trust-store.json`. The consuming dashboard must independently pin the expected publisher key and validate the canonical payload, digest and signature. Verifying only with a key embedded in the same untrusted JSON would allow an attacker to replace both payload and key.
+
+**Consumer-side verification is not confirmed by this PR.** Until a separate reviewed change enrolls the real publisher public key and a reproducible test proves that the actual consuming dashboard rejects unsigned, tampered, stale and self-signed untrusted snapshots, do not claim that the dashboard authenticates this feed. Since the trust store has no publisher key, the publishing firewall deliberately blocks snapshot commit. A missing artifact or unsupported browser crypto implementation must retain a local declared snapshot with promotion blocked.
 
 ## Non-claims
 
