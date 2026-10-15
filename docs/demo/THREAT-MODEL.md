@@ -22,7 +22,7 @@ The demo has no backend. Report vulnerabilities privately as described in
 
 | Threat | Mitigation | How it is tested |
 |---|---|---|
-| Visitor data or keys sent elsewhere | No backend, analytics or third-party resources; CSP `connect-src 'none'`, `frame-src 'none'`, `worker-src 'none'`; private keys are never serialised | UI suite checks that the page makes no requests during interactions and asserts the network, frame and worker CSP directives are deny-by-default |
+| Visitor data or keys sent elsewhere | No backend, analytics or third-party resources; CSP `connect-src 'self'` permits only same-origin reads of bundled static examples, while `frame-src 'none'` and `worker-src 'none'` block frames and workers; private keys are never serialised | UI suite checks that page loads use only same-origin GETs, that no request is sent during user interactions, and that frame/worker/object embedding is denied by CSP |
 | Script injection through displayed data | Results are written with `textContent`; no `innerHTML`, `eval` or inline scripts; restrictive CSP | UI suite tests inline script/style blocking and CSP violations |
 | Unreadable input shown as a verdict | `input.js` applies the CLI input contract: malformed or wrongly shaped manifest/trusted keys produce `ERROR`, exit 2, with no cryptographic phase shown | `tests/input-conformance.mjs` compares statuses, exit codes and findings against candidate CLI source, including malformed JSON and unsafe manifest paths |
 | Browser verdict drifting from the CLI | Browser/CLI conformance and UI jobs must pass; production deploy additionally requires the public release, PyPI version and GHCR image | `tests/conformance.mjs`, `tests/input-conformance.mjs`, Playwright jobs and the publication gate in `pages.yml` |
