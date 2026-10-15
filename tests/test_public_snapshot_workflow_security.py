@@ -29,6 +29,9 @@ class PublicSnapshotWorkflowSecurityTests(unittest.TestCase):
         self.assertIn("environment:\n      name: public-snapshot", publish)
         self.assertIn("persist-credentials: false", verify)
 
+    def test_external_validation_uses_the_governed_trust_store(self):
+        self.assertIn("--trusted-key-store trust/e3-001-trust-store.json", self.workflow)
+
     def test_publication_transfers_only_validation_json_artifacts(self):
         self.assertIn("name: e3-001-snapshot-validation", self.workflow)
         self.assertIn("artifacts/external-evidence-validation.json", self.workflow)
