@@ -126,7 +126,7 @@ python3 scripts/publish_public_snapshot.py \
   --workflow-run-id LOCAL-SIMULATION \
   --output /tmp/status-snapshot.json \
   --require-signature
-python3 scripts/validate_public_snapshot_firewall.py /tmp/status-snapshot.json
+python3 scripts/validate_public_snapshot_firewall.py /tmp/status-snapshot.json --trusted-key-store trust/e3-001-trust-store.json
 ```
 
 No uses `--require-signature` sin una clave de prueba disponible: el resultado correcto es fallo cerrado. El firewall debe rechazar `oneA=true`, `authority_verified=true`, `promotion=AUTHORIZED` y firmas ausentes o no base64.
@@ -177,7 +177,7 @@ python3 scripts/publish_public_snapshot.py \
   --output /tmp/status-snapshot.json \
   --signing-key-b64 "$CASTUO_SNAPSHOT_SIGNING_KEY_B64" \
   --require-signature
-python3 scripts/validate_public_snapshot_firewall.py /tmp/status-snapshot.json
+python3 scripts/validate_public_snapshot_firewall.py /tmp/status-snapshot.json --trusted-key-store trust/e3-001-trust-store.json
 ```
 
 `act` puede utilizarse como simulador opcional de GitHub Actions si está instalado, pero no debe recibir la clave real ni hacer push. El workflow actual requiere `workflow_dispatch`, `bundle_path`, `source_commit`, un environment protegido y permiso de escritura; por eso la reproducción manual de los comandos es el camino determinista y más seguro antes del dispatch.
