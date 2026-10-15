@@ -35,7 +35,7 @@ jobs:
           set -euo pipefail
           snapshot="public/status-snapshot.json"
           if [ -f "$snapshot" ]; then
-            python3 scripts/validate_public_snapshot_firewall.py "$snapshot"
+            python3 scripts/validate_public_snapshot_firewall.py "$snapshot" --trusted-key-store trust/e3-001-trust-store.json
             echo "Public snapshot check: PASS — validated $snapshot." | tee -a "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
