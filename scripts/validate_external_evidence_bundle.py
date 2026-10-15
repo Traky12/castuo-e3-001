@@ -34,8 +34,17 @@ def digest(path: Path) -> str:
     return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _reject_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON key: {key}")
+        result[key] = value
+    return result
+
+
 def load(path: Path) -> Any:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=_reject_duplicate_json_keys)
 
 
 def safe_bundle_file(package: Path, relative: Any, max_bytes: int) -> tuple[Path | None, str | None]:
@@ -174,7 +183,7 @@ def main() -> int:
     expected_fixture_hash = None
     if package is not None:
         fixture_name = manifest.get("fixture_path", "fixture.json")
-        if fixture_name in required_names.values():
+        if isinstance(fixture_name, str) and fixture_name in required_names.values():
             findings.append("manifest fixture_path must not reuse a protocol artifact path")
         else:
             fixture_path, fixture_issue = safe_bundle_file(package, fixture_name, MAX_FIXTURE_BYTES)
@@ -237,6 +246,7 @@ def main() -> int:
         findings.append("reviewers.json must be an array")
         reviewers = []
     identities: set[str] = set()
+    reviewer_public_keys: set[bytes] = set()
     for index, reviewer in enumerate(reviewers):
         prefix = f"reviewers[{index}]"
         if not isinstance(reviewer, dict):
@@ -259,6 +269,15 @@ def main() -> int:
             findings.append(f"{prefix}.evidence_hash does not match envelope")
         if reviewer.get("replay_result_hash") != expected_result_hash:
             findings.append(f"{prefix}.replay_result_hash does not match result")
+        try:
+            reviewer_key = base64.b64decode(reviewer["public_key_b64"], validate=True)
+        except (KeyError, ValueError, TypeError):
+            reviewer_key = None
+        if reviewer_key is not None:
+            if reviewer_key in reviewer_public_keys:
+                findings.append(f"{prefix}.public_key_b64 reuses another reviewer's key")
+            else:
+                reviewer_public_keys.add(reviewer_key)
         if not verify_signature(reviewer):
             findings.append(f"{prefix}.signature is invalid")
     if len(identities) < args.min_reviewers:
