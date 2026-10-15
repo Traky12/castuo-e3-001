@@ -20,6 +20,10 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
+MAX_JSON_BYTES = 5 * 1024 * 1024
+MAX_FIXTURE_BYTES = 20 * 1024 * 1024
+MAX_RELATIVE_PATH_LENGTH = 255
+MAX_PATH_DEPTH = 16
 
 
 def canonical(value: Any) -> bytes:
@@ -32,6 +36,44 @@ def digest(path: Path) -> str:
 
 def load(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def safe_bundle_file(package: Path, relative: Any, max_bytes: int) -> tuple[Path | None, str | None]:
+    """Resolve one regular artifact without traversal, symlinks or unbounded reads."""
+    if not isinstance(relative, str) or not relative:
+        return None, "path must be a non-empty relative string"
+    if len(relative) > MAX_RELATIVE_PATH_LENGTH:
+        return None, f"path exceeds {MAX_RELATIVE_PATH_LENGTH} characters"
+    if any(ord(ch) < 32 or ord(ch) == 127 for ch in relative):
+        return None, "path contains a control character"
+    if "\\" in relative or ":" in relative or relative.startswith("/"):
+        return None, "path must not be absolute or contain backslashes/colons"
+    parts = relative.split("/")
+    if len(parts) > MAX_PATH_DEPTH:
+        return None, f"path exceeds {MAX_PATH_DEPTH} levels"
+    if any(part in {"", ".", ".."} for part in parts):
+        return None, "path contains an empty, dot or parent segment"
+
+    candidate = package
+    for part in parts:
+        candidate = candidate / part
+        if candidate.is_symlink():
+            return None, "path must not traverse a symbolic link"
+    try:
+        resolved = candidate.resolve(strict=True)
+        resolved.relative_to(package)
+    except FileNotFoundError:
+        return None, "file does not exist"
+    except (OSError, ValueError):
+        return None, "path escapes the evidence bundle"
+    if not resolved.is_file():
+        return None, "path is not a regular file"
+    try:
+        if resolved.stat().st_size > max_bytes:
+            return None, f"file exceeds the {max_bytes}-byte safety limit"
+    except OSError:
+        return None, "file size could not be determined"
+    return resolved, None
 
 
 def verify_signature(record: dict[str, Any]) -> bool:
@@ -51,18 +93,41 @@ def main() -> int:
     parser.add_argument("--min-reviewers", type=int, default=2)
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
-    package = args.package
+    if not 1 <= args.min_reviewers <= 100:
+        parser.error("--min-reviewers must be between 1 and 100")
+
     findings: list[str] = []
-    required = {
-        "manifest": package / "manifest.json",
-        "result": package / "foreign-replay-result.json",
-        "envelope": package / "evidence-envelope.json",
-        "attestation": package / "runner-attestation.json",
-        "reviewers": package / "reviewers.json",
+    package: Path | None = None
+    if args.package.is_symlink():
+        findings.append("evidence bundle root must not be a symbolic link")
+    else:
+        try:
+            package = args.package.resolve(strict=True)
+        except OSError:
+            findings.append("evidence bundle directory does not exist")
+        else:
+            if not package.is_dir():
+                findings.append("evidence bundle path is not a directory")
+                package = None
+
+    required_names = {
+        "manifest": "manifest.json",
+        "result": "foreign-replay-result.json",
+        "envelope": "evidence-envelope.json",
+        "attestation": "runner-attestation.json",
+        "reviewers": "reviewers.json",
     }
-    for name, path in required.items():
-        if not path.is_file():
-            findings.append(f"missing {name}: {path.name}")
+    required: dict[str, Path] = {}
+    if package is not None:
+        for name, filename in required_names.items():
+            path, issue = safe_bundle_file(package, filename, MAX_JSON_BYTES)
+            if issue:
+                if issue == "file does not exist" or issue == "path is not a regular file":
+                    findings.append(f"missing {name}: {filename}")
+                else:
+                    findings.append(f"invalid {name} artifact {filename}: {issue}")
+            elif path is not None:
+                required[name] = path
 
     objects: dict[str, Any] = {}
     if not findings:
@@ -82,10 +147,10 @@ def main() -> int:
         findings.append("manifest must be an object")
         manifest = {}
     if not isinstance(result, dict):
-        findings.append("foreign-replay-result must be an object")
+        findings.append("foreign replay result must be an object")
         result = {}
     if not isinstance(envelope, dict):
-        findings.append("evidence-envelope must be an object")
+        findings.append("evidence envelope must be an object")
         envelope = {}
 
     if manifest.get("scenario_id") != "S-001A":
@@ -104,16 +169,28 @@ def main() -> int:
     if not manifest.get("rollback_ref"):
         findings.append("manifest rollback_ref is required")
 
-    expected_result_hash = digest(required["result"]) if required["result"].is_file() else None
-    expected_envelope_hash = digest(required["envelope"]) if required["envelope"].is_file() else None
-    fixture_path = package / manifest.get("fixture_path", "fixture.json")
-    expected_fixture_hash = digest(fixture_path) if fixture_path.is_file() else None
+    expected_result_hash = digest(required["result"]) if "result" in required else None
+    expected_envelope_hash = digest(required["envelope"]) if "envelope" in required else None
+    expected_fixture_hash = None
+    if package is not None:
+        fixture_name = manifest.get("fixture_path", "fixture.json")
+        if fixture_name in required_names.values():
+            findings.append("manifest fixture_path must not reuse a protocol artifact path")
+        else:
+            fixture_path, fixture_issue = safe_bundle_file(package, fixture_name, MAX_FIXTURE_BYTES)
+            if fixture_issue:
+                findings.append(f"manifest fixture_path is unsafe or unavailable: {fixture_issue}")
+            elif fixture_path is not None:
+                expected_fixture_hash = digest(fixture_path)
+
     for label, value in (("result_hash", expected_result_hash), ("fixture_hash", expected_fixture_hash)):
         declared = manifest.get(label)
         if not isinstance(declared, str) or not SHA256_RE.fullmatch(declared):
             findings.append(f"manifest {label} must be a lowercase SHA-256 value")
-        elif value and declared != value:
+        elif value is not None and declared != value:
             findings.append(f"manifest {label} does not match the artifact")
+        elif value is None and label == "fixture_hash":
+            findings.append("fixture_hash could not be verified")
 
     runner = result.get("runner", {}) if isinstance(result, dict) else {}
     replay = result.get("replay", {}) if isinstance(result, dict) else {}
