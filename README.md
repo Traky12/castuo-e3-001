@@ -176,7 +176,7 @@ Every change goes through a pull request with public review and automated tests;
 
 ## E3-001 protocol
 
-**External signer trust is fail-closed.** `trust/e3-001-trust-store.json` contains no enrolled runner or reviewer keys yet, so externally supplied evidence cannot qualify for G2 until identities and key possession are verified outside the bundle and accepted through a reviewed change. The synthetic demo remains `DEMO_VALIDATED` only; this is not production readiness, independent review or certification. See [key lifecycle and revocation policy](docs/KEY-LIFECYCLE.es.md).
+**Signer trust is fail-closed.** `trust/e3-001-trust-store.json` contains no enrolled runner, reviewer or publisher keys yet. External evidence cannot qualify for G2 and a public snapshot cannot pass its publication firewall until those identities and key fingerprints are verified out of band and enrolled through separate reviewed changes. A public key embedded in a snapshot is not, by itself, a trust anchor. The synthetic demo remains `DEMO_VALIDATED` only; this is not production readiness, independent review or certification. See [key lifecycle and revocation policy](docs/KEY-LIFECYCLE.es.md).
 
 `e3bundle` is also the public tooling of the CASTÚO-SYSTEM E3-001 public protocol for controlled independent reproduction. Controlled-review material may be provided under defined review conditions; the private core stays outside the public scope, and a successful reproduction does not validate, certify or promote it. Castuo-system remains the private canonical authority for current technical state and promotion decisions.
 
