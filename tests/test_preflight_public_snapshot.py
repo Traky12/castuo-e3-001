@@ -40,7 +40,7 @@ class PreflightTests(unittest.TestCase):
     def test_complete_bundle_is_ready_with_secret(self):
         with tempfile.TemporaryDirectory() as directory:
             bundle = self.bundle(Path(directory))
-            with patch.dict("os.environ", {"CASTUO_SNAPSHOT_SIGNING_KEY_B64": "present"}):
+            with patch.dict("os.environ", {"CASTUO_SNAPSHOT_SIGNING_KEY_B64": "EXAMPLE_SIGNING_KEY_PLACEHOLDER"}):
                 self.assertEqual(self.run_preflight(bundle, "--require-signing-secret"), 0)
 
     def test_workspace_accepts_only_a_relative_bundle_inside_workspace(self):
