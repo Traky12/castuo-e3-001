@@ -12,13 +12,13 @@ Cada entrada aprobada registra:
 
 - `key_id`: identificador único e inmutable de esa versión de clave.
 - `subject_id`: identidad exacta del runner o revisor.
-- `role`: exclusivamente `runner` o `reviewer`.
+- `role`: `runner`, `reviewer` o `publisher`; la clave de publicación debe ser distinta de las claves de runner y revisor.
 - `public_key_b64`: clave pública Ed25519 en Base64 canónico; nunca una clave privada.
 - `status`: `trusted` o `revoked`.
 - `approved_by` y `approval_ref`: responsable y referencia de revisión que autorizó el alta.
 - Si se revoca: `revocation_ref` y `revocation_reason`.
 
-El validador rechaza identidades no inscritas, claves que no coinciden, claves revocadas, duplicados y más de una clave activa por identidad y rol. Las claves públicas no se deben copiar del paquete candidato para incorporarlas al trust store: deben comprobarse mediante un canal externo y un procedimiento de prueba de posesión.
+Los validadores rechazan identidades no inscritas, claves que no coinciden, claves revocadas, duplicados y más de una clave activa por identidad y rol. El cortafuegos del snapshot exige que `public_verification.key_id` y su clave pública coincidan con una entrada activa `role: publisher`; una clave incluida por el propio snapshot no crea confianza. Las claves públicas no se deben copiar del paquete candidato para incorporarlas al trust store: deben comprobarse mediante un canal externo y un procedimiento de prueba de posesión.
 
 ## Alta y separación de funciones
 
@@ -37,7 +37,7 @@ La entrada en el trust store es una decisión de confianza, no un resultado de C
 - **Regla de evaluación:** las claves revocadas no satisfacen el umbral de confianza. No se confía en `signed_at` autocertificado para demostrar que una firma se creó antes de la revocación; sin una marca temporal de confianza, el tiempo declarado no resuelve esa duda.
 - **Custodia:** las claves privadas permanecen en el dispositivo del titular o en un gestor de secretos aprobado. Nunca se guardan en Git, paquetes de evidencia, páginas web, informes de verificación ni logs.
 
-La clave privada de publicación del snapshot tiene un uso y un límite distintos: debe permanecer únicamente en el environment protegido `public-snapshot`, disponible sólo para el job publicador aprobado. No se introduce en el trust store.
+La clave privada de publicación del snapshot tiene un uso y un límite distintos: debe permanecer únicamente en el environment protegido `public-snapshot`, disponible sólo para el job publicador aprobado. La clave pública correspondiente se inscribe como `role: publisher` tras verificar la huella por un canal externo y revisar la propuesta. No se introduce una clave real ni se desbloquea la publicación de forma automática.
 
 ## Límites de la afirmación
 
