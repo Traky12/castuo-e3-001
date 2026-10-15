@@ -22,7 +22,7 @@ The demo has no backend. Report vulnerabilities privately as described in
 
 | Threat | Mitigation | How it is tested |
 |---|---|---|
-| Visitor data or keys sent elsewhere | No backend, analytics or third-party resources; CSP `connect-src 'self'`; private keys are never serialised | UI suite checks requests are same-origin GETs without bodies and that no request leaves the page while scenarios run, files are edited, keys are made, or bundles are signed and verified |
+| Visitor data or keys sent elsewhere | No backend, analytics or third-party resources; CSP `connect-src 'none'`, `frame-src 'none'`, `worker-src 'none'`; private keys are never serialised | UI suite checks that the page makes no requests during interactions and asserts the network, frame and worker CSP directives are deny-by-default |
 | Script injection through displayed data | Results are written with `textContent`; no `innerHTML`, `eval` or inline scripts; restrictive CSP | UI suite tests inline script/style blocking and CSP violations |
 | Unreadable input shown as a verdict | `input.js` applies the CLI input contract: malformed or wrongly shaped manifest/trusted keys produce `ERROR`, exit 2, with no cryptographic phase shown | `tests/input-conformance.mjs` compares statuses, exit codes and findings against candidate CLI source, including malformed JSON and unsafe manifest paths |
 | Browser verdict drifting from the CLI | Browser/CLI conformance and UI jobs must pass; production deploy additionally requires the public release, PyPI version and GHCR image | `tests/conformance.mjs`, `tests/input-conformance.mjs`, Playwright jobs and the publication gate in `pages.yml` |
