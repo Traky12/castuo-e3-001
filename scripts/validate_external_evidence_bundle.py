@@ -138,8 +138,8 @@ def load_trust_store(path: Path) -> list[dict[str, Any]]:
         key_ids.add(key_id)
         if not isinstance(subject_id, str) or not subject_id:
             raise ValueError(f"trust store keys[{index}].subject_id is required")
-        if role not in {"runner", "reviewer"}:
-            raise ValueError(f"trust store keys[{index}].role must be runner or reviewer")
+        if role not in {"runner", "reviewer", "publisher"}:
+            raise ValueError(f"trust store keys[{index}].role must be runner, reviewer or publisher")
         if status not in {"trusted", "revoked"}:
             raise ValueError(f"trust store keys[{index}].status must be trusted or revoked")
         if not isinstance(entry.get("approved_by"), str) or not entry["approved_by"].strip():
