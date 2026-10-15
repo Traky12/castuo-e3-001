@@ -56,6 +56,60 @@ class ValidateExternalEvidenceBundleTests(unittest.TestCase):
         self.assertEqual(payload["claim_boundary"], "NO_CLAIM")
         self.assertTrue(any(expected in finding for finding in payload["findings"]), payload["findings"])
 
+
+    def test_external_lookalike_is_blocked_without_enrolled_trusted_keys(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bundle = root / "bundle"
+            make_demo_bundle.build(bundle, tamper="untrusted-external-keys")
+            trust_store = root / "trust-store.json"
+            trust_store.write_text(
+                json.dumps({"format": "castuo.e3-001.trust-store.v1", "keys": []}),
+                encoding="utf-8",
+            )
+            report = root / "validation.json"
+            code, payload = run(
+                VALIDATOR, bundle, "--min-reviewers", 2,
+                "--trusted-key-store", trust_store, "--output", report,
+            )
+            self.assertEqual(code, 1)
+            self.assertEqual(payload["status"], "BLOCKED")
+            self.assertFalse(payload["g2_eligible"])
+            self.assertFalse(payload["oneV"])
+            self.assertEqual(payload["promotion"], "BLOCKED")
+            self.assertTrue(any("not enrolled in the trusted key store" in finding
+                                for finding in payload["findings"]), payload["findings"])
+
+    def test_external_lookalike_without_trust_store_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "bundle"
+            make_demo_bundle.build(bundle, tamper="untrusted-external-keys")
+            code, payload = run(VALIDATOR, bundle, "--min-reviewers", 2)
+            self.assertEqual(code, 1)
+            self.assertEqual(payload["status"], "BLOCKED")
+            self.assertTrue(any("--trusted-key-store" in finding for finding in payload["findings"]))
+
+    def test_validation_without_output_does_not_mutate_bundle(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "bundle"
+            make_demo_bundle.build(bundle)
+            code, payload = run(VALIDATOR, bundle, "--min-reviewers", 2)
+            self.assertEqual(code, 0, payload["findings"])
+            self.assertEqual(payload["status"], "DEMO_VALIDATED")
+            self.assertFalse((bundle / "external-evidence-validation.json").exists())
+
+    def test_validation_report_inside_bundle_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "bundle"
+            make_demo_bundle.build(bundle)
+            output = bundle / "validation.json"
+            code, payload = run(VALIDATOR, bundle, "--output", output)
+            self.assertEqual(code, 1)
+            self.assertEqual(payload["status"], "BLOCKED")
+            self.assertTrue(any("validation output must be outside the evidence bundle" in finding
+                                for finding in payload["findings"]), payload["findings"])
+            self.assertFalse(output.exists())
+
     def test_modified_result_after_freeze_is_detected(self):
         self.assert_blocked("result", "result_hash does not match")
 
