@@ -24,6 +24,8 @@ MAX_JSON_BYTES = 5 * 1024 * 1024
 MAX_FIXTURE_BYTES = 20 * 1024 * 1024
 MAX_RELATIVE_PATH_LENGTH = 255
 MAX_PATH_DEPTH = 16
+TRUST_STORE_FORMAT = "castuo.e3-001.trust-store.v1"
+MAX_REVIEWER_RECORDS = 100
 
 
 def canonical(value: Any) -> bytes:
@@ -85,10 +87,24 @@ def safe_bundle_file(package: Path, relative: Any, max_bytes: int) -> tuple[Path
     return resolved, None
 
 
+def decode_canonical_public_key(value: Any) -> bytes:
+    if not isinstance(value, str):
+        raise ValueError("public key must be Base64 text")
+    raw = base64.b64decode(value, validate=True)
+    if base64.b64encode(raw).decode("ascii") != value:
+        raise ValueError("public key Base64 is not canonical")
+    Ed25519PublicKey.from_public_bytes(raw)
+    return raw
+
+
 def verify_signature(record: dict[str, Any]) -> bool:
     try:
-        public_key = base64.b64decode(record["public_key_b64"], validate=True)
-        signature = base64.b64decode(record["signature_b64"], validate=True)
+        public_key_text = record["public_key_b64"]
+        signature_text = record["signature_b64"]
+        public_key = decode_canonical_public_key(public_key_text)
+        signature = base64.b64decode(signature_text, validate=True)
+        if base64.b64encode(signature).decode("ascii") != signature_text:
+            return False
         payload = {key: value for key, value in record.items() if key != "signature_b64"}
         Ed25519PublicKey.from_public_bytes(public_key).verify(signature, canonical(payload))
         return True
@@ -96,10 +112,89 @@ def verify_signature(record: dict[str, Any]) -> bool:
         return False
 
 
+def load_trust_store(path: Path) -> list[dict[str, Any]]:
+    data = load(path)
+    if not isinstance(data, dict) or data.get("format") != TRUST_STORE_FORMAT:
+        raise ValueError(f"trust store format must be {TRUST_STORE_FORMAT}")
+    entries = data.get("keys")
+    if not isinstance(entries, list):
+        raise ValueError("trust store keys must be an array")
+
+    key_ids: set[str] = set()
+    key_bytes_seen: set[bytes] = set()
+    active_subjects: set[tuple[str, str]] = set()
+    parsed: list[dict[str, Any]] = []
+    for index, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            raise ValueError(f"trust store keys[{index}] must be an object")
+        key_id = entry.get("key_id")
+        subject_id = entry.get("subject_id")
+        role = entry.get("role")
+        status = entry.get("status")
+        if not isinstance(key_id, str) or not key_id:
+            raise ValueError(f"trust store keys[{index}].key_id is required")
+        if key_id in key_ids:
+            raise ValueError(f"duplicate trust-store key_id: {key_id}")
+        key_ids.add(key_id)
+        if not isinstance(subject_id, str) or not subject_id:
+            raise ValueError(f"trust store keys[{index}].subject_id is required")
+        if role not in {"runner", "reviewer"}:
+            raise ValueError(f"trust store keys[{index}].role must be runner or reviewer")
+        if status not in {"trusted", "revoked"}:
+            raise ValueError(f"trust store keys[{index}].status must be trusted or revoked")
+        if not isinstance(entry.get("approved_by"), str) or not entry["approved_by"].strip():
+            raise ValueError(f"trust store keys[{index}].approved_by is required")
+        if not isinstance(entry.get("approval_ref"), str) or not entry["approval_ref"].strip():
+            raise ValueError(f"trust store keys[{index}].approval_ref is required")
+        if status == "revoked":
+            if not isinstance(entry.get("revocation_ref"), str) or not entry["revocation_ref"].strip():
+                raise ValueError(f"revoked trust-store key {key_id} requires revocation_ref")
+            if not isinstance(entry.get("revocation_reason"), str) or not entry["revocation_reason"].strip():
+                raise ValueError(f"revoked trust-store key {key_id} requires revocation_reason")
+        public_key = decode_canonical_public_key(entry.get("public_key_b64"))
+        if public_key in key_bytes_seen:
+            raise ValueError("the same public key must not appear more than once in the trust store")
+        key_bytes_seen.add(public_key)
+        subject = (role, subject_id)
+        if status == "trusted":
+            if subject in active_subjects:
+                raise ValueError(f"more than one active key for {role} subject {subject_id}")
+            active_subjects.add(subject)
+        parsed.append({**entry, "_public_key_bytes": public_key})
+    return parsed
+
+
+def trusted_key_finding(
+    trust_store: list[dict[str, Any]], role: str, subject_id: Any, public_key_b64: Any
+) -> str | None:
+    if not isinstance(subject_id, str) or not subject_id:
+        return f"{role} identity is missing; no trust decision can be made"
+    try:
+        actual_key = decode_canonical_public_key(public_key_b64)
+    except (ValueError, TypeError):
+        return f"{role} {subject_id} has an invalid or non-canonical public key"
+    subject_records = [
+        entry for entry in trust_store
+        if entry["role"] == role and entry["subject_id"] == subject_id
+    ]
+    if not subject_records:
+        return f"{role} {subject_id} is not enrolled in the trusted key store"
+    for entry in subject_records:
+        if entry["_public_key_bytes"] == actual_key:
+            if entry["status"] == "revoked":
+                return f"{role} {subject_id} used a revoked key ({entry['key_id']})"
+            return None
+    return f"{role} {subject_id} key does not match its active trusted key"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("package", type=Path)
     parser.add_argument("--min-reviewers", type=int, default=2)
+    parser.add_argument(
+        "--trusted-key-store", type=Path, default=None,
+        help="Version-controlled trust store for external runner/reviewer identities; demo bundles do not use it.",
+    )
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
     if not 1 <= args.min_reviewers <= 100:
@@ -201,8 +296,10 @@ def main() -> int:
         elif value is None and label == "fixture_hash":
             findings.append("fixture_hash could not be verified")
 
-    runner = result.get("runner", {}) if isinstance(result, dict) else {}
-    replay = result.get("replay", {}) if isinstance(result, dict) else {}
+    runner_value = result.get("runner", {}) if isinstance(result, dict) else {}
+    replay_value = result.get("replay", {}) if isinstance(result, dict) else {}
+    runner = runner_value if isinstance(runner_value, dict) else {}
+    replay = replay_value if isinstance(replay_value, dict) else {}
     if result.get("status") != "PASS_WITHIN_DECLARED_SCOPE":
         findings.append("foreign replay result must be PASS_WITHIN_DECLARED_SCOPE")
     if runner.get("source_commit") != source_commit:
@@ -218,7 +315,8 @@ def main() -> int:
     if replay.get("promotion") != "BLOCKED":
         findings.append("replay promotion must remain BLOCKED")
 
-    assurance = envelope.get("assurance", {})
+    assurance_value = envelope.get("assurance", {})
+    assurance = assurance_value if isinstance(assurance_value, dict) else {}
     if envelope.get("scenario_id") != "S-001A":
         findings.append("envelope scenario_id must be S-001A")
     if envelope.get("promotion", "BLOCKED") != "BLOCKED":
@@ -242,9 +340,32 @@ def main() -> int:
         if not verify_signature(attestation):
             findings.append("runner attestation Ed25519 signature is invalid")
 
+    # The synthetic demo exercises validation logic but is never external
+    # evidence. Detect several explicit demo markers so a passing synthetic
+    # bundle cannot be promoted to VERIFIED_FOR_G2 by changing one field.
+    demo_only = (
+        envelope.get("claim_boundary") == "DEMO_ONLY"
+        or str(runner.get("runner_id", "")).startswith("DEMO-")
+        or (
+            isinstance(attestation, dict)
+            and str(attestation.get("attestation_id", "")).startswith("DEMO-")
+        )
+        or (
+            isinstance(reviewers, list)
+            and any(
+                isinstance(reviewer, dict)
+                and str(reviewer.get("reviewer_id", "")).startswith("DEMO-")
+                for reviewer in reviewers
+            )
+        )
+    )
+
     if not isinstance(reviewers, list):
         findings.append("reviewers.json must be an array")
         reviewers = []
+    if len(reviewers) > MAX_REVIEWER_RECORDS:
+        findings.append(f"reviewers.json exceeds {MAX_REVIEWER_RECORDS} records")
+        reviewers = reviewers[:MAX_REVIEWER_RECORDS]
     identities: set[str] = set()
     reviewer_public_keys: set[bytes] = set()
     for index, reviewer in enumerate(reviewers):
@@ -270,8 +391,8 @@ def main() -> int:
         if reviewer.get("replay_result_hash") != expected_result_hash:
             findings.append(f"{prefix}.replay_result_hash does not match result")
         try:
-            reviewer_key = base64.b64decode(reviewer["public_key_b64"], validate=True)
-        except (KeyError, ValueError, TypeError):
+            reviewer_key = decode_canonical_public_key(reviewer.get("public_key_b64"))
+        except (ValueError, TypeError):
             reviewer_key = None
         if reviewer_key is not None:
             if reviewer_key in reviewer_public_keys:
@@ -283,25 +404,36 @@ def main() -> int:
     if len(identities) < args.min_reviewers:
         findings.append(f"independent reviewer quorum not met: {len(identities)} < {args.min_reviewers}")
 
-    # The synthetic demo exercises validation logic but is never external
-    # evidence. Detect several explicit demo markers so a passing synthetic
-    # bundle cannot be promoted to VERIFIED_FOR_G2 by changing one field.
-    demo_only = (
-        envelope.get("claim_boundary") == "DEMO_ONLY"
-        or str(runner.get("runner_id", "")).startswith("DEMO-")
-        or (
-            isinstance(attestation, dict)
-            and str(attestation.get("attestation_id", "")).startswith("DEMO-")
-        )
-        or (
-            isinstance(reviewers, list)
-            and any(
-                isinstance(reviewer, dict)
-                and str(reviewer.get("reviewer_id", "")).startswith("DEMO-")
-                for reviewer in reviewers
-            )
-        )
-    )
+    if not demo_only:
+        trust_store: list[dict[str, Any]] | None = None
+        trust_store_issue: str | None = None
+        if args.trusted_key_store is None:
+            trust_store_issue = "external evidence requires --trusted-key-store; self-declared keys do not establish signer identity"
+        else:
+            try:
+                trust_store = load_trust_store(args.trusted_key_store)
+            except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+                trust_store_issue = f"trusted key store is missing or invalid: {exc}"
+        if trust_store_issue:
+            findings.append(trust_store_issue)
+        elif trust_store is not None:
+            if not isinstance(attestation, dict):
+                findings.append("runner attestation is not an object; trusted identity cannot be checked")
+            else:
+                issue = trusted_key_finding(
+                    trust_store, "runner", runner.get("runner_id"), attestation.get("public_key_b64")
+                )
+                if issue:
+                    findings.append(issue)
+            for index, reviewer in enumerate(reviewers):
+                if not isinstance(reviewer, dict):
+                    continue
+                issue = trusted_key_finding(
+                    trust_store, "reviewer", reviewer.get("reviewer_id"), reviewer.get("public_key_b64")
+                )
+                if issue:
+                    findings.append(f"reviewers[{index}]: {issue}")
+
     verified_for_g2 = not findings and not demo_only
     status = (
         "DEMO_VALIDATED"
@@ -330,9 +462,32 @@ def main() -> int:
         ),
         "findings": findings,
     }
-    output_path = args.output or package / "external-evidence-validation.json"
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(output, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    # Validation is read-only by default. An optional report may be written only
+    # outside the evidence package so the act of validating cannot mutate it.
+    output_safe = True
+    if args.output is not None and package is not None:
+        try:
+            output_resolved = args.output.resolve(strict=False)
+            output_resolved.relative_to(package)
+        except ValueError:
+            pass
+        except OSError:
+            findings.append("validation output path cannot be resolved safely")
+            output_safe = False
+        else:
+            findings.append("validation output must be outside the evidence bundle")
+            output_safe = False
+            output["status"] = "BLOCKED"
+            output["g2_eligible"] = False
+            output["foreign_replay_verified"] = False
+            output["human_review_verified"] = False
+            output["oneR"] = False
+            output["oneV"] = False
+            output["claim_boundary"] = "NO_CLAIM"
+            output["findings"] = findings
+    if args.output is not None and output_safe:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(output, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(output, indent=2, sort_keys=True))
     return 0 if not findings else 1
 
