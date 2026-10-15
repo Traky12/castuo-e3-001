@@ -28,6 +28,7 @@ TAMPERS = (
     "reviewer-quorum",
     "reviewer-duplicate",
     "reviewer-key-reuse",
+    "untrusted-external-keys",
     "local-runner",
     "production-claim",
     "missing-envelope",
@@ -58,7 +59,11 @@ def build(output: Path, tamper: str | None = None) -> Path:
     if tamper is not None and tamper not in TAMPERS:
         raise ValueError(f"unknown tamper: {tamper}")
     output.mkdir(parents=True, exist_ok=True)
-    runner_id = "LOCAL-demo-runner" if tamper == "local-runner" else "DEMO-RUNNER-001"
+    runner_id = (
+        "LOCAL-demo-runner" if tamper == "local-runner"
+        else "UNENROLLED-RUNNER-001" if tamper == "untrusted-external-keys"
+        else "DEMO-RUNNER-001"
+    )
 
     fixture = output / "fixture.json"
     write(fixture, {"demo": True, "scenario_id": "S-001A", "steps": ["inject_fault", "capture", "recover", "replay"]})
@@ -72,7 +77,7 @@ def build(output: Path, tamper: str | None = None) -> Path:
     envelope = output / "evidence-envelope.json"
     write(envelope, {
         "scenario_id": "S-001A",
-        "claim_boundary": "DEMO_ONLY",
+        "claim_boundary": "EXTERNAL_REPLAY_ONLY" if tamper == "untrusted-external-keys" else "DEMO_ONLY",
         "assurance": {"oneD": True, "oneR": True, "oneV": False, "oneA": False},
         "promotion": "BLOCKED",
     })
@@ -92,7 +97,7 @@ def build(output: Path, tamper: str | None = None) -> Path:
         "commercial_claim": False,
     })
     attestation = sign({
-        "attestation_id": "DEMO-ATTESTATION-001",
+        "attestation_id": "UNENROLLED-ATTESTATION-001" if tamper == "untrusted-external-keys" else "DEMO-ATTESTATION-001",
         "runner_id": runner_id,
         "independent": True,
         "source_commit": DEMO_COMMIT,
@@ -101,8 +106,8 @@ def build(output: Path, tamper: str | None = None) -> Path:
     shared_reviewer_key = Ed25519PrivateKey.generate() if tamper == "reviewer-key-reuse" else None
     reviewers = [
         sign({
-            "review_id": f"DEMO-REVIEW-{label}",
-            "reviewer_id": f"DEMO-REVIEWER-{label}",
+            "review_id": f"{'UNENROLLED' if tamper == 'untrusted-external-keys' else 'DEMO'}-REVIEW-{label}",
+            "reviewer_id": f"{'UNENROLLED' if tamper == 'untrusted-external-keys' else 'DEMO'}-REVIEWER-{label}",
             "independence": True,
             "decision": "APPROVE",
             "source_commit": DEMO_COMMIT,
