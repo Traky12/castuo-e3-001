@@ -128,8 +128,10 @@ jobs:
             --output public/status-snapshot.json \
             --require-signature
 
-      - name: Enforce public claim firewall
-        run: python scripts/validate_public_snapshot_firewall.py public/status-snapshot.json
+      - name: Enforce public claim firewall and pinned publisher trust
+        run: >-
+          python scripts/validate_public_snapshot_firewall.py public/status-snapshot.json
+          --trusted-key-store trust/e3-001-trust-store.json
 
       - name: Commit public snapshot only after successful verification
         run: |
