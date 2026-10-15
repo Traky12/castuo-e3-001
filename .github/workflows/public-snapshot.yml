@@ -63,6 +63,7 @@ jobs:
           set -euo pipefail
           python scripts/validate_external_evidence_bundle.py "$BUNDLE_PATH" \
             --min-reviewers 2 \
+            --trusted-key-store trust/e3-001-trust-store.json \
             --output artifacts/external-evidence-validation.json
 
       - name: Evaluate G2 read-only decision
