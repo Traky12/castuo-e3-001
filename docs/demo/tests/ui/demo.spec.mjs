@@ -182,6 +182,20 @@ test.describe('privacy: nothing leaves the page', () => {
 });
 
 test.describe('content security policy', () => {
+  test('all demo pages disable network APIs, frames, workers and object embeds', async ({ page }) => {
+    for (const file of ['index.html', 'crear.html', 'paquete.html']) {
+      await page.goto(file);
+      const policy = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
+      expect(policy).toContain("default-src 'none'");
+      expect(policy).toContain("connect-src 'none'");
+      expect(policy).toContain("frame-src 'none'");
+      expect(policy).toContain("worker-src 'none'");
+      expect(policy).toContain("object-src 'none'");
+      expect(policy).toContain("base-uri 'none'");
+      expect(policy).toContain("form-action 'none'");
+    }
+  });
+
   for (const file of ['index.html', 'crear.html', 'paquete.html']) {
     test(`${file}: inline script and inline style are blocked`, async ({ page }) => {
       await watch(page);
