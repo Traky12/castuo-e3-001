@@ -176,7 +176,7 @@ class DatasetTamperingTutorialTests(unittest.TestCase):
             self.assertIn("scenario-add", tutorial)
             self.assertIn("scenario-delete", tutorial)
             self.assertIn("data/readings.csv", tutorial)
-            self.assertIn("exit code", tutorial.lower())
+            self.assertTrue("exit code" in tutorial.lower() or "código de salida" in tutorial.lower())
             self.assertIn("trusted-keys.json", tutorial)
 
         self.assertIn("undeclared file: data/extra.txt", english)
