@@ -158,5 +158,32 @@ class DatasetTamperingTutorialTests(unittest.TestCase):
             self.assertIn("FAILED", deleted)
 
 
+    def test_bilingual_tutorials_are_linked_and_cover_all_mutations(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        contributing = (ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
+        english = (ROOT / "docs" / "tutorial-dataset-tampering.md").read_text(encoding="utf-8")
+        spanish = (ROOT / "docs" / "tutorial-dataset-tampering.es.md").read_text(encoding="utf-8")
+
+        for path in (
+            "docs/tutorial-dataset-tampering.md",
+            "docs/tutorial-dataset-tampering.es.md",
+        ):
+            self.assertIn(path, readme)
+            self.assertIn(path, contributing)
+
+        for tutorial in (english, spanish):
+            self.assertIn("scenario-edit", tutorial)
+            self.assertIn("scenario-add", tutorial)
+            self.assertIn("scenario-delete", tutorial)
+            self.assertIn("data/readings.csv", tutorial)
+            self.assertIn("exit code", tutorial.lower())
+            self.assertIn("trusted-keys.json", tutorial)
+
+        self.assertIn("undeclared file: data/extra.txt", english)
+        self.assertIn("undeclared file: data/extra.txt", spanish)
+        self.assertIn("missing file: report.md", english)
+        self.assertIn("missing file: report.md", spanish)
+
+
 if __name__ == "__main__":
     unittest.main()
