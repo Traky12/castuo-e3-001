@@ -2,7 +2,7 @@
 # Usage: docker run --rm -v "$PWD:/data" ghcr.io/traky12/e3bundle:<version> verify <bundle> ...
 
 # --- build: produce the wheel from this source tree -------------------------
-FROM python:3.12-slim@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1 AS build
+FROM python:3.14-slim@sha256:a2b82f3c48559aa0a8446d9af49826b6e2b2016f4cd2afabfe6013ec53729170 AS build
 WORKDIR /src
 COPY pyproject.toml README.md LICENSE ./
 COPY scripts/ ./scripts/
@@ -10,7 +10,7 @@ RUN python -m pip install --no-cache-dir --disable-pip-version-check --upgrade p
  && python -m pip wheel --no-cache-dir --disable-pip-version-check --wheel-dir /wheels .
 
 # --- runtime: only the installed tool, non-root, no network needed -----------
-FROM python:3.12-slim@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
+FROM python:3.14-slim@sha256:a2b82f3c48559aa0a8446d9af49826b6e2b2016f4cd2afabfe6013ec53729170
 ARG VERSION=dev
 ARG REVISION=unknown
 LABEL org.opencontainers.image.title="e3bundle" \
