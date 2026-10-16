@@ -73,6 +73,7 @@ Complete these tasks before asking new users to evaluate the tool:
 - [ ] Keep copy-paste commands aligned with an actually available source/release; do not make `pip install e3bundle` the primary path until PyPI availability is verified.
 - [ ] Make supported Python versions and environment requirements consistent across README, package metadata, CI and release notes.
 - [ ] Link directly to valid and tampered fixtures, the CLI report schema, the threat model, the contribution guide and the security reporting route.
+- [ ] Link both the [English end-to-end dataset-tampering tutorial](tutorial-dataset-tampering.md) and the [Spanish version](tutorial-dataset-tampering.es.md) from README and CONTRIBUTING; automated checks keep those entry points and the three negative cases aligned.
 - [ ] Preserve the explanation that integrity/signature verification does not prove content truth, real-world identity, independence of signers or field validity.
 - [ ] Remove duplicate explanations and stale release wording, without rewriting historical release tags.
 - [ ] Review open PRs and issues before adding new ones. Prefer closing loops on the existing backlog; do not create duplicate tasks.
