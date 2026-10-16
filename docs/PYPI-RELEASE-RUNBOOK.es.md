@@ -51,11 +51,16 @@ Evidencia de [run 38088766020](https://github.com/Traky12/castuo-e3-001/actions/
 - Claims observados: `repository=Traky12/castuo-e3-001`, `repository_owner=Traky12`, `repository_owner_id=202805065`, `workflow_ref=Traky12/castuo-e3-001/.github/workflows/publish-pypi.yml@refs/tags/v0.1.3`, `ref=refs/tags/v0.1.3`, `environment=pypi`.
 - El claim `sub` observado es `repo:Traky12@202805065/castuo-e3-001@1341612953:environment:pypi`.
 
-### Señal adicional que debe comprobarse
+### Corrección del diagnóstico OIDC — revisión del 14/10/2026
 
-GitHub informa que los repositorios creados después del 15 de julio de 2026 reciben por defecto un `sub` OIDC inmutable con IDs de propietario y repositorio. Este repositorio fue creado el 21 de agosto de 2026, y el claim observado coincide con ese formato. Véase [GitHub: Immutable subject claims](https://docs.github.com/en/actions/reference/security/oidc#immutable-subject-claims) y el [anuncio oficial](https://github.blog/changelog/2026-04-23-immutable-subject-claims-for-github-actions-oidc-tokens/).
+El claim observado `sub=repo:Traky12@202805065/castuo-e3-001@1341612953:environment:pypi` contiene IDs inmutables, pero **eso no debe tratarse como la causa principal**. Warehouse fusionó [PR #19422 el 29/01/2026](https://github.com/pypi/warehouse/pull/19422), que elimina la comprobación de `sub` para Trusted Publishers de GitHub porque los claims estructurados correspondientes se validan por separado. El [issue #19347](https://github.com/pypi/warehouse/issues/19347) sigue abierto para soporte OIDC genérico/personalizado; no prueba que el flujo GitHub→PyPI aquí sea incompatible.
 
-Esto es una **pista de compatibilidad que se debe investigar, no una causa raíz confirmada**. PyPI define `invalid-publisher` como un token válido que no coincide con ningún publisher configurado; su [guía de diagnóstico](https://docs.pypi.org/trusted-publishers/troubleshooting/) recomienda comparar claims y configuración. PyPI mantiene abierta la solicitud [warehouse #19347 — Generic OIDC support](https://github.com/pypi/warehouse/issues/19347), que describe problemas potenciales cuando el `sub` se personaliza. Esa solicitud no prueba por sí sola que el formato actual sea la causa de este fallo.
+`invalid-publisher` solo permite concluir que no se encontró un publisher que coincidiera con las reclamaciones recibidas. La causa concreta sigue **UNCONFIRMED**. Por prioridad:
+
+1. Confirmar en el ámbito/cuenta de PyPI correcto que el Pending Publisher de `e3bundle` realmente aparece guardado y no solo que el formulario se envió.
+2. Comparar los campos guardados, carácter por carácter, con los claims no secretos de la ejecución: nombre de proyecto, owner/cuenta, repositorio, nombre de fichero del workflow y environment. Revisar espacios al inicio/final, selector de cuenta/proyecto y nombre exacto del workflow.
+3. Si la interfaz indica que existe y todo parece coincidir, no inferir que los datos persistidos son idénticos a lo que evalúa Warehouse. Registrar la discrepancia y pedir a soporte que confirme el registro persistido usando el run URL y los valores no secretos. Un reporte similar, [Warehouse #20504](https://github.com/pypi/warehouse/issues/20504), recibió respuesta del mantenedor indicando que no había fila pendiente para el proyecto del reportante; ese caso solo ilustra la necesidad de confirmar persistencia, no establece la causa de e3bundle.
+4. No publicar JWT OIDC, API tokens, cookies, credenciales ni valores de secretos. No comentar repetidamente en issues de terceros; usar el canal oficial de soporte y el seguimiento propio existente.
 
 ## 5. Procedimiento frente a un fallo de identidad
 
@@ -63,8 +68,8 @@ Esto es una **pista de compatibilidad que se debe investigar, no una causa raíz
 2. Verificar la fila guardada en la página **Publishing**. Comparar, carácter por carácter, project, owner, repository, workflow filename y environment con la tabla anterior.
 3. Comparar los claims no secretos del log con los campos del publisher. No copiar ni solicitar tokens OIDC, API tokens, códigos de recuperación, cookies o valores de secretos.
 4. Si hay una diferencia, corregir únicamente ese campo en PyPI y registrar la evidencia antes de reintentar.
-5. Si la fila ya coincide exactamente, **detener los reintentos OIDC**. Escalar a PyPI (`admin@pypi.org`) con el run URL, nombre del workflow, IDs del repo/owner, claims no secretos y referencia a warehouse #19347. No enviar API tokens, tokens OIDC, códigos de recuperación ni otros secretos.
-6. Si urge publicar `0.1.3` antes de que PyPI acepte el nuevo formato, la única contingencia operativa disponible en este proceso es una primera subida manual controlada por el titular con Twine. Como el proyecto aún no existe en PyPI, el token tendrá que tener alcance de cuenta; es una excepción de riesgo superior y debe revocarse inmediatamente después de verificar la subida. No compartirlo en chat, ni guardarlo en GitHub, ni añadirlo como secret permanente. Este paso requiere que el titular autentique la cuenta y pegue el token en su propia terminal; el agente no puede hacerlo sin credenciales.
+5. Si los campos visibles coinciden y la existencia/alcance del registro está confirmada, **detener los reintentos OIDC** y escalar por soporte con el run URL, nombre/ID del workflow, referencia/tag, IDs del repo/owner, claims no secretos y resultado de la comparación. Solicitar confirmación del registro persistido; no enviar JWT OIDC, API tokens, códigos de recuperación ni otros secretos.
+6. Solo si la primera publicación es urgente y el titular acepta expresamente el riesgo, puede evaluarse la contingencia de subida manual controlada con Twine. No usarla para fingir que Trusted Publishing quedó resuelto. Para un proyecto aún no creado, el token puede requerir un alcance amplio; debe crearlo el titular, usarlo únicamente en su terminal y revocarlo inmediatamente tras comprobar la subida. Nunca compartirlo en chat, guardarlo en GitHub ni añadirlo como secreto permanente.
 7. No cambiar el `sub` de GitHub ni reducir la protección OIDC automáticamente. Cualquier ajuste de seguridad debe pasar por una evaluación de compatibilidad y por la evidencia de la configuración real.
 
 **Regla de reintento:** máximo un reintento después de una corrección identificada y registrada. Un nuevo fallo debe producir diagnóstico/escalado, no más repeticiones.
@@ -119,5 +124,7 @@ No crear issues duplicadas para cada repetición; añadir cada transición a [is
 
 - [PyPI Trusted Publishers — troubleshooting](https://docs.pypi.org/trusted-publishers/troubleshooting/)
 - [PyPI — creating a project through OIDC](https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/)
-- [PyPI Warehouse #19347 — Generic OIDC support](https://github.com/pypi/warehouse/issues/19347)
+- [PyPI Warehouse PR #19422 — disregard GitHub `sub` claim (merged 2026-01-29)](https://github.com/pypi/warehouse/pull/19422)
+- [PyPI Warehouse #19347 — generic OIDC support (context, not confirmed cause)](https://github.com/pypi/warehouse/issues/19347)
+- [PyPI Warehouse #20504 — example of invalid-publisher with no persisted pending row](https://github.com/pypi/warehouse/issues/20504)
 - [GitHub OIDC immutable subject claims](https://docs.github.com/en/actions/reference/security/oidc#immutable-subject-claims)
