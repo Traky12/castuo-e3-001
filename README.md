@@ -72,6 +72,8 @@ $ echo $?
 
 Both commands run in CI on every change, so this output is checked, not illustrative.
 
+Read the full [dataset-tampering walkthrough in English](docs/tutorial-dataset-tampering.md) or [en español](docs/tutorial-dataset-tampering.es.md) to reproduce signing, trusted-key verification, and the edit/add/delete negative cases from a clean workspace.
+
 For a human-readable summary, add `--format text`:
 
 ```console
