@@ -141,6 +141,8 @@ A `VERIFIED` result means the declared files are unchanged and enough valid sign
 
 The bundle format `e3.bundle.v1` is **experimental** and may change before `1.0`.
 
+Legal claim boundary and pre-pilot controls: [docs/LEGAL-CLAIM-BOUNDARY.es.md](docs/LEGAL-CLAIM-BOUNDARY.es.md).
+
 ## Security
 
 Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md). The tool never reads private keys during `verify`, makes no network calls and does not modify the bundle.
