@@ -11,6 +11,22 @@ Use `castuo-e3-001` as the single public adoption surface for e3bundle. Do not c
 
 **Observed baseline (GitHub API, 2026-10-16):** 2 stars, 1 fork and 20 open issues on this repository. The open queue also contains multiple dependency and maintenance PRs. Re-check these counts before using them in a public update; never present them as adoption or validation evidence.
 
+## Existing GitHub work to reconcile first
+
+**Snapshot: 2026-10-16.** These are pointers into the current backlog, not a substitute for re-checking their live checks and reviews. Reuse these threads and branches; do not open duplicate issues for the same work.
+
+| Item | Current purpose | Required next step before the relevant gate can close |
+|---|---|---|
+| [PR #85](https://github.com/Traky12/castuo-e3-001/pull/85) | Canonical Base64 key identity follow-up | Verify exact-head security, CLI and browser/CLI conformance checks; do not claim v0.1.3 contains this follow-up. |
+| [PR #91](https://github.com/Traky12/castuo-e3-001/pull/91) | Demo CSP and public-evidence publication hardening | Complete review of the trust boundary and exact-head negative tests before merging or promoting. |
+| [PR #90](https://github.com/Traky12/castuo-e3-001/pull/90) and [issue #87](https://github.com/Traky12/castuo-e3-001/issues/87) | Align demo/release wording and preserve publication gates | Review the source pin and new status-contract test; do not retarget or rewrite the existing v0.1.3 tag. |
+| [PR #89](https://github.com/Traky12/castuo-e3-001/pull/89) | Correct PyPI Trusted Publisher diagnosis | Keep root cause `UNCONFIRMED`; only the account owner can read back the saved Pending Publisher row and compare its fields. |
+| [PR #88](https://github.com/Traky12/castuo-e3-001/pull/88) | Spanish legal/claim boundary documentation | Obtain the required owner/legal wording review; do not present it as a legal compliance assessment. |
+| [PR #94](https://github.com/Traky12/castuo-e3-001/pull/94) | Playwright dependency update | A Pages workflow check was observed failing on this PR head; diagnose the failed check before considering merge. Recheck the live result rather than assuming it is still failing. |
+| [issue #30](https://github.com/Traky12/castuo-e3-001/issues/30) | Five independent CLI testers | Keep `PAUSED` until the PyPI package, fixed-version advisory and matching public Pages deployment are verified. |
+
+Do not merge any of these solely because another PR is green. In particular, separate a source-code fix from the released artifact, and separate a candidate browser build from a successful public Pages deployment.
+
 ## Non-negotiable principles
 
 1. **No artificial engagement.** Never buy, exchange, automate, or coordinate stars; do not use alternate accounts or mass unsolicited promotion.
