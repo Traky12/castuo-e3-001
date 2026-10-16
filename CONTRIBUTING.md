@@ -24,6 +24,8 @@ Expected: the first prints `"status": "VERIFIED"` and exits `0`; the second prin
 
 Then report what happened in [issue #30](https://github.com/Traky12/castuo-e3-001/issues/30) or with the *Reproduction report* form: operating system, Python version, commands, full output, and what worked, failed or confused you. Failures are as valuable as successes.
 
+For an end-to-end version of the same exercise, use the [dataset-tampering tutorial in English](docs/tutorial-dataset-tampering.md) or [Spanish](docs/tutorial-dataset-tampering.es.md). It adds a signed synthetic dataset and three separate negative cases; the examples do not count as independent external tester reports.
+
 ### Level 2 — Improve the project (1–2 hours)
 
 Pick a scoped task labelled [`good first issue`](https://github.com/Traky12/castuo-e3-001/labels/good%20first%20issue) or [`help wanted`](https://github.com/Traky12/castuo-e3-001/labels/help%20wanted). Each one states its goal, the files involved and how it will be accepted. Documentation, tests, accessibility and translation count as much as code.
