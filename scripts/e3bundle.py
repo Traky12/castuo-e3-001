@@ -154,10 +154,29 @@ def public_b64(key: Ed25519PrivateKey) -> str:
     return base64.b64encode(raw).decode()
 
 
+def decode_public_key(value: Any) -> bytes | None:
+    """Return a canonical raw Ed25519 public key, rejecting Base64 aliases."""
+    if not isinstance(value, str):
+        return None
+    try:
+        public_key = base64.b64decode(value, validate=True)
+    except (ValueError, TypeError):
+        return None
+    if len(public_key) != 32 or base64.b64encode(public_key).decode("ascii") != value:
+        return None
+    return public_key
+
+
 def verify_signature(record: dict[str, Any]) -> bool:
     try:
-        public_key = base64.b64decode(record["public_key_b64"], validate=True)
-        signature = base64.b64decode(record["signature_b64"], validate=True)
+        public_key = decode_public_key(record.get("public_key_b64"))
+        signature_text = record.get("signature_b64")
+        if public_key is None or not isinstance(signature_text, str):
+            return False
+        signature = base64.b64decode(signature_text, validate=True)
+        # Reject alternate encodings of the same signature bytes as well as noncanonical keys.
+        if base64.b64encode(signature).decode("ascii") != signature_text:
+            return False
         payload = {key: value for key, value in record.items() if key != "signature_b64"}
         Ed25519PublicKey.from_public_bytes(public_key).verify(signature, canonical(payload))
         return True
@@ -290,7 +309,8 @@ def verify(bundle: Path, min_signatures: int, trusted: dict[str, str] | None, al
             findings.append(f"{SIGNATURES} must be an array")
             signatures = []
     valid_signers: set[str] = set()
-    key_owners: dict[str, str] = {}
+    # Identity is the decoded Ed25519 key bytes, not its serialized spelling.
+    key_owners: dict[bytes, str] = {}
     trusted_signers: set[str] = set()
     for index, record in enumerate(signatures):
         prefix = f"signatures[{index}]"
@@ -315,7 +335,11 @@ def verify(bundle: Path, min_signatures: int, trusted: dict[str, str] | None, al
             continue
         # The threshold counts keys, not names: one key signing under several
         # signer_ids is still one signer.
-        public_key = record.get("public_key_b64")
+        # The threshold counts decoded public-key identities, not signer names or Base64 text.
+        public_key = decode_public_key(record.get("public_key_b64"))
+        if public_key is None:  # Defensive: verify_signature already validated this field.
+            findings.append(f"{prefix}: invalid Ed25519 signature")
+            continue
         if public_key in key_owners:
             findings.append(f"{prefix}: duplicate key: {signer} reuses the key of {key_owners[public_key]}")
             continue

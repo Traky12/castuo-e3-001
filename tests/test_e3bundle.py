@@ -1,9 +1,12 @@
+import base64
 import json
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 ROOT = Path(__file__).parents[1]
 CLI = ROOT / "scripts" / "e3bundle.py"
@@ -206,6 +209,75 @@ class E3BundleTests(unittest.TestCase):
         self.sign_as("alice", "alice", "runner")
         self.sign_as("alice", "bob")
         self.assert_failed("signatures[1]: duplicate key: bob reuses the key of alice", "--min-signatures", 2)
+
+    def test_noncanonical_base64_alias_cannot_count_same_key_twice(self):
+        self.sign("alice", "runner")
+        signatures_path = self.bundle / "signatures.json"
+        signatures = json.loads(signatures_path.read_text(encoding="utf-8"))
+        first = signatures[0]
+        canonical_key = first["public_key_b64"]
+        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+        last_index = alphabet.index(canonical_key[-2])
+        alias_key = canonical_key[:-2] + alphabet[last_index | 1] + "="
+        self.assertNotEqual(alias_key, canonical_key)
+        self.assertEqual(
+            base64.b64decode(alias_key, validate=True),
+            base64.b64decode(canonical_key, validate=True),
+        )
+
+        private_raw = base64.b64decode(
+            self.keys["alice"].read_text(encoding="utf-8").strip(),
+            validate=True,
+        )
+        private_key = Ed25519PrivateKey.from_private_bytes(private_raw)
+        second = dict(first)
+        second["signer_id"] = "bob"
+        second["role"] = "reviewer"
+        second["public_key_b64"] = alias_key
+        payload = {key: value for key, value in second.items() if key != "signature_b64"}
+        second["signature_b64"] = base64.b64encode(
+            private_key.sign(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8"))
+        ).decode("ascii")
+        signatures_path.write_text(json.dumps([first, second]), encoding="utf-8")
+
+        trusted = self.root / "same-key-alias.json"
+        trusted.write_text(json.dumps({"alice": canonical_key, "bob": alias_key}), encoding="utf-8")
+        code, report = self.verify("--min-signatures", 2, "--trusted-keys", trusted)
+        self.assertEqual(code, 1, report)
+        self.assertEqual(report["status"], "FAILED")
+        self.assertIn("signatures[1]: invalid Ed25519 signature", report["findings"])
+        self.assertIn("signature threshold not met: 1 < 2", report["findings"])
+        self.assertEqual(report["signatures_valid"], 1)
+        self.assertEqual(report["signatures_trusted"], 1)
+
+    def test_noncanonical_signature_base64_alias_is_rejected(self):
+        self.sign("alice", "runner")
+        signatures_path = self.bundle / "signatures.json"
+        signatures = json.loads(signatures_path.read_text(encoding="utf-8"))
+        record = signatures[0]
+        canonical_signature = record["signature_b64"]
+        self.assertTrue(canonical_signature.endswith("=="))
+
+        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+        last_index = alphabet.index(canonical_signature[-3])
+        alias_signature = canonical_signature[:-3] + alphabet[last_index | 1] + "=="
+        self.assertNotEqual(alias_signature, canonical_signature)
+        self.assertEqual(
+            base64.b64decode(alias_signature, validate=True),
+            base64.b64decode(canonical_signature, validate=True),
+        )
+
+        record["signature_b64"] = alias_signature
+        signatures_path.write_text(json.dumps(signatures), encoding="utf-8")
+        code, report = self.verify(
+            "--min-signatures", "1", "--trusted-keys", self.trusted("alice")
+        )
+        self.assertEqual(code, 1, report)
+        self.assertEqual(report["status"], "FAILED")
+        self.assertIn("signatures[0]: invalid Ed25519 signature", report["findings"])
+        self.assertIn("signature threshold not met: 0 < 1", report["findings"])
+        self.assertEqual(report["signatures_valid"], 0)
+        self.assertEqual(report["signatures_trusted"], 0)
 
     def test_text_without_pinned_keys_does_not_claim_trust(self):
         self.sign("alice")
