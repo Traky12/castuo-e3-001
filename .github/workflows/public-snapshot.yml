@@ -4,32 +4,36 @@ on:
   workflow_dispatch:
     inputs:
       bundle_path:
-        description: "Path to the externally supplied evidence bundle"
+        description: "Relative path to the externally supplied evidence bundle inside the checked-out repository"
         required: true
         default: "evidence-bundle"
         type: string
       source_commit:
-        description: "Exact frozen source commit bound to the bundle"
+        description: "Exact frozen source commit bound to the bundle (40 lowercase hexadecimal characters)"
         required: true
         type: string
 
+# Read-only by default. Only the isolated publication job can write to the repository.
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: e3-001-public-snapshot
   cancel-in-progress: false
 
 jobs:
-  verify-and-publish:
+  verify:
+    # Never validate evidence from an arbitrary dispatch ref. Publication is tied to main.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment:
-      name: public-snapshot
+    permissions:
+      contents: read
     steps:
-      - name: Checkout frozen protocol repository
+      - name: Checkout frozen protocol repository without a write credential
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -39,48 +43,107 @@ jobs:
       - name: Install cryptographic verifier
         run: python -m pip install --disable-pip-version-check cryptography
 
+      # Dispatch values are environment data, never interpolated into shell source.
       - name: Preflight dispatch inputs
         env:
-          CASTUO_SNAPSHOT_SIGNING_KEY_B64: ${{ secrets.CASTUO_SNAPSHOT_SIGNING_KEY_B64 }}
-        run: >-
-          python scripts/preflight_public_snapshot.py "${{ inputs.bundle_path }}"
-          --source-commit "${{ inputs.source_commit }}"
-          --require-signing-secret
-          --output /tmp/public-snapshot-preflight.json
+          INPUT_BUNDLE_PATH: ${{ inputs.bundle_path }}
+          INPUT_SOURCE_COMMIT: ${{ inputs.source_commit }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          python scripts/preflight_public_snapshot.py "$INPUT_BUNDLE_PATH" \
+            --source-commit "$INPUT_SOURCE_COMMIT" \
+            --workspace-root "$GITHUB_WORKSPACE" \
+            --output artifacts/public-snapshot-preflight.json
 
-      - name: Validate external evidence bundle
+      - name: Validate external evidence bundle (no signing secret in this job)
         env:
           BUNDLE_PATH: ${{ inputs.bundle_path }}
-        run: >-
-          python scripts/validate_external_evidence_bundle.py "$BUNDLE_PATH"
-          --min-reviewers 2
-          --output /tmp/external-evidence-validation.json
+        run: |
+          set -euo pipefail
+          python scripts/validate_external_evidence_bundle.py "$BUNDLE_PATH" \
+            --min-reviewers 2 \
+            --trusted-key-store trust/e3-001-trust-store.json \
+            --output artifacts/external-evidence-validation.json
 
       - name: Evaluate G2 read-only decision
-        run: >-
-          python scripts/evaluate_g2.py /tmp/external-evidence-validation.json
-          --output /tmp/g2-decision.json
+        run: |
+          set -euo pipefail
+          python scripts/evaluate_g2.py artifacts/external-evidence-validation.json \
+            --output artifacts/g2-decision.json
+
+      - name: Preserve validation outputs for the isolated publisher
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e3-001-snapshot-validation
+          path: |
+            artifacts/external-evidence-validation.json
+            artifacts/g2-decision.json
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    if: github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-latest
+    # This job alone has repository write permission and accesses the signing secret.
+    permissions:
+      contents: write
+    environment:
+      name: public-snapshot
+    steps:
+      - name: Checkout main workflow revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Download validated JSON outputs only
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: e3-001-snapshot-validation
+          path: artifacts
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+
+      - name: Install cryptographic verifier
+        run: python -m pip install --disable-pip-version-check cryptography
+
+      - name: Require signing key without echoing it
+        env:
+          CASTUO_SNAPSHOT_SIGNING_KEY_B64: ${{ secrets.CASTUO_SNAPSHOT_SIGNING_KEY_B64 }}
+        run: |
+          set -euo pipefail
+          test -n "${CASTUO_SNAPSHOT_SIGNING_KEY_B64:-}" || {
+            echo "Publication blocked: signing key is not configured." >&2
+            exit 1
+          }
 
       - name: Publish signed public snapshot
         env:
           CASTUO_SNAPSHOT_SIGNING_KEY_B64: ${{ secrets.CASTUO_SNAPSHOT_SIGNING_KEY_B64 }}
           SOURCE_COMMIT: ${{ inputs.source_commit }}
           RUN_ID: ${{ github.run_id }}
-          BUNDLE_PATH: ${{ inputs.bundle_path }}
-        run: >-
-          python scripts/publish_public_snapshot.py
-          --validation /tmp/external-evidence-validation.json
-          --g2-decision /tmp/g2-decision.json
-          --source-commit "$SOURCE_COMMIT"
-          --workflow-run-id "$RUN_ID"
-          --output public/status-snapshot.json
-          --require-signature
+        run: |
+          set -euo pipefail
+          python scripts/publish_public_snapshot.py \
+            --validation artifacts/external-evidence-validation.json \
+            --g2-decision artifacts/g2-decision.json \
+            --source-commit "$SOURCE_COMMIT" \
+            --workflow-run-id "$RUN_ID" \
+            --output public/status-snapshot.json \
+            --require-signature
 
-      - name: Enforce public claim firewall
-        run: python scripts/validate_public_snapshot_firewall.py public/status-snapshot.json
+      - name: Enforce public claim firewall and pinned publisher trust
+        run: >-
+          python scripts/validate_public_snapshot_firewall.py public/status-snapshot.json
+          --trusted-key-store trust/e3-001-trust-store.json
 
       - name: Commit public snapshot only after successful verification
         run: |
+          set -euo pipefail
           git config user.name "castuo-e3-001[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/status-snapshot.json
