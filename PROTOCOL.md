@@ -55,7 +55,19 @@ Never rename/promote it or claim `PASS_WITHIN_DECLARED_SCOPE` from this
 candidate test. The E3 external acceptance remains BLOCKED until real signed
 evidence is independently reviewed.
 
-The replay must show PASS_WITHIN_DECLARED_SCOPE, deterministic equivalent decisions and equivalent evidence semantics, recovery completion, negative behavior and an unchanged claim firewall.
+A CI candidate contract is provided at `.github/workflows/s001a-candidate-cross-repo.yml`:
+it checks out the **public Evidence commit**
+`8b23f4370bccdf8c7dcbd93d395b41b70d6ba1de`, verifies the runner SHA-256
+`41077a6848ec1429e34cf20babcf5fb2b37ab2fbc4f675b20c840ab8f49ca360`,
+runs three bounded candidate replays, checks exact functional/event digest
+equivalence and **requires E3 to reject the unsigned candidate**. GitHub Actions
+run `41248932917` recorded SUCCESS with all steps, including the rejection
+test. **This is a CI candidate executing public code, not a foreign operator
+attestation; the workflow has no proven runtime network isolation.**
+
+The *independent* replay must separately show PASS_WITHIN_DECLARED_SCOPE,
+deterministic equivalent decisions and equivalent evidence semantics, recovery
+completion, negative behavior and an unchanged claim firewall.
 
 ## 3. Runner attestation
 
