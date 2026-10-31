@@ -7,6 +7,7 @@ on:
       - "scripts/run_s001a_foreign_replay.py"
       - "tests/fixtures/s001a_candidate_real_runner.json"
       - "tests/test_s001a_candidate_harness.py"
+      - "scripts/check_joint_candidate.py"
 
 permissions:
   contents: read
@@ -29,10 +30,28 @@ jobs:
           ref: 8b23f4370bccdf8c7dcbd93d395b41b70d6ba1de
           path: evidence-public
           persist-credentials: false
+      - name: Checkout public Edge candidate at exact immutable commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Traky12/castuo-agro-edge
+          ref: a0639d6a234807c4f323d6e4a7b786cda9fd51e2
+          path: edge-public
+          persist-credentials: false
       - name: Python 3.13
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
+      - name: Install bounded JSON Schema checker for public Edge fixture
+        shell: bash
+        run: python -m pip install --disable-pip-version-check "jsonschema==4.25.1"
+      - name: Edge → Evidence → E3 synthetic candidate using identical exported fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B e3/scripts/check_joint_candidate.py \
+            --edge edge-public \
+            --evidence evidence-public \
+            --e3 e3
       - name: Verify actual Evidence source bytes before test
         shell: bash
         run: |
