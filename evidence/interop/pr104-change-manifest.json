@@ -1,0 +1,29 @@
+{
+  "schema": "castuo.changed-files.sha256.v1",
+  "scope": "PR_CHANGED_FILES_ONLY_NOT_FULL_REPOSITORY",
+  "repository": "Traky12/castuo-e3-001",
+  "pr": 104,
+  "source_head_before_manifest": "98baebd423ec815b336e1d8bdc2e7ae1ab6078ef",
+  "hash_algorithm": "SHA-256",
+  "file_count": 3,
+  "files": [
+    {
+      "path": "PROTOCOL.md",
+      "sha256": "54649f6f8bec002874444a8b28c4f0b9f26bef48a02996177d9bd7a98e8db3d0"
+    },
+    {
+      "path": "scripts/run_s001a_foreign_replay.py",
+      "sha256": "601146b9a8bd25404af60cc8adfa5729037396588c851fe5d40de60bb86b6dd8"
+    },
+    {
+      "path": "tests/test_s001a_candidate_harness.py",
+      "sha256": "55bc0dc33e9090b0d994d0eec4874ea94aa2523a13d8c52dd2d1fa0034743ed2"
+    }
+  ],
+  "aggregate_method": "sha256(utf8(path + tab + hexsha256 + newline) in sorted path order)",
+  "aggregate_sha256": "d7ed1171846fad26ad3dca5c7569c90b7fac2e3aee743eae24f4cad6c797b25a",
+  "self_included": false,
+  "G1": "BLOCKED",
+  "G2": "BLOCKED",
+  "independent_review": "PENDING"
+}
