@@ -3,17 +3,25 @@
   "scope": "PR_CHANGED_FILES_ONLY_NOT_FULL_REPOSITORY",
   "repository": "Traky12/castuo-e3-001",
   "pr": 104,
-  "source_head_before_manifest": "98baebd423ec815b336e1d8bdc2e7ae1ab6078ef",
+  "source_head_before_manifest": "9a4ee168f75cde376196efc5db3cf47e9f5eb177",
   "hash_algorithm": "SHA-256",
-  "file_count": 3,
+  "file_count": 5,
   "files": [
     {
+      "path": ".github/workflows/s001a-candidate-cross-repo.yml",
+      "sha256": "85c72f0397fdf4e85a0721684504110ecc725d0a2663140c8afd862705cea0ba"
+    },
+    {
       "path": "PROTOCOL.md",
-      "sha256": "54649f6f8bec002874444a8b28c4f0b9f26bef48a02996177d9bd7a98e8db3d0"
+      "sha256": "17bc0d31157977a1ae7fc2188b0e42f9a93a76e87f41784525a89bccf41fcc6b"
     },
     {
       "path": "scripts/run_s001a_foreign_replay.py",
       "sha256": "601146b9a8bd25404af60cc8adfa5729037396588c851fe5d40de60bb86b6dd8"
+    },
+    {
+      "path": "tests/fixtures/s001a_candidate_real_runner.json",
+      "sha256": "29a12ebf671b1d223143a74a1abc43548528078ee2c69ae25387b25d26f2d6f6"
     },
     {
       "path": "tests/test_s001a_candidate_harness.py",
@@ -21,7 +29,7 @@
     }
   ],
   "aggregate_method": "sha256(utf8(path + tab + hexsha256 + newline) in sorted path order)",
-  "aggregate_sha256": "d7ed1171846fad26ad3dca5c7569c90b7fac2e3aee743eae24f4cad6c797b25a",
+  "aggregate_sha256": "bfbe228a75d20f70c1e6fcce06e8b8b2774deb4ecc1f483037ad22ffde6c2bd7",
   "self_included": false,
   "G1": "BLOCKED",
   "G2": "BLOCKED",
