@@ -26,18 +26,48 @@ The manifest binds the SHA-256 of the fixture, replay result and evidence envelo
 
 The operator must not be the implementation author or the package author. The runner uses a clean checkout and an identity that is not a local fallback or GitHub candidate runner. The harness must be offline-only.
 
+The repository now provides a **candidate replay harness** (not an
+authenticated independent replay or a signing device). The operator must supply
+a separately obtained, exact-HEAD checkout of the public `castuo-evidence`
+runner and enforce network isolation outside Python. The harness rejects dirty
+tracked files and verifies the runner's SHA-256 and Git commit. Example:
+
 ```bash
 python3 scripts/run_s001a_foreign_replay.py \
-  --fixture fixture.json \
-  --output foreign-replay-result.json \
-  --runner-id FOREIGN-RUNNER-<operator-id> \
-  --source-commit <source-commit> \
+  --fixture /trusted/frozen/fixture.json \
+  --runner-script /trusted/castuo-evidence/runners/s001a_runner.py \
+  --runner-script-sha256 <64-lowercase-hex> \
+  --source-commit <exact-evidence-runner-commit> \
+  --runner-id <operator-assigned-external-runner-id> \
+  --output /isolated/output-folder \
   --stress-repetitions 3
 ```
 
-> **Availability:** `scripts/run_s001a_foreign_replay.py` is not published in this repository. The replay harness is supplied to the independent runner together with the frozen package; until it is published, this step cannot be reproduced from a clean clone of this repository alone. To try the validator without a replay, see *Try the validator* in `README.md`.
+The harness writes `candidate-replay.json` with
+`status=CANDIDATE_REPLAY_ONLY`, `oneR=false`, `oneV=false`,
+`oneA=false`, `promotion=BLOCKED` even if all repeats match.
+It explicitly reports `network_isolation=NOT_VERIFIED_BY_THIS_HARNESS`:
+the independent operator must enforce and evidence network isolation,
+sign the actual external attestation, and obtain two independent human
+reviewers. The candidate report is **not** the signed
+`foreign-replay-result.json` consumed by the external evidence validator.
+Never rename/promote it or claim `PASS_WITHIN_DECLARED_SCOPE` from this
+candidate test. The E3 external acceptance remains BLOCKED until real signed
+evidence is independently reviewed.
 
-The replay must show PASS_WITHIN_DECLARED_SCOPE, deterministic equivalent decisions and equivalent evidence semantics, recovery completion, negative behavior and an unchanged claim firewall.
+A CI candidate contract is provided at `.github/workflows/s001a-candidate-cross-repo.yml`:
+it checks out the **public Evidence commit**
+`8b23f4370bccdf8c7dcbd93d395b41b70d6ba1de`, verifies the runner SHA-256
+`41077a6848ec1429e34cf20babcf5fb2b37ab2fbc4f675b20c840ab8f49ca360`,
+runs three bounded candidate replays, checks exact functional/event digest
+equivalence and **requires E3 to reject the unsigned candidate**. GitHub Actions
+run `41248932917` recorded SUCCESS with all steps, including the rejection
+test. **This is a CI candidate executing public code, not a foreign operator
+attestation; the workflow has no proven runtime network isolation.**
+
+The *independent* replay must separately show PASS_WITHIN_DECLARED_SCOPE,
+deterministic equivalent decisions and equivalent evidence semantics, recovery
+completion, negative behavior and an unchanged claim firewall.
 
 ## 3. Runner attestation
 
@@ -91,3 +121,29 @@ A staging run is operational validation within its declared endpoint scope. It i
 | G2 | Read-only evaluator returns PASS |
 | Staging | Protected environment and real RLS-001 execution are available |
 | Promotion | Remains BLOCKED until a separate AuthorityObject and decision |
+
+
+### Three-repository synthetic contract verification (31 October 2026)
+
+The same candidate CI workflow now pins **Agro Edge**
+`a0639d6a234807c4f323d6e4a7b786cda9fd51e2` and **Evidence**
+`8b23f4370bccdf8c7dcbd93d395b41b70d6ba1de` by exact Git commit.
+`scripts/check_joint_candidate.py` creates three synthetic telemetry events through
+Edge, exports a real canonical `events.jsonl` with chain and SHA-256 manifest,
+verifies that package using the Edge verifier, and proves that a changed
+event is rejected. The **actual exported events.jsonl** is then supplied as
+the Evidence S-001A replay fixture. E3 checks three matching functional and
+event hashes, fixture digest binding, and rejection of unsigned evidence.
+
+GitHub run `41249634376` completed **SUCCESS** on E3 commit
+`c3e4cf2d8c2d09d3684ddc7fd892d8e927a3258c`; its log reports
+`SYNTHETIC_TRIPLE_REPO_CANDIDATE_ONLY`,
+`tampered_pack_rejected=true`, `equivalent=true`,
+`reviewers=0`, `G1/G2=BLOCKED`, `promotion=BLOCKED`.
+The five workflows for that exact commit completed successfully.
+
+**Acceptance limit:** this proves one cross-repository *synthetic* contract,
+not unattended field transport, production identity, independence of the
+external reviewer, offline host isolation, signatures, regulatory compliance
+or permission for GO. A second qualified operator must run the separate
+signed acceptance path and two real humans must independently review it.

@@ -1,0 +1,105 @@
+name: S-001A real-runner candidate contract (NO G2)
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/s001a-candidate-cross-repo.yml"
+      - "scripts/run_s001a_foreign_replay.py"
+      - "tests/fixtures/s001a_candidate_real_runner.json"
+      - "tests/test_s001a_candidate_harness.py"
+      - "scripts/check_joint_candidate.py"
+
+permissions:
+  contents: read
+
+jobs:
+  real-runner-candidate:
+    name: Evidence source pinned / S-001A candidate only
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout E3 candidate without persistent credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          path: e3
+      - name: Checkout public Evidence candidate at exact immutable commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Traky12/castuo-evidence
+          ref: 8b23f4370bccdf8c7dcbd93d395b41b70d6ba1de
+          path: evidence-public
+          persist-credentials: false
+      - name: Checkout public Edge candidate at exact immutable commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Traky12/castuo-agro-edge
+          ref: a0639d6a234807c4f323d6e4a7b786cda9fd51e2
+          path: edge-public
+          persist-credentials: false
+      - name: Python 3.13
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Install bounded JSON Schema checker for public Edge fixture
+        shell: bash
+        run: python -m pip install --disable-pip-version-check "jsonschema==4.25.1"
+      - name: Edge → Evidence → E3 synthetic candidate using identical exported fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B e3/scripts/check_joint_candidate.py \
+            --edge edge-public \
+            --evidence evidence-public \
+            --e3 e3
+      - name: Verify actual Evidence source bytes before test
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C evidence-public rev-parse HEAD)" = "8b23f4370bccdf8c7dcbd93d395b41b70d6ba1de"
+          printf '%s  %s\n' "41077a6848ec1429e34cf20babcf5fb2b37ab2fbc4f675b20c840ab8f49ca360" "evidence-public/runners/s001a_runner.py" | sha256sum -c -
+          test -z "$(git -C evidence-public status --porcelain --untracked-files=no)"
+      - name: Execute three real-runner replays (candidate, not independent)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B e3/scripts/run_s001a_foreign_replay.py \
+            --fixture e3/tests/fixtures/s001a_candidate_real_runner.json \
+            --runner-script evidence-public/runners/s001a_runner.py \
+            --runner-script-sha256 41077a6848ec1429e34cf20babcf5fb2b37ab2fbc4f675b20c840ab8f49ca360 \
+            --source-commit 8b23f4370bccdf8c7dcbd93d395b41b70d6ba1de \
+            --runner-id CI-CANDIDATE-UNVERIFIED \
+            --output "$RUNNER_TEMP/s001a-candidate-report" \
+            --stress-repetitions 3
+      - name: Assert claim firewall and integrity of candidate result
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])/"s001a-candidate-report/candidate-replay.json"
+          result=json.loads(p.read_text(encoding="utf-8"))
+          assert result["status"]=="CANDIDATE_REPLAY_ONLY"
+          assert result["equivalent"] is True
+          assert result["promotion"]=="BLOCKED"
+          assert result["independence"]=="NOT_AUTHENTICATED"
+          assert result["network_isolation"]=="NOT_VERIFIED_BY_THIS_HARNESS"
+          assert result["signed_attestation"] is False
+          assert result["reviewer_signatures"]==0
+          assert all(result[key] is False for key in ("oneR","oneV","oneA"))
+          assert len(result["replays"])==3
+          assert len({r["functional_hash"] for r in result["replays"]})==1
+          assert len({r["events_hash"] for r in result["replays"]})==1
+          print("CANDIDATE_3_REPLAYS_MATCHED: YES; G2_ELIGIBLE: NO")
+          PY
+      - name: External evidence validator must reject unsigned candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          if python -B e3/scripts/validate_external_evidence_bundle.py "$RUNNER_TEMP/s001a-candidate-report" --min-reviewers 2 > /dev/null; then
+            echo "FAIL: unsigned candidate was accepted as independent evidence" >&2
+            exit 1
+          fi
+          echo "UNSIGNED_CANDIDATE_REJECTED_BY_E3: YES"
