@@ -26,16 +26,34 @@ The manifest binds the SHA-256 of the fixture, replay result and evidence envelo
 
 The operator must not be the implementation author or the package author. The runner uses a clean checkout and an identity that is not a local fallback or GitHub candidate runner. The harness must be offline-only.
 
+The repository now provides a **candidate replay harness** (not an
+authenticated independent replay or a signing device). The operator must supply
+a separately obtained, exact-HEAD checkout of the public `castuo-evidence`
+runner and enforce network isolation outside Python. The harness rejects dirty
+tracked files and verifies the runner's SHA-256 and Git commit. Example:
+
 ```bash
 python3 scripts/run_s001a_foreign_replay.py \
-  --fixture fixture.json \
-  --output foreign-replay-result.json \
-  --runner-id FOREIGN-RUNNER-<operator-id> \
-  --source-commit <source-commit> \
+  --fixture /trusted/frozen/fixture.json \
+  --runner-script /trusted/castuo-evidence/runners/s001a_runner.py \
+  --runner-script-sha256 <64-lowercase-hex> \
+  --source-commit <exact-evidence-runner-commit> \
+  --runner-id <operator-assigned-external-runner-id> \
+  --output /isolated/output-folder \
   --stress-repetitions 3
 ```
 
-> **Availability:** `scripts/run_s001a_foreign_replay.py` is not published in this repository. The replay harness is supplied to the independent runner together with the frozen package; until it is published, this step cannot be reproduced from a clean clone of this repository alone. To try the validator without a replay, see *Try the validator* in `README.md`.
+The harness writes `candidate-replay.json` with
+`status=CANDIDATE_REPLAY_ONLY`, `oneR=false`, `oneV=false`,
+`oneA=false`, `promotion=BLOCKED` even if all repeats match.
+It explicitly reports `network_isolation=NOT_VERIFIED_BY_THIS_HARNESS`:
+the independent operator must enforce and evidence network isolation,
+sign the actual external attestation, and obtain two independent human
+reviewers. The candidate report is **not** the signed
+`foreign-replay-result.json` consumed by the external evidence validator.
+Never rename/promote it or claim `PASS_WITHIN_DECLARED_SCOPE` from this
+candidate test. The E3 external acceptance remains BLOCKED until real signed
+evidence is independently reviewed.
 
 The replay must show PASS_WITHIN_DECLARED_SCOPE, deterministic equivalent decisions and equivalent evidence semantics, recovery completion, negative behavior and an unchanged claim firewall.
 
