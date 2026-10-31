@@ -121,3 +121,29 @@ A staging run is operational validation within its declared endpoint scope. It i
 | G2 | Read-only evaluator returns PASS |
 | Staging | Protected environment and real RLS-001 execution are available |
 | Promotion | Remains BLOCKED until a separate AuthorityObject and decision |
+
+
+### Three-repository synthetic contract verification (31 October 2026)
+
+The same candidate CI workflow now pins **Agro Edge**
+`a0639d6a234807c4f323d6e4a7b786cda9fd51e2` and **Evidence**
+`8b23f4370bccdf8c7dcbd93d395b41b70d6ba1de` by exact Git commit.
+`scripts/check_joint_candidate.py` creates three synthetic telemetry events through
+Edge, exports a real canonical `events.jsonl` with chain and SHA-256 manifest,
+verifies that package using the Edge verifier, and proves that a changed
+event is rejected. The **actual exported events.jsonl** is then supplied as
+the Evidence S-001A replay fixture. E3 checks three matching functional and
+event hashes, fixture digest binding, and rejection of unsigned evidence.
+
+GitHub run `41249634376` completed **SUCCESS** on E3 commit
+`c3e4cf2d8c2d09d3684ddc7fd892d8e927a3258c`; its log reports
+`SYNTHETIC_TRIPLE_REPO_CANDIDATE_ONLY`,
+`tampered_pack_rejected=true`, `equivalent=true`,
+`reviewers=0`, `G1/G2=BLOCKED`, `promotion=BLOCKED`.
+The five workflows for that exact commit completed successfully.
+
+**Acceptance limit:** this proves one cross-repository *synthetic* contract,
+not unattended field transport, production identity, independence of the
+external reviewer, offline host isolation, signatures, regulatory compliance
+or permission for GO. A second qualified operator must run the separate
+signed acceptance path and two real humans must independently review it.
