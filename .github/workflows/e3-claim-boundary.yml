@@ -1,0 +1,49 @@
+name: E3 bounded public-release claims (read-only)
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  public-claim-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout literal source HEAD without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Assert HEAD and reject unsupported release root-cause assertions
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          python - <<'PY'
+          from pathlib import Path
+          text = Path("README.md").read_text(encoding="utf-8")
+          def detect(source):
+              problems = []
+              mandatory = (
+                  "**PyPI publication remains blocked; root cause is unconfirmed.**",
+                  "invalid-publisher",
+                  "Stop blind retries",
+                  "No production or independent-validation claim is made.",
+              )
+              forbidden = ("This is now the leading explanation:",
+                           "PyPI publication is green",
+                           "root cause is confirmed")
+              problems += ["missing bounded statement"] if any(x not in source for x in mandatory) else []
+              problems += ["unproven assertion"] if any(x in source for x in forbidden) else []
+              return problems
+          assert detect(text) == [], detect(text)
+          variants = [
+              text.replace("root cause is unconfirmed.", "root cause unknown.", 1),
+              text + "\nThis is now the leading explanation:",
+              text + "\nPyPI publication is green",
+              text.replace("No production or independent-validation claim is made.", "", 1),
+          ]
+          assert all(detect(v) for v in variants), "negative claim test failed"
+          print("E3_RELEASE_CLAIM_BOUNDARY_PASS: 4 negative cases, promotion BLOCKED")
+          PY
