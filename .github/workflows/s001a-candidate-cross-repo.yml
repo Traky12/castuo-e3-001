@@ -149,8 +149,13 @@ jobs:
               uses = re.findall(r"uses:\s+actions/(?:checkout|setup-python)@([^\s]+)", workflow_text)
               if len(uses) < 4 or any(not re.fullmatch(r"[0-9a-f]{40}", v) for v in uses):
                   problems.append("mutable Actions reference")
-              tail = workflow_text.split("      - name: External evidence validator must semantically reject unsigned candidate", 1)
-              if len(tail) != 2 or 'echo "UNSIGNED_CANDIDATE_REJECTED_BY_E3_POLICY: YES"' not in tail[1]:
+              lines = workflow_text.splitlines()
+              positions = [i for i, line in enumerate(lines)
+                           if line.startswith("      - name: External evidence validator must semantically reject unsigned candidate")]
+              if len(positions) != 1 or not any(
+                  line.strip() == 'echo "UNSIGNED_CANDIDATE_REJECTED_BY_E3_POLICY: YES"'
+                  for line in lines[positions[0]+1:]
+              ):
                   problems.append("semantic reject guard absent")
               return problems
 
@@ -160,7 +165,9 @@ jobs:
               assert check(corrupted), "mutable checkout incorrectly accepted"
           tampered = workflow.replace("persist-credentials: false", "persist-credentials: true", 1)
           assert check(tampered), "privilege regression incorrectly accepted"
-          without_semantic = workflow.replace('echo "UNSIGNED_CANDIDATE_REJECTED_BY_E3_POLICY: YES"', 'echo "NO_SEMANTIC_REJECTION"')
+          target = '\\n          echo "UNSIGNED_CANDIDATE_REJECTED_BY_E3_POLICY: YES"'
+          assert target.replace('\\n', '\n') in workflow
+          without_semantic = workflow.replace(target.replace('\\n', '\n'), '\n          echo "NO_SEMANTIC_REJECTION"')
           assert check(without_semantic), "missing policy rejection incorrectly accepted"
           print(json.dumps({"status": "PIN_CONSISTENCY_ONLY", "promotion": "BLOCKED", "negative_controls": 4}))
           PY
