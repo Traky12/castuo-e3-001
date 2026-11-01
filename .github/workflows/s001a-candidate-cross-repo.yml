@@ -142,7 +142,7 @@ jobs:
               runner = re.findall(r"--runner-script-sha256\s+([0-9a-f]{64})", workflow_text)
               if runner != [values.get("EVIDENCE_RUNNER_SHA256")]:
                   problems.append("runner hash drift")
-              if workflow_text.count("persist-credentials: false") < 3:
+              if len(re.findall(r"(?m)^\s+persist-credentials: false\s*$", workflow_text)) < 3:
                   problems.append("checkout credentials not disabled")
               if "permissions:\n  contents: read" not in workflow_text:
                   problems.append("contents not read-only")
