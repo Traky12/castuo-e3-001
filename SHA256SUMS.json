@@ -4,7 +4,7 @@
   "base_commit": "16bfe53cfcb1f916b29800e81a725071f0d79851",
   "algorithm": "SHA-256",
   "file_count": 103,
-  "global_sha256": "36d99e4c30863a35bad44ca49391536b16635e509462daa599150a57420af168",
+  "global_sha256": "7c86ff5244c9822098f1716fbdc090428a4cde14bda45ff4462ddcf635bb307e",
   "aggregation": "SHA256(concat(sorted(relative-path UTF-8 + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
   "gitlinks": [],
@@ -124,7 +124,7 @@
     },
     {
       "path": "PROTOCOL.md",
-      "sha256": "a8a45b6790c9216907380a9258f7f06e57c42702e4380354e8e5b088046e"
+      "sha256": "d7f7f5470720ecdba81a1bc17afcb4edad64ecd019040d8312712ad265f38db4"
     },
     {
       "path": "README.md",
