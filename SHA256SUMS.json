@@ -4,7 +4,7 @@
   "source_base_commit": "d3f216a56a908fb8a3cb6c8546f76af4aec67c50",
   "algorithm": "SHA-256",
   "file_count": 114,
-  "global_sha256": "c2e85cbbec03e07cf388836beea0a73ab339be69e792efe08e5a2cbf102805d4",
+  "global_sha256": "511a61bf4c5057629eb9bb51e20037f6dab83298b41ae26fde2ce98bf97b6a32",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + per-file sha256 hex + LF)))",
   "self_excluded": true,
   "gitlinks": [],
@@ -76,7 +76,7 @@
     },
     {
       "path": ".github/workflows/s001a-candidate-cross-repo.yml",
-      "sha256": "6f349edd84d14ea789f0a5ed3f6495065c56852e8dc43b5013347c448cc0c6e5"
+      "sha256": "3b6b8e04f3126ddcc92d2024faf610f5af9dddb01a7056b19bd22a7fb211b756"
     },
     {
       "path": ".github/workflows/secret-scan.yml",
