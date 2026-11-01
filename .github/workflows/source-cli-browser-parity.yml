@@ -18,7 +18,15 @@ jobs:
       - name: Checkout exact candidate without retained credentials
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+      - name: Assert literal triggering source HEAD (not synthetic merge)
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$EXPECTED_HEAD"
+          echo "E3_EXACT_SOURCE_HEAD=$actual"
       - name: Verify complete SHA-256 tree manifest before parity tests
         shell: bash
         run: |

@@ -4,7 +4,7 @@
   "base_commit": "16bfe53cfcb1f916b29800e81a725071f0d79851",
   "algorithm": "SHA-256",
   "file_count": 103,
-  "global_sha256": "c264216c98cb71e457235a7da6d5fea31b7b793ce2d37f0aabca1651333507a9",
+  "global_sha256": "78e0b3d1866e66406e20486e507d9d020ac52528ded18e496369866f95a15676",
   "aggregation": "SHA256(concat(sorted(relative-path UTF-8 + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
   "gitlinks": [],
@@ -80,7 +80,7 @@
     },
     {
       "path": ".github/workflows/source-cli-browser-parity.yml",
-      "sha256": "6e51aa03982dc39cd160e3549e0dc4926ec9464df0f50cf6eae0a9bd05eab17b"
+      "sha256": "9ff69188010c79ee0a478bd619460152a4ede91fb675438d732f13d4b3b6c5fd"
     },
     {
       "path": ".github/workflows/tests.yml",
