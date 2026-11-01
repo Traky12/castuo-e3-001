@@ -56,6 +56,60 @@ class ValidateExternalEvidenceBundleTests(unittest.TestCase):
         self.assertEqual(payload["claim_boundary"], "NO_CLAIM")
         self.assertTrue(any(expected in finding for finding in payload["findings"]), payload["findings"])
 
+
+    def test_external_lookalike_is_blocked_without_enrolled_trusted_keys(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bundle = root / "bundle"
+            make_demo_bundle.build(bundle, tamper="untrusted-external-keys")
+            trust_store = root / "trust-store.json"
+            trust_store.write_text(
+                json.dumps({"format": "castuo.e3-001.trust-store.v1", "keys": []}),
+                encoding="utf-8",
+            )
+            report = root / "validation.json"
+            code, payload = run(
+                VALIDATOR, bundle, "--min-reviewers", 2,
+                "--trusted-key-store", trust_store, "--output", report,
+            )
+            self.assertEqual(code, 1)
+            self.assertEqual(payload["status"], "BLOCKED")
+            self.assertFalse(payload["g2_eligible"])
+            self.assertFalse(payload["oneV"])
+            self.assertEqual(payload["promotion"], "BLOCKED")
+            self.assertTrue(any("not enrolled in the trusted key store" in finding
+                                for finding in payload["findings"]), payload["findings"])
+
+    def test_external_lookalike_without_trust_store_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "bundle"
+            make_demo_bundle.build(bundle, tamper="untrusted-external-keys")
+            code, payload = run(VALIDATOR, bundle, "--min-reviewers", 2)
+            self.assertEqual(code, 1)
+            self.assertEqual(payload["status"], "BLOCKED")
+            self.assertTrue(any("--trusted-key-store" in finding for finding in payload["findings"]))
+
+    def test_validation_without_output_does_not_mutate_bundle(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "bundle"
+            make_demo_bundle.build(bundle)
+            code, payload = run(VALIDATOR, bundle, "--min-reviewers", 2)
+            self.assertEqual(code, 0, payload["findings"])
+            self.assertEqual(payload["status"], "DEMO_VALIDATED")
+            self.assertFalse((bundle / "external-evidence-validation.json").exists())
+
+    def test_validation_report_inside_bundle_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "bundle"
+            make_demo_bundle.build(bundle)
+            output = bundle / "validation.json"
+            code, payload = run(VALIDATOR, bundle, "--output", output)
+            self.assertEqual(code, 1)
+            self.assertEqual(payload["status"], "BLOCKED")
+            self.assertTrue(any("validation output must be outside the evidence bundle" in finding
+                                for finding in payload["findings"]), payload["findings"])
+            self.assertFalse(output.exists())
+
     def test_modified_result_after_freeze_is_detected(self):
         self.assert_blocked("result", "result_hash does not match")
 
@@ -73,6 +127,47 @@ class ValidateExternalEvidenceBundleTests(unittest.TestCase):
 
     def test_duplicate_reviewer_identity_is_detected(self):
         self.assert_blocked("reviewer-duplicate", "duplicate reviewer identity")
+
+    def test_reviewer_public_key_reuse_is_detected(self):
+        self.assert_blocked("reviewer-key-reuse", "reuses another reviewer's key")
+
+    def test_fixture_path_traversal_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "bundle"
+            make_demo_bundle.build(bundle)
+            manifest_path = bundle / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["fixture_path"] = "../../outside.json"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            code, payload = run(VALIDATOR, bundle, "--min-reviewers", 2)
+            self.assertEqual(code, 1)
+            self.assertEqual(payload["status"], "BLOCKED")
+            self.assertTrue(
+                any("manifest fixture_path is unsafe or unavailable" in finding for finding in payload["findings"]),
+                payload["findings"],
+            )
+
+    def test_duplicate_json_keys_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "bundle"
+            make_demo_bundle.build(bundle)
+            (bundle / "manifest.json").write_text('{"scenario_id":"S-001A","scenario_id":"S-001A"}', encoding="utf-8")
+            code, payload = run(VALIDATOR, bundle, "--min-reviewers", 2)
+            self.assertEqual(code, 1)
+            self.assertEqual(payload["status"], "BLOCKED")
+            self.assertTrue(any("duplicate JSON key" in finding for finding in payload["findings"]), payload["findings"])
+
+    def test_nonpositive_reviewer_threshold_is_refused(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "bundle"
+            make_demo_bundle.build(bundle)
+            proc = subprocess.run(
+                [sys.executable, str(VALIDATOR), str(bundle), "--min-reviewers", "0"],
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(proc.returncode, 2)
+            self.assertIn("--min-reviewers must be between 1 and 100", proc.stderr)
 
     def test_local_runner_identity_is_rejected(self):
         self.assert_blocked("local-runner", "runner_id must identify an external runner")
