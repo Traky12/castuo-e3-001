@@ -129,7 +129,7 @@ jobs:
               for repository, key in (("castuo-evidence", "EVIDENCE_SHA"), ("castuo-agro-edge", "EDGE_SHA")):
                   expected = values.get(key)
                   refs = re.findall(
-                      rf"repository: Traky12/{repository}\\s*\\n\\s*ref:\\s*([^\\s]+)",
+                      rf"repository: Traky12/{repository}\s*\n\s*ref:\s*([^\s]+)",
                       workflow_text
                   )
                   if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{40}", expected):
@@ -139,14 +139,14 @@ jobs:
               for key in ("EVIDENCE_RUNNER_SHA256", "EDGE_EXPORT_SHA256"):
                   if not isinstance(values.get(key), str) or not re.fullmatch(r"[0-9a-f]{64}", values[key]):
                       problems.append(key + ": invalid SHA-256")
-              runner = re.findall(r"--runner-script-sha256\\s+([0-9a-f]{64})", workflow_text)
+              runner = re.findall(r"--runner-script-sha256\s+([0-9a-f]{64})", workflow_text)
               if runner != [values.get("EVIDENCE_RUNNER_SHA256")]:
                   problems.append("runner hash drift")
               if workflow_text.count("persist-credentials: false") < 3:
                   problems.append("checkout credentials not disabled")
-              if "permissions:\\n  contents: read" not in workflow_text:
+              if "permissions:\n  contents: read" not in workflow_text:
                   problems.append("contents not read-only")
-              uses = re.findall(r"uses:\\s+actions/(?:checkout|setup-python)@([^\\s]+)", workflow_text)
+              uses = re.findall(r"uses:\s+actions/(?:checkout|setup-python)@([^\s]+)", workflow_text)
               if len(uses) < 4 or any(not re.fullmatch(r"[0-9a-f]{40}", v) for v in uses):
                   problems.append("mutable Actions reference")
               if "UNSIGNED_CANDIDATE_REJECTED_BY_E3_POLICY: YES" not in workflow_text:
