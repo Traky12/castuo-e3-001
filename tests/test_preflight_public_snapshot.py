@@ -25,11 +25,49 @@ class PreflightTests(unittest.TestCase):
         with patch.object(sys, "argv", args):
             return preflight_public_snapshot.main()
 
+    def run_workspace_preflight(self, bundle_arg: str, workspace: Path) -> int:
+        args = [
+            "preflight_public_snapshot.py",
+            bundle_arg,
+            "--source-commit",
+            self.commit,
+            "--workspace-root",
+            str(workspace),
+        ]
+        with patch.object(sys, "argv", args):
+            return preflight_public_snapshot.main()
+
     def test_complete_bundle_is_ready_with_secret(self):
         with tempfile.TemporaryDirectory() as directory:
             bundle = self.bundle(Path(directory))
-            with patch.dict("os.environ", {"CASTUO_SNAPSHOT_SIGNING_KEY_B64": "present"}):
+            with patch.dict("os.environ", {"CASTUO_SNAPSHOT_SIGNING_KEY_B64": "EXAMPLE_SIGNING_KEY_PLACEHOLDER"}):
                 self.assertEqual(self.run_preflight(bundle, "--require-signing-secret"), 0)
+
+    def test_workspace_accepts_only_a_relative_bundle_inside_workspace(self):
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            self.bundle(workspace)
+            with patch.dict("os.environ", {}, clear=True):
+                self.assertEqual(self.run_workspace_preflight("bundle", workspace), 0)
+
+    def test_workspace_rejects_absolute_bundle_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            bundle = self.bundle(workspace)
+            self.assertEqual(self.run_workspace_preflight(str(bundle), workspace), 1)
+
+    def test_workspace_rejects_parent_traversal(self):
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            self.bundle(workspace)
+            self.assertEqual(self.run_workspace_preflight("../bundle", workspace), 1)
+
+    def test_workspace_rejects_symlinked_bundle_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            self.bundle(workspace)
+            (workspace / "bundle-link").symlink_to(workspace / "bundle", target_is_directory=True)
+            self.assertEqual(self.run_workspace_preflight("bundle-link", workspace), 1)
 
     def test_missing_secret_blocks(self):
         with tempfile.TemporaryDirectory() as directory:

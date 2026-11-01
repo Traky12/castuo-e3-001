@@ -24,7 +24,7 @@ The manifest binds the SHA-256 of the fixture, replay result and evidence envelo
 
 ## 2. Independent runner
 
-The operator must not be the implementation author or the package author. The runner uses a clean checkout and an identity that is not a local fallback or GitHub candidate runner. The harness must be offline-only.
+The operator must not be the implementation author or the package author. The runner uses a clean checkout and an identity that is not a local fallback or GitHub candidate runner. The harness must be offline-only. The runner identity and reviewer identities must also map to distinct approved public keys in the external trust store; self-declared `independent: true` and an embedded public key do not establish identity.
 
 ```bash
 python3 scripts/run_s001a_foreign_replay.py \
@@ -56,10 +56,11 @@ A reviewer must inspect the fixture, commands, output, negative cases, recovery 
 ```bash
 python3 scripts/validate_external_evidence_bundle.py bundle \
   --min-reviewers 2 \
-  --output external-evidence-validation.json
+  --trusted-key-store trust/e3-001-trust-store.json \
+  --output /tmp/external-evidence-validation.json
 ```
 
-The command must return zero and report `VERIFIED_FOR_G2`. A successful report means the bundle is eligible for G2; it does not mutate repository state.
+External evidence must match the version-controlled `trust/e3-001-trust-store.json`: runner and reviewer public keys are compared by role and identity to an enrolled, active key. The registry currently contains no enrolled keys, so real external evidence deliberately remains `BLOCKED` until identities and proof of key possession are verified outside the package and approved through review. Do not copy candidate keys into the registry just to obtain a passing result. Reports must be written outside the bundle; validation is read-only. Only after enrollment can an eligible packet report `VERIFIED_FOR_G2`, and that is not production authorization.
 
 ## 6. G2
 
