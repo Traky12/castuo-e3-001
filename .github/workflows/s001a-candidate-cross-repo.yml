@@ -41,9 +41,14 @@ jobs:
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
-      - name: Install bounded JSON Schema checker for public Edge fixture
+      - name: Install E3 verifier dependencies and JSON Schema checker
         shell: bash
-        run: python -m pip install --disable-pip-version-check "jsonschema==4.25.1"
+        run: |
+          python -m pip install --disable-pip-version-check -r e3/requirements.txt "jsonschema==4.25.1"
+          python -c "from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey; print('ED25519_IMPORT_OK')"
+      - name: Reject false-positive unsigned policy reports in unit tests
+        shell: bash
+        run: python -m unittest discover -s e3/tests -p "test_unsigned_rejection_policy.py" -v
       - name: Edge → Evidence → E3 synthetic candidate using identical exported fixture
         shell: bash
         run: |
@@ -94,12 +99,15 @@ jobs:
           assert len({r["events_hash"] for r in result["replays"]})==1
           print("CANDIDATE_3_REPLAYS_MATCHED: YES; G2_ELIGIBLE: NO")
           PY
-      - name: External evidence validator must reject unsigned candidate
+      - name: External evidence validator must semantically reject unsigned candidate
         shell: bash
         run: |
           set -euo pipefail
-          if python -B e3/scripts/validate_external_evidence_bundle.py "$RUNNER_TEMP/s001a-candidate-report" --min-reviewers 2 > /dev/null; then
-            echo "FAIL: unsigned candidate was accepted as independent evidence" >&2
-            exit 1
-          fi
-          echo "UNSIGNED_CANDIDATE_REJECTED_BY_E3: YES"
+          report="$RUNNER_TEMP/s001a-unsigned-validation.json"
+          rm -f "$report"
+          set +e
+          python -B e3/scripts/validate_external_evidence_bundle.py "$RUNNER_TEMP/s001a-candidate-report" --min-reviewers 2 --output "$report" > "$RUNNER_TEMP/s001a-unsigned-stdout.json"
+          code=$?
+          set -e
+          python -B e3/scripts/check_unsigned_rejection.py "$report" "$code"
+          echo "UNSIGNED_CANDIDATE_REJECTED_BY_E3_POLICY: YES"
