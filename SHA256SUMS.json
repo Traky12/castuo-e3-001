@@ -1,15 +1,15 @@
 {
   "schema": "castuo.sha256-manifest.v1",
   "scope": "complete_repository_tree_candidate",
-  "source_base_commit": "d17458cd0dac6985f69004a03221deea853964f3",
+  "source_base_commit": "ba1f4f34cbf96f78686c03e0f80c159874a7767c",
   "source_refs": {
     "main": "4e41c5c58e2e02361a2118768df9ee83a78038c9",
     "pr85": "16bfe53cfcb1f916b29800e81a725071f0d79851",
     "pr91": "fc6886057bbe68a7095eaa4b3e19839dab071056",
     "pr109": "02d8dba32b2e67355eec1f11b67d609f79a1dd8c"
   },
-  "file_count": 114,
-  "global_sha256": "ed5a23360c35ef0001d61e37e0d835a44fffb9c7fecf83880af02f60459ddcb7",
+  "file_count": 118,
+  "global_sha256": "c6d5a280bbeebed65bf9683f69b1dfd5445aff77d85cb1ca538703d58dade4fc",
   "algorithm": "SHA-256",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
@@ -209,6 +209,10 @@
       "sha256": "1f0628ff2ff7f65fdea5ef5e7d84e786713416a96da1c808908c01ec87d3fbf8"
     },
     {
+      "path": "docs/demo/INTEGRACION_SEGURIDAD_ECOSISTEMA.md",
+      "sha256": "139ba86de6eeb2362c1c6fc38d2aa8daeb8323e9a4128a623b127d61e9b9fffc"
+    },
+    {
       "path": "docs/demo/LEGAL-PUBLICATION.md",
       "sha256": "57a5f96d289d8753f670f883e809064caa1f59ce867e579380e4542ca23a4aa7"
     },
@@ -238,7 +242,7 @@
     },
     {
       "path": "docs/demo/index.html",
-      "sha256": "5c9534d24c33b0d0757107fa0b431f9436018557b673e1a22007e5a890837581"
+      "sha256": "bb76c819174bc27746a493cc20b19bb22386fb83bb33ccc33118339be11356d3"
     },
     {
       "path": "docs/demo/input.js",
@@ -353,6 +357,10 @@
       "sha256": "66bee6a4ee1d1ca5a487aba1d6f332fcc64305da6a1e850f50c4fae89b90a764"
     },
     {
+      "path": "examples/ecosystem/synthetic-edge.jsonl",
+      "sha256": "bb889eabe7d6c31c4a2781dee3ee1a6bb7d2b328caed7ba57993a4246b849cb6"
+    },
+    {
       "path": "examples/make_demo_bundle.py",
       "sha256": "14c84814c7b7a0ff44615229b5c22a43e104dea92d8a1d1051fe6151a284ebb9"
     },
@@ -379,6 +387,10 @@
     {
       "path": "scripts/check_public_advisory.py",
       "sha256": "2e32c085130332e79e38cb90da571f700654315d80ca8e4df6d9cbfcc0c0bae0"
+    },
+    {
+      "path": "scripts/demo_ecosystem_bridge.py",
+      "sha256": "f0e6fe31431d1ec49aa74204fccee33105ddedf4eaa4761fb26bb92919b86898"
     },
     {
       "path": "scripts/e3bundle.py",
@@ -427,6 +439,10 @@
     {
       "path": "tests/test_dataset_tampering_tutorial.py",
       "sha256": "e73f4eb8b93b30520a1ff8ed64c2d753876be904c499d0afb26a7071420efbc9"
+    },
+    {
+      "path": "tests/test_demo_ecosystem_bridge.py",
+      "sha256": "45983a696e2fcac76cea062a0b7bba4da5781d2310492f57d21c4f63322134b5"
     },
     {
       "path": "tests/test_e3bundle.py",
