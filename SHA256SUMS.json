@@ -9,7 +9,7 @@
     "pr109": "02d8dba32b2e67355eec1f11b67d609f79a1dd8c"
   },
   "file_count": 114,
-  "global_sha256": "39df3fef1c2d62ceefe11f5d0841cf3bdcc2f96708ebda683a5301f363e88bbc",
+  "global_sha256": "ed5a23360c35ef0001d61e37e0d835a44fffb9c7fecf83880af02f60459ddcb7",
   "algorithm": "SHA-256",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
@@ -438,7 +438,7 @@
     },
     {
       "path": "tests/test_examples_and_packaging.py",
-      "sha256": "71261a967a8b7f484f3b2dab4464ee542b3b956bc0062d32cd3fb08978109d6e"
+      "sha256": "e08b6322c9348fbf05ae296c9ad27866e988d624383f30ea04aec13b06c055ae"
     },
     {
       "path": "tests/test_preflight_public_snapshot.py",
@@ -466,7 +466,7 @@
     },
     {
       "path": "tests/test_validate_external_evidence_bundle.py",
-      "sha256": "659b6603b9bcc68e116fd9a9ac6d83180b0ee2dfbd3b2b64ff64bacccfe77c00"
+      "sha256": "fd601a51fdf5de74198a8a55746b5f73027bbdad8c62c2a395dd457d59a5bd6f"
     },
     {
       "path": "trust/e3-001-trust-store.json",
