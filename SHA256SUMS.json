@@ -9,7 +9,7 @@
     "pr109": "02d8dba32b2e67355eec1f11b67d609f79a1dd8c"
   },
   "file_count": 118,
-  "global_sha256": "c6d5a280bbeebed65bf9683f69b1dfd5445aff77d85cb1ca538703d58dade4fc",
+  "global_sha256": "983397772514215506a05a38dd928015ee04643df511dbf5a21fdd22d3b984fc",
   "algorithm": "SHA-256",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
@@ -442,7 +442,7 @@
     },
     {
       "path": "tests/test_demo_ecosystem_bridge.py",
-      "sha256": "45983a696e2fcac76cea062a0b7bba4da5781d2310492f57d21c4f63322134b5"
+      "sha256": "e78646db9ba0e38548d5369e4e5eab34278d3ff45f36c53ec7a11cd9fb767773"
     },
     {
       "path": "tests/test_e3bundle.py",

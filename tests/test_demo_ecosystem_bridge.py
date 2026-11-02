@@ -109,7 +109,7 @@ def test_output_never_overwritten(tmp_path):
 
 
 def test_demo_shows_no_field_or_g2_claims():
-    html = (ROOT / "docs" / "demo" / "index.html").read_text()
+    html = (ROOT / "docs" / "demo" / "index.html").read_text(encoding="utf-8")
     section = html.split('id="ecosystem-security"', 1)[1].split("</section>", 1)[0]
     for word in (
         "Agro Edge", "EvidenceObject", "e3bundle", "sintéticos",
