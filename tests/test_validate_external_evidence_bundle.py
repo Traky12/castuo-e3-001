@@ -7,7 +7,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT / "examples"))
-import make_demo_bundle
+# The fixture generator is imported only after its examples directory is registered.
+import make_demo_bundle  # noqa: E402
 
 VALIDATOR = ROOT / "scripts" / "validate_external_evidence_bundle.py"
 G2 = ROOT / "scripts" / "evaluate_g2.py"

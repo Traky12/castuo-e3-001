@@ -1,0 +1,112 @@
+name: E3 full technical assurance candidate (no promotion)
+
+# Complements, but never replaces, independent human review or signed external replay.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  cross-platform:
+    name: exact-head (${{ matrix.os }}, py${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+        python-version: ["3.11", "3.12", "3.13"]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout literal pull-request HEAD (read-only)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Assert exact source SHA
+        env:
+          EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$EXPECTED_SOURCE_SHA"
+          echo "E3_ASSURANCE_EXACT_SOURCE_SHA=$actual"
+      - name: Python from matrix
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install source and test dependencies
+        run: python -m pip install --disable-pip-version-check -e ".[test]"
+      - name: Check installed dependency metadata
+        run: python -m pip check
+      - name: Full current Python tests on this OS
+        run: python -m pytest tests -q
+      - name: Strict signed fixture and required tamper rejection
+        run: |
+          python - <<'PY'
+          import json
+          import subprocess
+          import sys
+
+          args = [
+              sys.executable, "scripts/e3bundle.py", "verify",
+              "examples/bundles/valid", "--min-signatures", "2",
+              "--trusted-keys", "examples/bundles/trusted-keys.json",
+              "--strict", "--format", "json",
+          ]
+          good = subprocess.run(args, capture_output=True, text=True, check=False)
+          assert good.returncode == 0, (good.returncode, good.stderr[:200])
+          report = json.loads(good.stdout)
+          assert report.get("status") == "VERIFIED", report.get("status")
+          bad = args.copy()
+          bad[3] = "examples/bundles/tampered"
+          tampered = subprocess.run(bad, capture_output=True, text=True, check=False)
+          assert tampered.returncode != 0, "tampered fixture incorrectly accepted"
+          damaged = json.loads(tampered.stdout)
+          assert damaged.get("status") == "FAILED", damaged.get("status")
+          print("E3_OS_STRICT_VERIFY_PASS: verified + tampered rejected")
+          PY
+
+  lint:
+    name: ruff-security-and-quality-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout literal HEAD
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install Ruff
+        run: python -m pip install --disable-pip-version-check "ruff==0.14.0"
+      - name: Ruff full Python source, test and example inventory
+        run: ruff check scripts tests examples
+
+  audit:
+    name: pip-audit-and-installed-dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout literal HEAD
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install application, tests and audit tool
+        run: |
+          python -m pip install --disable-pip-version-check -e ".[test]"
+          python -m pip install --disable-pip-version-check "pip-audit==2.9.0"
+      - name: Validate dependency metadata
+        run: python -m pip check
+      - name: Audit fresh job environment (includes test/audit tools)
+        run: python -m pip_audit --local
