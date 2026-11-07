@@ -1,10 +1,10 @@
 {
   "schema": "castuo.sha256-manifest.v1",
   "scope": "complete_repository_tree_candidate",
-  "source_base_commit": "d3f216a56a908fb8a3cb6c8546f76af4aec67c50",
+  "source_base_commit": "b76b8a782ca078b01472f22ec1499a717764fde2",
   "algorithm": "SHA-256",
   "file_count": 114,
-  "global_sha256": "511a61bf4c5057629eb9bb51e20037f6dab83298b41ae26fde2ce98bf97b6a32",
+  "global_sha256": "8668bf09e39eb9b2855b14c8ba066cf5ddd61d9623160c7ead0320dfb48c933b",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + per-file sha256 hex + LF)))",
   "self_excluded": true,
   "gitlinks": [],
@@ -76,7 +76,7 @@
     },
     {
       "path": ".github/workflows/s001a-candidate-cross-repo.yml",
-      "sha256": "3b6b8e04f3126ddcc92d2024faf610f5af9dddb01a7056b19bd22a7fb211b756"
+      "sha256": "1255ca4568d49129d4527d5ec35f138191588338654be4912d61072002f5a0a4"
     },
     {
       "path": ".github/workflows/secret-scan.yml",
