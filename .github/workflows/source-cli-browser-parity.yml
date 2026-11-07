@@ -1,0 +1,105 @@
+name: E3 source CLI/browser cryptographic parity (no deployment)
+
+# Checks the source code at the exact PR/push HEAD, not the pinned v0.1.3 demo.
+# This workflow cannot approve a release, prove external identities or close G1/G2.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  source-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact candidate without retained credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Assert literal triggering source HEAD (not synthetic merge)
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$EXPECTED_HEAD"
+          echo "E3_EXACT_SOURCE_HEAD=$actual"
+      - name: Verify complete SHA-256 tree manifest before parity tests
+        shell: bash
+        run: |
+          python - <<'PYMANIFEST'
+          import hashlib
+          import json
+          import subprocess
+          from pathlib import Path, PurePosixPath
+
+          def strict_object(pairs):
+              data = {}
+              for key, value in pairs:
+                  if key in data:
+                      raise ValueError("duplicated JSON property")
+                  data[key] = value
+              return data
+
+          manifest_path = Path("SHA256SUMS.json")
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"), object_pairs_hook=strict_object)
+          records = manifest["files"]
+          assert manifest["self_excluded"] is True
+          assert manifest["algorithm"] == "SHA-256"
+          assert manifest["file_count"] == len(records)
+          indexed = subprocess.check_output(["git", "ls-files", "--stage", "-z"]).split(b"\0")
+          tracked = set()
+          for record in indexed:
+              if not record:
+                  continue
+              head, name = record.split(b"\t", 1)
+              mode, _gitsha, stage = head.decode().split(" ")
+              assert mode in ("100644", "100755") and stage == "0", "gitlink or symlink is forbidden"
+              tracked.add(name.decode("utf-8"))
+          expected = set()
+          aggregate = hashlib.sha256()
+          assert [x["path"] for x in records] == sorted(x["path"] for x in records)
+          for entry in records:
+              name, digest = entry["path"], entry["sha256"]
+              path = PurePosixPath(name)
+              assert name == path.as_posix() and not name.startswith("/")
+              assert all(part not in ("", ".", "..") for part in name.split("/"))
+              assert name not in expected and name != str(manifest_path)
+              assert isinstance(digest, str) and len(digest) == 64 and all(c in "0123456789abcdef" for c in digest)
+              expected.add(name)
+              source = Path(name)
+              assert source.is_file() and not source.is_symlink()
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == digest, name
+              aggregate.update(f"{name}\0{digest}\n".encode("utf-8"))
+          assert tracked == expected | {str(manifest_path)}, "unlisted or missing tracked file"
+          assert aggregate.hexdigest() == manifest["global_sha256"], "global SHA mismatch"
+          print(f"E3_FULL_TREE_SHA256_PASS: {len(expected)}")
+          PYMANIFEST
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Set up Node.js 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+      - name: Install CLI verification dependency
+        run: python -m pip install --disable-pip-version-check 'cryptography>=50.0.2'
+      - name: Check JavaScript syntax at exact source HEAD
+        run: |
+          node --check docs/demo/verifier.js
+          node --check docs/demo/tests/conformance.mjs
+          node --check docs/demo/tests/input-conformance.mjs
+      - name: Source parity including distinct-key reuse and Base64 aliases
+        env:
+          E3_CONFORMANCE_KEY_REUSE: '1'
+        run: |
+          echo "source_commit=$(git rev-parse HEAD)"
+          node docs/demo/tests/conformance.mjs examples/bundles python scripts/e3bundle.py
+      - name: Source input parity for malformed and unsafe bundles
+        run: node docs/demo/tests/input-conformance.mjs examples/bundles python scripts/e3bundle.py
+      - name: Local importer negative checks
+        run: node docs/demo/tests/importer.mjs
