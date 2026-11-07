@@ -33,23 +33,67 @@ def safe_required_artifact(bundle: Path, filename: str) -> tuple[Path | None, st
     return candidate, None
 
 
+def resolve_bundle_in_workspace(
+    bundle_arg: Path, workspace_arg: Path, findings: list[str]
+) -> Path | None:
+    """Resolve a dispatch-supplied bundle path strictly inside the checked-out workspace."""
+    try:
+        workspace = workspace_arg.resolve(strict=True)
+    except OSError:
+        findings.append("workspace root does not exist")
+        return None
+
+    if bundle_arg.is_absolute() or not bundle_arg.parts or ".." in bundle_arg.parts:
+        findings.append("bundle path must be a non-empty relative path without parent traversal")
+        return None
+
+    candidate = workspace
+    for part in bundle_arg.parts:
+        if part in {"", ".", ".."}:
+            findings.append("bundle path contains an unsafe path segment")
+            return None
+        candidate = candidate / part
+        if candidate.is_symlink():
+            findings.append("bundle path must not traverse a symbolic link")
+            return None
+
+    try:
+        resolved = candidate.resolve(strict=True)
+        resolved.relative_to(workspace)
+    except (OSError, ValueError):
+        findings.append("bundle path does not resolve to a path inside the workspace")
+        return None
+    if not resolved.is_dir():
+        findings.append("bundle directory does not exist")
+        return None
+    return resolved
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("bundle", type=Path)
     parser.add_argument("--source-commit", required=True)
+    parser.add_argument(
+        "--workspace-root",
+        type=Path,
+        default=None,
+        help="When set, require bundle to be a relative, non-symlink path inside this workspace.",
+    )
     parser.add_argument("--output", type=Path)
     parser.add_argument("--require-signing-secret", action="store_true")
     args = parser.parse_args()
 
     findings: list[str] = []
-    bundle = args.bundle.resolve()
+    bundle = (
+        resolve_bundle_in_workspace(args.bundle, args.workspace_root, findings)
+        if args.workspace_root is not None
+        else args.bundle.resolve()
+    )
     source_commit = args.source_commit
     artifacts: dict[str, Path] = {}
     if not re.fullmatch(r"[0-9a-f]{40}", source_commit):
         findings.append("source_commit must be exactly 40 lowercase hexadecimal characters")
-    if not bundle.is_dir():
-        findings.append("bundle directory does not exist")
-    else:
+    if bundle is not None:
         for filename in REQUIRED_FILES:
             artifact, finding = safe_required_artifact(bundle, filename)
             if finding:
@@ -80,7 +124,7 @@ def main() -> int:
 
     result = {
         "status": "READY" if not findings else "BLOCKED",
-        "bundle": str(bundle),
+        "bundle": str(bundle) if bundle is not None else None,
         "source_commit": source_commit,
         "signing_secret_present": secret_present,
         "required_artifacts": list(REQUIRED_FILES),

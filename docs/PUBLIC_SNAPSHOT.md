@@ -6,7 +6,7 @@ The public snapshot is an optional, read-only projection of `validate_external_e
 
 The workflow `.github/workflows/public-snapshot.yml` runs on a protected GitHub environment named `public-snapshot`. The evidence bundle must be supplied by an external operator. The runner validates the bundle, evaluates G2, and only then calls `scripts/publish_public_snapshot.py`.
 
-The private Ed25519 key is read from the protected `CASTUO_SNAPSHOT_SIGNING_KEY_B64` secret. It is not committed, printed, sent to the dashboard, or embedded in the generated JSON. The snapshot contains only the public key, key identifier, payload digest and signature.
+The private Ed25519 key is read from the protected `CASTUO_SNAPSHOT_SIGNING_KEY_B64` secret. It is not committed, printed, sent to the dashboard, or embedded in the generated JSON. The snapshot contains only the public key, key identifier, payload digest and signature. These fields provide self-contained signature material, not publisher trust; the public key must be pinned out of band.
 
 ## Required operator configuration
 
@@ -21,15 +21,21 @@ gh secret set CASTUO_SNAPSHOT_SIGNING_KEY_B64 \
 
 The key must be generated and stored by the approved external operator or signing device. Do not paste it into a browser form or commit it to the repository.
 
-## Dashboard contract
+## External signer identity gate
 
-The dashboard reads:
+The snapshot workflow passes `trust/e3-001-trust-store.json` to the evidence validator. This registry is deliberately empty at present. Consequently, an external bundle cannot qualify for G2 merely by carrying self-signed runner/reviewer records: it remains `BLOCKED` until the public keys are verified out of band, approved through a separate reviewed change, and enrolled with explicit role and identity. The registry must retain revocation records; revoked keys never satisfy validation. This is an additional gate independent of the publication signing secret.
+
+## Dashboard verification contract — not yet demonstrated
+
+Intended public source URL:
 
 ```text
 https://raw.githubusercontent.com/Traky12/castuo-e3-001/main/public/status-snapshot.json
 ```
 
-It rejects the artifact unless the JSON schema is valid, the canonical unsigned payload digest matches `signed_payload_sha256`, and the Ed25519 signature verifies with the embedded public key. A missing artifact, invalid signature or unsupported browser crypto implementation falls back to the local declared snapshot and keeps promotion blocked.
+The embedded public key is **not a trust root**. The publishing firewall checks the canonical unsigned payload digest and Ed25519 signature, and also requires `public_verification.key_id` plus its public key to match an active `role: publisher` entry in `trust/e3-001-trust-store.json`. The consuming dashboard must independently pin the expected publisher key and validate the canonical payload, digest and signature. Verifying only with a key embedded in the same untrusted JSON would allow an attacker to replace both payload and key.
+
+**Consumer-side verification is not confirmed by this PR.** Until a separate reviewed change enrolls the real publisher public key and a reproducible test proves that the actual consuming dashboard rejects unsigned, tampered, stale and self-signed untrusted snapshots, do not claim that the dashboard authenticates this feed. Since the trust store has no publisher key, the publishing firewall deliberately blocks snapshot commit. A missing artifact or unsupported browser crypto implementation must retain a local declared snapshot with promotion blocked.
 
 ## Non-claims
 
@@ -39,6 +45,6 @@ A signed public snapshot proves that the configured runner signed the declared p
 
 As of the latest verification, the `public-snapshot` environment exists with protected-branch policy and a required reviewer rule for `Traky12` with self-review prevention. The environment has no configured `CASTUO_SNAPSHOT_SIGNING_KEY_B64` secret, and `public/status-snapshot.json` is intentionally absent. The public snapshot workflow therefore cannot be run successfully yet. This is the expected fail-closed state, not a workflow failure.
 
-To close the external gate, an authorized operator must add the secret through GitHub environment secrets, supply a real externally generated E3-001 bundle, and dispatch `E3-001 public verified snapshot` with the exact frozen source commit. The workflow then validates the bundle, evaluates G2, runs the public claim firewall, and writes the signed snapshot only if all checks pass. A successful run still keeps `oneA=false` and `promotion=BLOCKED`.
+To close the external gate, an authorized operator must first verify and enroll the external runner/reviewer public keys in the trust store through a separately reviewed change, add the publication secret through GitHub environment secrets, supply a real externally generated E3-001 bundle, and dispatch `E3-001 public verified snapshot` with the exact frozen source commit. The workflow then validates the bundle, evaluates G2, verifies the signed payload and the pinned publisher identity, runs the public claim firewall, and writes the signed snapshot only if all checks pass. The publisher-key entry is intentionally absent from the initial trust store, so this gate remains blocked until a real public key is independently checked and approved. A successful run still keeps `oneA=false` and `promotion=BLOCKED`.
 
 The available local candidate was also checked read-only and returned `status: BLOCKED` with `claim_boundary: NO_CLAIM`; it lacks the external runner attestation and signed reviewer quorum and does not satisfy the E3-001 manifest contract. It is therefore not promoted, copied or relabeled as external evidence.
