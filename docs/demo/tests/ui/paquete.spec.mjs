@@ -37,6 +37,9 @@ const norm = (f) => (f.startsWith('cannot read ') ? f.slice(0, f.indexOf(':')) :
 async function choose(page, dir, { keys, pin, min = 2 } = {}) {
   await page.goto('paquete.html');
   await page.locator('#folder').setInputFiles(dir);
+  // WebKit can delay processing directory-upload change events. Wait for the
+  // visible import plan before attempting a second file-input interaction.
+  await expect(page.locator('#planProblem')).not.toBeEmpty();
   if (keys) await page.locator('#keys').setInputFiles(keys);
   if (pin) {
     await page.getByLabel('Fijar solo las claves que marque').check();

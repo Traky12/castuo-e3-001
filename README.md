@@ -37,7 +37,7 @@ The tag's README contains a stale pre-publication statement; this current `main`
 
 Verify the signed example bundles without installing anything: **[open the browser demo](https://traky12.github.io/castuo-e3-001/)**.
 
-The demo uses the real `v0.1.1` example bundles and performs SHA-256 and Ed25519 verification locally with WebCrypto. You can tamper with the files in eight ways, create and sign your own bundle and verify it later with the CLI, or [verify a bundle folder from your device](https://traky12.github.io/castuo-e3-001/paquete.html) without uploading it (browser limits: 200 files, 50 MiB). On every change, CI checks that the demo gives the same result as the `v0.1.1` CLI (`docs/demo/tests/`) in Chromium, Firefox and WebKit. Data is synthetic; a successful verification does not certify that content is true.
+The browser demo uses synthetic example fixtures and performs SHA-256 and Ed25519 verification locally with WebCrypto. You can tamper with the files in eight ways, create and sign your own bundle and verify it later with the CLI, or [verify a bundle folder from your device](https://traky12.github.io/castuo-e3-001/paquete.html) without uploading it (browser limits: 200 files, 50 MiB). The Pages workflow pins the CLI source for the published e3bundle v0.1.3 alpha at commit `3f622a2cfd5cf1826d22d9266b542710d8b0faf1` for release-parity scenarios, and separately tests unreleased canonical-Base64 security regressions against the current browser verifier and CLI source. This extra hardening is **unreleased** and must not be attributed retroactively to v0.1.3. Check the workflow result and public URL separately before relying on a deployed copy. Data is synthetic; a successful verification does not certify that content is true.
 
 ## Run with Docker
 
@@ -120,7 +120,7 @@ e3bundle verify   my-bundle --min-signatures 1 --trusted-keys trusted.json
 
 Only plain `VERIFIED` says who signed. In CI, add `--strict` so a missing key file or minimum is an error instead of a weaker pass.
 
-What `verify` detects: modified, missing and undeclared files; path traversal and symlinks; signatures that are forged, made over an older manifest, duplicated, or (with `--trusted-keys`) made with a key you did not pin.
+What `verify` detects: modified, missing and undeclared files; path traversal and symlinks; forged, stale or duplicate signatures; and non-canonical Base64 encodings of cryptographic fields. Signature thresholds count distinct decoded public keys, not signer IDs or their textual encodings. With `--trusted-keys`, signatures from keys you did not pin are rejected.
 
 ## Use it in GitHub Actions
 

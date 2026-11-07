@@ -1,12 +1,13 @@
 # Browser demo: threat model
 
-Scope: the static demo in `docs/demo/` served by GitHub Pages
-(<https://traky12.github.io/castuo-e3-001/>). This draft targets the v0.1.3
-candidate CLI source at commit `55cba4500daf7b5cc803c63ccaff01985e4d965f`. That source commit is not itself
-a tag or published release. Production deployment remains gated on a public
-v0.1.3 GitHub release, the matching PyPI distribution and the GHCR image.
-The demo has no backend. Report vulnerabilities privately as described in
-[SECURITY.md](../../SECURITY.md).
+Scope: the static demo source in `docs/demo/`, intended for GitHub Pages
+(<https://traky12.github.io/castuo-e3-001/>). The Pages workflow pins the e3bundle v0.1.3
+alpha CLI source at commit `3f622a2cfd5cf1826d22d9266b542710d8b0faf1`, corresponding to
+the published GitHub alpha prerelease. That is not production authorization. The
+PyPI distribution, fixed-version public security-advisory metadata, legal publication
+inputs and deployment of this exact page remain separate gates; the public URL is not
+claimed to serve this branch until verified. The demo has no backend. Report
+vulnerabilities privately as described in [SECURITY.md](../../SECURITY.md).
 
 ## Assets
 
@@ -16,7 +17,7 @@ The demo has no backend. Report vulnerabilities privately as described in
 | Text the visitor types (CSV, files, signer id) | Page memory only |
 | Files of a local bundle chosen on `paquete.html` | Read with `File.arrayBuffer()` into page memory only |
 | Verification reports | Page memory; copied or downloaded only after a visitor action |
-| Correctness of the verdict | `verifier.js` + `input.js`, checked against the pinned candidate CLI source in CI |
+| Correctness of the verdict | `verifier.js` + `input.js`, checked against the pinned v0.1.3 alpha CLI source in CI |
 
 ## Threats and mitigations
 
@@ -24,11 +25,11 @@ The demo has no backend. Report vulnerabilities privately as described in
 |---|---|---|
 | Visitor data or keys sent elsewhere | No backend, analytics or third-party resources; CSP `connect-src 'self'`; private keys are never serialised | UI suite checks requests are same-origin GETs without bodies and that no request leaves the page while scenarios run, files are edited, keys are made, or bundles are signed and verified |
 | Script injection through displayed data | Results are written with `textContent`; no `innerHTML`, `eval` or inline scripts; restrictive CSP | UI suite tests inline script/style blocking and CSP violations |
-| Unreadable input shown as a verdict | `input.js` applies the CLI input contract: malformed or wrongly shaped manifest/trusted keys produce `ERROR`, exit 2, with no cryptographic phase shown | `tests/input-conformance.mjs` compares statuses, exit codes and findings against candidate CLI source, including malformed JSON and unsafe manifest paths |
-| Browser verdict drifting from the CLI | Browser/CLI conformance and UI jobs must pass; production deploy additionally requires the public release, PyPI version and GHCR image | `tests/conformance.mjs`, `tests/input-conformance.mjs`, Playwright jobs and the publication gate in `pages.yml` |
+| Unreadable input shown as a verdict | `input.js` applies the CLI input contract: malformed or wrongly shaped manifest/trusted keys produce `ERROR`, exit 2, with no cryptographic phase shown | `tests/input-conformance.mjs` compares statuses, exit codes and findings against the pinned v0.1.3 alpha CLI source, including malformed JSON and unsafe manifest paths |
+| Browser verdict drifting from the CLI | Browser/CLI conformance and UI jobs must pass; production deploy additionally requires the public release, PyPI distribution, public advisory metadata and legal/deployment gate | `tests/conformance.mjs`, `tests/input-conformance.mjs`, Playwright jobs and the publication gate in `pages.yml` |
 | Hostile local folder (traversal, ambiguous names, huge or numerous files) | `importer.js` plans imports from names/sizes before reading bytes: ≤200 files, ≤10 MiB each, ≤50 MiB total, paths ≤255 characters and ≤16 levels; rejects unsafe segments, separators, control characters, empty segments and case-colliding names. If a path is rejected, no bundle is verified. No ZIP; file contents use prototype-free maps | `tests/importer.mjs` and the UI suite |
 | Imported keys treated as trusted | Imported public keys start unchecked; only explicitly pinned keys count, and the selected subset can be downloaded for CLI reproduction | UI suite checks unchecked keys and threshold failure when too few trusted keys are selected |
-| Local verdict differing from the CLI | Same input order as the CLI (keys first, then manifest, then signatures); strict UTF-8 decode with BOM preserved | UI suite compares local folders with the pinned candidate CLI source by status, exit code and findings |
+| Local verdict differing from the CLI | Same input order as the CLI (keys first, then manifest, then signatures); strict UTF-8 decode with BOM preserved | UI suite compares local folders with the pinned v0.1.3 alpha CLI source by status, exit code and findings |
 | Reading VERIFIED as certification or identity | Limitations are stated alongside the result; without pinned keys the UI says trust was not checked | Content review and unsupported-claims check in `pages.yml` |
 
 ## Residual risks and limits
