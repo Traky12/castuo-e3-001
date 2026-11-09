@@ -1,7 +1,7 @@
 {
   "schema": "castuo.sha256-manifest.v1",
   "scope": "complete_repository_tree_candidate",
-  "source_base_commit": "2c0c4ea47e9cd31d5af7a59e986925123921e517",
+  "source_base_commit": "975f76cf3d261d34df7c5386098bad4625e7740f",
   "source_refs": {
     "main": "4e41c5c58e2e02361a2118768df9ee83a78038c9",
     "pr85": "16bfe53cfcb1f916b29800e81a725071f0d79851",
@@ -9,7 +9,7 @@
     "pr109": "02d8dba32b2e67355eec1f11b67d609f79a1dd8c"
   },
   "file_count": 118,
-  "global_sha256": "5ea1fb44ab81f68700000390ed8640f680b2afa29c404720f65706c6d8460934",
+  "global_sha256": "6050f083941eb2b619602b5f4e58e9a7847aff6dd7b7e8a4c70ba072518f3ef0",
   "algorithm": "SHA-256",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
@@ -282,7 +282,7 @@
     },
     {
       "path": "docs/demo/tests/ui/demo.spec.mjs",
-      "sha256": "97b750a1fba2ad6ae67cc08a3ddd5ad4190a1ad775b3806d7d0483f00ddce998"
+      "sha256": "e1db0449a90923afadd1d2b14a59aad3758ad859ab130cdd4d423d3f1d7fe963"
     },
     {
       "path": "docs/demo/tests/ui/package-lock.json",
