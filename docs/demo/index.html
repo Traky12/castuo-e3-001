@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>e3bundle · Evidencia verificable para datos de campo</title>
 <meta name="description" content="Borrador de demo de e3bundle: verifica localmente paquetes sintéticos con SHA-256 y Ed25519. Candidato v0.1.3, todavía no publicado.">
@@ -39,6 +39,24 @@
 <main class="wrap">
   <div class="alert" role="note"><strong>Borrador no publicado.</strong> Este candidato se contrasta con el CLI fuente fijado en el commit <a href="https://github.com/Traky12/castuo-e3-001/commit/55cba4500daf7b5cc803c63ccaff01985e4d965f">55cba450</a>. No se afirma que la release v0.1.3, el paquete PyPI ni la imagen GHCR estén publicados. El despliegue público permanece bloqueado hasta comprobar esos artefactos y las pruebas de conformidad.</div>
   <div class="notice" role="note"><strong>Dónde ocurre el cálculo.</strong> En la demo, los hashes SHA-256 y las firmas Ed25519 se calculan en el navegador con WebCrypto. Lo que edites aquí no se envía a ningún servidor. Este borrador no cambia por sí solo la página pública.</div>
+  <section class="card" id="ecosystem-security" aria-labelledby="ecosystem-security-title">
+    <p class="kicker">Integración del ecosistema · Solo laboratorio</p>
+    <h2 id="ecosystem-security-title">Seguridad de la cadena: Agro Edge → EvidenceObject → e3bundle</h2>
+    <p class="body-2">Ensayo offline con tres eventos <strong>sintéticos</strong> de Agro Edge:
+      se conserva su procedencia, se crea un EvidenceObject 2.0 y e3bundle
+      comprueba la integridad SHA-256. Esta demostración no es una integración operativa
+      con sensores, código privado o producción.</p>
+    <ol class="steps">
+      <li>Agro Edge: telemetría sintética en modo lectura, sin órdenes físicas.</li>
+      <li>EvidenceObject: estado <strong>PENDING</strong> y revisión humana por realizar.</li>
+      <li>e3bundle: paquete sin firmantes externos = <strong>VERIFIED_INTEGRITY_ONLY</strong>.</li>
+      <li>Confianza externa, replay independiente y G1/G2: <strong>BLOCKED</strong>.</li>
+    </ol>
+    <p class="body-2">Reproduce la demo con el CLI real y los archivos sintéticos:
+      <a href="https://github.com/Traky12/castuo-e3-001/blob/demo/security-ecosystem-bridge-20261102/docs/demo/INTEGRACION_SEGURIDAD_ECOSISTEMA.md">procedimiento y limitaciones de esta rama candidata</a>.
+    </p>
+    <p class="hint">La integridad no demuestra verdad de origen ni reemplaza la revisión humana o la aprobación del responsable.</p>
+  </section>
   <div class="alert" id="unsupported" hidden>Tu navegador no admite verificación Ed25519 en WebCrypto. La integridad SHA-256 se comprueba igual, pero las firmas no. Puedes verificar el paquete con el CLI: <code>e3bundle verify examples/bundles/valid --min-signatures 2 --trusted-keys examples/bundles/trusted-keys.json</code></div>
   <div class="alert" id="loadError" hidden>No se pudieron cargar los paquetes de ejemplo. Recarga la página.</div>
 

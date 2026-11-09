@@ -116,6 +116,22 @@ test.describe('create page', () => {
   test('keygen, manifest, sign, verify; edit after signing fails; reset clears', async ({ page, browserName }) => {
     const w = await watch(page);
     await page.goto('crear.html');
+    // Preserve the native capability failure without exporting or logging any key.
+    const capability = await page.evaluate(async () => {
+      const result = { secureContext: window.isSecureContext, subtle: !!window.crypto?.subtle, error: null };
+      try {
+        await window.crypto.subtle.generateKey({ name: 'Ed25519' }, false, ['sign', 'verify']);
+      } catch (error) {
+        result.error = { name: error.name, message: error.message };
+      }
+      return result;
+    });
+    await test.info().attach('ed25519-native-capability.json', {
+      body: JSON.stringify({ browserName, ...capability }, null, 2),
+      contentType: 'application/json',
+    });
+    expect(capability.secureContext, 'Creation requires a secure context').toBe(true);
+    expect(capability.error, 'Native Ed25519 key generation failed; see capability attachment').toBeNull();
     await page.getByRole('button', { name: 'Generar clave Ed25519' }).click();
     await expect(page.locator('#pub')).not.toBeEmpty();
     await page.getByRole('button', { name: /crear manifest\.json/ }).click();
@@ -139,6 +155,28 @@ test.describe('create page', () => {
     await noViolations(page, w);
     test.info().annotations.push({ type: 'engine', description: browserName });
   });
+});
+
+test('create page fails closed when native Ed25519 generation is unavailable', async ({ page }) => {
+  const w = await watch(page);
+  await page.addInitScript(() => {
+    Object.defineProperty(window.crypto.subtle, 'generateKey', {
+      value: async () => { throw new DOMException('Synthetic unsupported capability', 'NotSupportedError'); },
+      configurable: true,
+    });
+  });
+  await page.goto('crear.html');
+  await expect(page.locator('#unsupported')).toBeVisible();
+  for (const id of ['keygen', 'mk', 'sign', 'verify', 'cpM', 'cpS', 'cpT']) {
+    await expect(page.locator(`#${id}`)).toBeDisabled();
+  }
+  await expect(page.locator('#pub')).toBeEmpty();
+  await expect(page.locator('#status')).not.toHaveText('VERIFIED');
+  await page.getByRole('button', { name: 'Reiniciar sesión' }).click();
+  await expect(page.locator('#unsupported')).toBeVisible();
+  await expect(page.locator('#keygen')).toBeDisabled();
+  await expect(page.locator('#verify')).toBeDisabled();
+  await noViolations(page, w);
 });
 
 test.describe('privacy: nothing leaves the page', () => {
@@ -182,6 +220,20 @@ test.describe('privacy: nothing leaves the page', () => {
 });
 
 test.describe('content security policy', () => {
+  test('demo pages allow only same-origin connections and deny frames, workers and object embeds', async ({ page }) => {
+    for (const file of ['index.html', 'crear.html', 'paquete.html', 'legal.html']) {
+      await page.goto(file);
+      const policy = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
+      expect(policy).toContain("default-src 'none'");
+      expect(policy).toContain("connect-src 'self'");
+      expect(policy).toContain("frame-src 'none'");
+      expect(policy).toContain("worker-src 'none'");
+      expect(policy).toContain("object-src 'none'");
+      expect(policy).toContain("base-uri 'none'");
+      expect(policy).toContain("form-action 'none'");
+    }
+  });
+
   for (const file of ['index.html', 'crear.html', 'paquete.html']) {
     test(`${file}: inline script and inline style are blocked`, async ({ page }) => {
       await watch(page);
