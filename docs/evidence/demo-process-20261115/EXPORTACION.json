@@ -1,0 +1,7 @@
+{
+  "scope": "demo process increment only",
+  "manifest": "MANIFEST.json",
+  "full_repository_manifest": false,
+  "state": "PREPARED_FOR_REVIEW",
+  "production_authorized": false
+}

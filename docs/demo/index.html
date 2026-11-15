@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<a class="skip-link" href="#main-content">Saltar al contenido</a>
 <div class="dark">
   <header class="topbar"><div class="wrap">
     <a class="brand" href="./"><img src="assets/logo.jpg" alt="">CASTÚO-SYSTEM</a>
@@ -36,9 +37,19 @@
   </div></section>
 </div>
 
-<main class="wrap">
+<main class="wrap" id="main-content" tabindex="-1">
   <div class="alert" role="note"><strong>Borrador no publicado.</strong> Este candidato se contrasta con el CLI fuente fijado en el commit <a href="https://github.com/Traky12/castuo-e3-001/commit/55cba4500daf7b5cc803c63ccaff01985e4d965f">55cba450</a>. No se afirma que la release v0.1.3, el paquete PyPI ni la imagen GHCR estén publicados. El despliegue público permanece bloqueado hasta comprobar esos artefactos y las pruebas de conformidad.</div>
   <div class="notice" role="note"><strong>Dónde ocurre el cálculo.</strong> En la demo, los hashes SHA-256 y las firmas Ed25519 se calculan en el navegador con WebCrypto. Lo que edites aquí no se envía a ningún servidor. Este borrador no cambia por sí solo la página pública.</div>
+  <section class="card" aria-labelledby="journey-title">
+    <p class="kicker">Empieza por tu objetivo</p>
+    <h2 id="journey-title">Tres recorridos. Una verificación con límites claros.</h2>
+    <div class="journey-grid">
+      <a class="journey-option" href="#probar"><strong>01 · Entender el resultado</strong><span>Prueba el original y después modifica una lectura. Compara los hallazgos con datos sintéticos.</span></a>
+      <a class="journey-option" href="crear.html"><strong>02 · Crear un ejemplo</strong><span>Genera una clave de prueba, crea el manifiesto y firma. No uses credenciales de producción.</span></a>
+      <a class="journey-option" href="paquete.html"><strong>03 · Verificar tu paquete</strong><span>Selecciona una carpeta y fija las claves públicas comprobadas por un canal independiente.</span></a>
+    </div>
+    <p class="body-2"><strong>VERIFIED no equivale a GO.</strong> El informe técnico no autoriza campo, producción, publicación ni ejecución automática.</p>
+  </section>
   <section class="card" id="ecosystem-security" aria-labelledby="ecosystem-security-title">
     <p class="kicker">Integración del ecosistema · Solo laboratorio</p>
     <h2 id="ecosystem-security-title">Seguridad de la cadena: Agro Edge → EvidenceObject → e3bundle</h2>
@@ -240,8 +251,13 @@
       <pre class="terminal">git clone https://github.com/Traky12/castuo-e3-001
 cd castuo-e3-001
 git checkout 55cba4500daf7b5cc803c63ccaff01985e4d965f
-python -m pip install .
-e3bundle verify examples/bundles/valid \
+python -m venv .venv
+# Linux / macOS:
+.venv/bin/python -m pip install .
+# Windows (PowerShell), alternativa:
+# .venv\\Scripts\\python.exe -m pip install .
+# Linux / macOS (en Windows usa .venv\\Scripts\\e3bundle.exe):
+.venv/bin/e3bundle verify examples/bundles/valid \
   --min-signatures 2 \
   --trusted-keys examples/bundles/trusted-keys.json \
   --format text</pre>
@@ -261,7 +277,7 @@ e3bundle verify examples/bundles/valid \
         <li><a href="https://github.com/Traky12/castuo-e3-001/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">Más tareas para empezar</a> · <a href="https://github.com/Traky12/castuo-e3-001/blob/main/PROTOCOL.md">revisar el protocolo E3-001</a> · <a href="https://github.com/Traky12/castuo-e3-001/issues/new?template=feature_request.yml">proponer un caso de uso</a></li>
       </ul>
       <p class="body-2"><strong>Contribuciones externas aceptadas a 10 de octubre de 2026: 2.</strong> la salida legible de <code>verify --format text</code> (<a href="https://github.com/Traky12/castuo-e3-001/pull/32">#32</a>) y los mensajes de error accionables del CLI (<a href="https://github.com/Traky12/castuo-e3-001/pull/72">#72</a>, integrada en <a href="https://github.com/Traky12/castuo-e3-001/pull/73">#73</a>).</p>
-      <p class="body-2">Una reproducción o una contribución no es una validación independiente: la revisión E3-001 exige dos revisores externos que firmen, y hoy hay 0 de 2. Si te interesa ser uno de ellos, pregunta en <a href="https://github.com/Traky12/castuo-e3-001/discussions">Discussions</a>.</p>
+      <p class="body-2">Una reproducción o una contribución no es una validación independiente: la revisión E3-001 exige dos revisores externos que firmen, y cuyo estado debe comprobarse en el expediente vigente. Si te interesa ser uno de ellos, pregunta en <a href="https://github.com/Traky12/castuo-e3-001/discussions">Discussions</a>.</p>
       <p class="body-2"><strong>Vulnerabilidades:</strong> nunca en una issue pública. Repórtalas en privado desde <a href="https://github.com/Traky12/castuo-e3-001/security/advisories/new">Security → Report a vulnerability</a>, con descripción, pasos para reproducir, versión, impacto y, si la tienes, una prueba de concepto. Ver <a href="https://github.com/Traky12/castuo-e3-001/blob/main/SECURITY.md">SECURITY.md</a>.</p>
     </section>
   </div>
@@ -285,7 +301,7 @@ e3bundle verify examples/bundles/valid \
   </section>
 
   <section class="card closing">
-    <p class="closing-text">La demo demuestra que la verificación funciona. El siguiente paso es demostrar que funciona en un caso real, con datos autorizados, personas independientes y criterios definidos.</p>
+    <p class="closing-text">Esta demo permite explorar la verificación con datos sintéticos. La aptitud para un caso real requiere datos autorizados, criterios definidos y revisión independiente.</p>
     <a class="btn brass" href="crear.html">Fase 2: crea y firma el tuyo</a>
   </section>
 </main>
@@ -299,3 +315,4 @@ e3bundle verify examples/bundles/valid \
 <script src="demo.js"></script>
 </body>
 </html>
+

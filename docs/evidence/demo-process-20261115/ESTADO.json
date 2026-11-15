@@ -1,0 +1,30 @@
+{
+  "base_sha": "1cf89700d025a41d1a1e09b3861ac34096385622",
+  "implementation": "IMPLEMENTED",
+  "static_checks": [
+    {
+      "file": "index.html",
+      "duplicate_ids": 0,
+      "missing_local_anchors": 0,
+      "skip_target": true
+    },
+    {
+      "file": "crear.html",
+      "duplicate_ids": 0,
+      "missing_local_anchors": 0,
+      "skip_target": true
+    },
+    {
+      "file": "paquete.html",
+      "duplicate_ids": 0,
+      "missing_local_anchors": 0,
+      "skip_target": true
+    }
+  ],
+  "browser_checks": "BLOCKED: Chromium socket operation not permitted",
+  "cryptographic_conformance": "NOT_TESTED in this change; verifier unchanged",
+  "human_accessibility_review": "PENDING",
+  "independent_review": "PENDING",
+  "decision": "NO_GO",
+  "deployment": "BLOCKED"
+}

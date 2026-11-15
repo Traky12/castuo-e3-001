@@ -1,0 +1,37 @@
+{
+  "files": [
+    {
+      "path": "docs/demo/crear.html",
+      "sha256": "897a5f93ed8fb1db6944c43f8f12b30b39e412c880f8541f1793157596c7cad9"
+    },
+    {
+      "path": "docs/demo/index.html",
+      "sha256": "9159e5a70775d1fcbc8e7317c115f43bc3ef2c49c4c74b928dfddcd1f99b691b"
+    },
+    {
+      "path": "docs/demo/paquete.html",
+      "sha256": "8a926ccde8ad9597e1f1db366752c9d90fbea594453b743812ab8393db045b46"
+    },
+    {
+      "path": "docs/demo/styles.css",
+      "sha256": "a18e4fc48e40c90247edfcaaddd5bb1442a93e62ce36d7af5435a8bc0cf1e54a"
+    },
+    {
+      "path": "docs/evidence/demo-process-20261115/ESTADO.json",
+      "sha256": "6ddcb7919749b4f47463f838511b86c2dd5444c79791f8b340eeb76e547a598b"
+    },
+    {
+      "path": "docs/evidence/demo-process-20261115/EXPORTACION.json",
+      "sha256": "66f744e5e7c06a5753872b1ccba9bc997841b180022419837c61f0ee01f000a3"
+    },
+    {
+      "path": "docs/evidence/demo-process-20261115/REVISION.md",
+      "sha256": "dd75fe4e9d6148d4c2910b8418247fa689f303e4c25d3c5de5c455677c51ab41"
+    }
+  ],
+  "file_count": 7,
+  "global_sha256": "671fef7f519e2f4d18f7674f91fb24ca9f4c28b33c2a8ca38b75b2d02bf8527b",
+  "aggregate_algorithm": "SHA-256 of sorted sha256 + two spaces + relative path + LF",
+  "self_excluded": true,
+  "scope": "increment only"
+}
