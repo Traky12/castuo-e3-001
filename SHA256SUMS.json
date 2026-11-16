@@ -1,12 +1,15 @@
 {
   "schema": "castuo.sha256-manifest.v1",
   "scope": "complete_repository_tree_candidate",
-  "source_base_commit": "26fb34d1094b136824a067795c884999e513331d",
+  "source_base_commit": "975f76cf3d261d34df7c5386098bad4625e7740f",
   "source_refs": {
-    "repair_parent": "26fb34d1094b136824a067795c884999e513331d"
+    "main": "4e41c5c58e2e02361a2118768df9ee83a78038c9",
+    "pr85": "16bfe53cfcb1f916b29800e81a725071f0d79851",
+    "pr91": "fc6886057bbe68a7095eaa4b3e19839dab071056",
+    "pr109": "02d8dba32b2e67355eec1f11b67d609f79a1dd8c"
   },
-  "file_count": 129,
-  "global_sha256": "32ad48786748d01d315b7019bd057904c33d4b06f2ab62736540216b35a46bc9",
+  "file_count": 120,
+  "global_sha256": "d268117513543a39a5d65d8d79f85fef170821bb9dc570fcddabd813bd628ed8",
   "algorithm": "SHA-256",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
@@ -202,36 +205,12 @@
       "sha256": "ac93fb31dea35689337188f0934c45c883a959b205c34b53419bf7917c151832"
     },
     {
+      "path": "docs/architecture/PROPOSED-HANDOFF-CONTRACT.md",
+      "sha256": "c0667124357702533a22cdd0383869ce22c89ea9f6e749cb6b0c9a8fa63e800a"
+    },
+    {
       "path": "docs/assets/demo.svg",
       "sha256": "1f0628ff2ff7f65fdea5ef5e7d84e786713416a96da1c808908c01ec87d3fbf8"
-    },
-    {
-      "path": "docs/delivery/pr122-local-validation/LOCAL-VALIDATION.md",
-      "sha256": "10b166c9fc639d798ff9d3daac37f234125571b73b22a722a3ac0364262fab52"
-    },
-    {
-      "path": "docs/delivery/pr122-local-validation/PROCESS.md",
-      "sha256": "2618db07ce95f894170eefddb37d871e8b59dc9fef7a011e285e073eee120ca9"
-    },
-    {
-      "path": "docs/delivery/pr122-local-validation/README.md",
-      "sha256": "4195fbe12985889931eaae2056cf14990baba6c04ccd8f0eb4a70e5bd5b25bbf"
-    },
-    {
-      "path": "docs/delivery/pr122-local-validation/SHA256SUMS.json",
-      "sha256": "25045977ada2619eb610c58aecd6ee18bf3b7d7b35314558564c2844e19724b2"
-    },
-    {
-      "path": "docs/delivery/pr122-local-validation/STAGING-APPROVAL.md",
-      "sha256": "0fb02b2d851859b90330acf09006011dc5f59944956a63416b3161414d219583"
-    },
-    {
-      "path": "docs/delivery/pr122-local-validation/tasks.json",
-      "sha256": "8374ccacb74745bde675c972e471f7bd5bb37b7b20f3a8e1248af43150d41e15"
-    },
-    {
-      "path": "docs/delivery/pr122-local-validation/validation.json",
-      "sha256": "11f3e915dc96943864163d9e0fbf8e0802e87b495b6efdadb85de5ccad1e126b"
     },
     {
       "path": "docs/demo/INTEGRACION_SEGURIDAD_ECOSISTEMA.md",
@@ -251,7 +230,7 @@
     },
     {
       "path": "docs/demo/crear.html",
-      "sha256": "897a5f93ed8fb1db6944c43f8f12b30b39e412c880f8541f1793157596c7cad9"
+      "sha256": "da7584fa346d5a9c3c7dcbbc4bb179d3fbaf06d81973040c4b3afb1e367dfbd8"
     },
     {
       "path": "docs/demo/crear.js",
@@ -267,7 +246,7 @@
     },
     {
       "path": "docs/demo/index.html",
-      "sha256": "e6731b5656b0716ef64a4cb179a93870b1c1851679b3e4e1ec20467cb553ef62"
+      "sha256": "bb76c819174bc27746a493cc20b19bb22386fb83bb33ccc33118339be11356d3"
     },
     {
       "path": "docs/demo/input.js",
@@ -279,7 +258,7 @@
     },
     {
       "path": "docs/demo/paquete.html",
-      "sha256": "8a926ccde8ad9597e1f1db366752c9d90fbea594453b743812ab8393db045b46"
+      "sha256": "d8d03f7300bf4a302874271fb69bb85f2cf628b5b416e7e001bba87969bbfa35"
     },
     {
       "path": "docs/demo/paquete.js",
@@ -287,7 +266,7 @@
     },
     {
       "path": "docs/demo/styles.css",
-      "sha256": "592b65d061af1789d1f6c2d12cd9f8ef3a09bdbbd46e2b2a2036ea461dd36863"
+      "sha256": "de222e8516c0d1c9daa238e75d49d1342ad1d45684f1fb955a1c208331841ece"
     },
     {
       "path": "docs/demo/tests/conformance.mjs",
@@ -330,24 +309,12 @@
       "sha256": "4b0655904071d35ccc46251f44a4be0060c0dd8b41a42cb9dbe9766e42393675"
     },
     {
-      "path": "docs/evidence/demo-process-20261115/ESTADO.json",
-      "sha256": "b5adbf1f8aaf248c3e8fcdd8462db821b90d0d5f625eb01df00b2744a16a5ec6"
-    },
-    {
-      "path": "docs/evidence/demo-process-20261115/EXPORTACION.json",
-      "sha256": "66f744e5e7c06a5753872b1ccba9bc997841b180022419837c61f0ee01f000a3"
-    },
-    {
-      "path": "docs/evidence/demo-process-20261115/MANIFEST.json",
-      "sha256": "8fce42f69f3fd657d9e981dcbc27dc4b1abcfb9a1b202123db493d246a717b5b"
-    },
-    {
-      "path": "docs/evidence/demo-process-20261115/REVISION.md",
-      "sha256": "6e399d89a1f9d19dea0832feadf7b4e54b11046a5ff3c527da8990f98963c44f"
-    },
-    {
       "path": "docs/governance/CASTUO-ECOSYSTEM-SYNC-2026-08-22.md",
       "sha256": "735d7ef0182b8d21e8f4410bcb775034813a2339481e9b4f30bd405fb170e292"
+    },
+    {
+      "path": "docs/governance/PROPOSED-HANDOFF-GOVERNANCE.md",
+      "sha256": "53e743d243e6bc8606350cad75a531875626101b650ab7d91b6f1f6d8f2e9bb2"
     },
     {
       "path": "docs/tutorial-dataset-tampering.es.md",
