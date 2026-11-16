@@ -8,8 +8,8 @@
     "pr91": "fc6886057bbe68a7095eaa4b3e19839dab071056",
     "pr109": "02d8dba32b2e67355eec1f11b67d609f79a1dd8c"
   },
-  "file_count": 118,
-  "global_sha256": "6050f083941eb2b619602b5f4e58e9a7847aff6dd7b7e8a4c70ba072518f3ef0",
+  "file_count": 120,
+  "global_sha256": "d268117513543a39a5d65d8d79f85fef170821bb9dc570fcddabd813bd628ed8",
   "algorithm": "SHA-256",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
@@ -86,7 +86,7 @@
     },
     {
       "path": ".github/workflows/publish-pypi.yml",
-      "sha256": "bb986a0fe41f8fce4c8fa79f31ba119f62d64aa20cd7201f32ec36d1a52a7acd"
+      "sha256": "ae90bcc2f2098126119eeb7c56e45d737ee8193a4b157d65b50ac6704c8c4800"
     },
     {
       "path": ".github/workflows/secret-scan.yml",
@@ -205,6 +205,10 @@
       "sha256": "ac93fb31dea35689337188f0934c45c883a959b205c34b53419bf7917c151832"
     },
     {
+      "path": "docs/architecture/PROPOSED-HANDOFF-CONTRACT.md",
+      "sha256": "c0667124357702533a22cdd0383869ce22c89ea9f6e749cb6b0c9a8fa63e800a"
+    },
+    {
       "path": "docs/assets/demo.svg",
       "sha256": "1f0628ff2ff7f65fdea5ef5e7d84e786713416a96da1c808908c01ec87d3fbf8"
     },
@@ -307,6 +311,10 @@
     {
       "path": "docs/governance/CASTUO-ECOSYSTEM-SYNC-2026-08-22.md",
       "sha256": "735d7ef0182b8d21e8f4410bcb775034813a2339481e9b4f30bd405fb170e292"
+    },
+    {
+      "path": "docs/governance/PROPOSED-HANDOFF-GOVERNANCE.md",
+      "sha256": "53e743d243e6bc8606350cad75a531875626101b650ab7d91b6f1f6d8f2e9bb2"
     },
     {
       "path": "docs/tutorial-dataset-tampering.es.md",
