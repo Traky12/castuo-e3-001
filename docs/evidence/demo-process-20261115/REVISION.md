@@ -15,3 +15,6 @@ Se conserva el historial del intento local. La CI posterior del PR inicial regis
 Se reconstruyó el árbol de partida e1913eeeb9c2196c4dd998c36808bec2bcbc4e9c y se cotejaron sus blobs Git. El validador original del workflow source-cli-browser-parity reprodujo FAIL en .github/workflows/publish-pypi.yml antes de reparar el manifiesto. No se modifica ese workflow ni sus controles para ocultar el fallo.
 
 Se separan instrucciones POSIX y PowerShell y se identifica su CLI histórico. Reproducción de los comandos en sistemas limpios PENDING. Regenerados manifiesto parcial y global. Pruebas del validador: candidato PASS; mutación, omisión y archivo añadido al índice se rechazan; restauración PASS. Esta evidencia solo cubre integridad del árbol. CI nueva, conformidad sobre SHA final y revisión humana PENDING. Sin merge ni despliegue.
+
+### Seguimiento CI del primer arreglo
+SHA 26fb34d1094b136824a067795c884999e513331d: source-parity PASS (run 43861017717, job 133277540580), incluyendo E3_EXACT_SOURCE_HEAD y manifiesto de 122 archivos. UI Chromium/WebKit detectó scrollWidth 409 > 375 en index y modo avanzado. Se añade ajuste de línea al SHA largo en texto; tests originales conservados. Nueva CI PENDING hasta ejecución del nuevo SHA.

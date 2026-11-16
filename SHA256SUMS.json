@@ -1,12 +1,12 @@
 {
   "schema": "castuo.sha256-manifest.v1",
   "scope": "complete_repository_tree_candidate",
-  "source_base_commit": "e1913eeeb9c2196c4dd998c36808bec2bcbc4e9c",
+  "source_base_commit": "26fb34d1094b136824a067795c884999e513331d",
   "source_refs": {
-    "repair_parent": "e1913eeeb9c2196c4dd998c36808bec2bcbc4e9c"
+    "repair_parent": "26fb34d1094b136824a067795c884999e513331d"
   },
   "file_count": 122,
-  "global_sha256": "d32414aeedabeec08d222e312560a8912d05d8618ffe64f2dcde37cf75f5997d",
+  "global_sha256": "1ae5739f9152837efc1a93efc394eac4f8fae674030358b234989f0f0161f639",
   "algorithm": "SHA-256",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
@@ -259,7 +259,7 @@
     },
     {
       "path": "docs/demo/styles.css",
-      "sha256": "a18e4fc48e40c90247edfcaaddd5bb1442a93e62ce36d7af5435a8bc0cf1e54a"
+      "sha256": "592b65d061af1789d1f6c2d12cd9f8ef3a09bdbbd46e2b2a2036ea461dd36863"
     },
     {
       "path": "docs/demo/tests/conformance.mjs",
@@ -303,7 +303,7 @@
     },
     {
       "path": "docs/evidence/demo-process-20261115/ESTADO.json",
-      "sha256": "e5d398996802b95b268f382ad6ac66232345b27deb7358f1e2065fc80709ddbf"
+      "sha256": "b5adbf1f8aaf248c3e8fcdd8462db821b90d0d5f625eb01df00b2744a16a5ec6"
     },
     {
       "path": "docs/evidence/demo-process-20261115/EXPORTACION.json",
@@ -311,11 +311,11 @@
     },
     {
       "path": "docs/evidence/demo-process-20261115/MANIFEST.json",
-      "sha256": "19967193ef2b5e39ff90a60f1b31ff92ce80490d190520ae21bcbc3e42fe5077"
+      "sha256": "8fce42f69f3fd657d9e981dcbc27dc4b1abcfb9a1b202123db493d246a717b5b"
     },
     {
       "path": "docs/evidence/demo-process-20261115/REVISION.md",
-      "sha256": "2c1cf67eb06748a7756a1a59fa986cc30d314529b239543b0f4bb3617048a8ec"
+      "sha256": "6e399d89a1f9d19dea0832feadf7b4e54b11046a5ff3c527da8990f98963c44f"
     },
     {
       "path": "docs/governance/CASTUO-ECOSYSTEM-SYNC-2026-08-22.md",

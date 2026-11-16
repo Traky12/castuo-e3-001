@@ -180,3 +180,6 @@ input[type="number"] { min-height: 44px; padding: 0 10px; border: 1px solid #c6c
 .grid2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
 .sig-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
 
+
+/* Full commit IDs in prose must wrap without hiding provenance on mobile. */
+.body-2 code { overflow-wrap: anywhere; }

@@ -27,12 +27,17 @@
   "independent_review": "PENDING",
   "decision": "NO_GO",
   "deployment": "BLOCKED",
-  "repair_base_sha": "e1913eeeb9c2196c4dd998c36808bec2bcbc4e9c",
+  "repair_base_sha": "26fb34d1094b136824a067795c884999e513331d",
   "global_manifest_repair": "IMPLEMENTED; verification recorded in REVISION.md",
   "candidate_ci": "PENDING for repaired content",
   "historical_ci": {
     "run": 43752941253,
     "tested_commit": "2259ab32de1c177c06094d6205912aa03e64f23d",
     "scope": "merge-test UI/build, not literal repaired HEAD"
+  },
+  "previous_repair_ci": {
+    "source_parity": "PASS",
+    "ui": "FAIL: horizontal overflow at 375px",
+    "sha": "26fb34d1094b136824a067795c884999e513331d"
   }
 }
