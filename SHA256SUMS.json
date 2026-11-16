@@ -8,8 +8,8 @@
     "pr91": "fc6886057bbe68a7095eaa4b3e19839dab071056",
     "pr109": "02d8dba32b2e67355eec1f11b67d609f79a1dd8c"
   },
-  "file_count": 118,
-  "global_sha256": "a648c8eb0a3e3273be254f508ba591f6b8a885ef08924451154d37826b5d5430",
+  "file_count": 119,
+  "global_sha256": "cf6c2622833676dad67f3a0c28cfafbfb35ee9ea8aba1f8d518b741999143024",
   "algorithm": "SHA-256",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
@@ -203,6 +203,10 @@
     {
       "path": "docs/PYPI-RELEASE-RUNBOOK.es.md",
       "sha256": "ac93fb31dea35689337188f0934c45c883a959b205c34b53419bf7917c151832"
+    },
+    {
+      "path": "docs/architecture/PROPOSED-HANDOFF-CONTRACT.md",
+      "sha256": "c0667124357702533a22cdd0383869ce22c89ea9f6e749cb6b0c9a8fa63e800a"
     },
     {
       "path": "docs/assets/demo.svg",
