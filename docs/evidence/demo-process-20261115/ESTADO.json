@@ -26,5 +26,13 @@
   "human_accessibility_review": "PENDING",
   "independent_review": "PENDING",
   "decision": "NO_GO",
-  "deployment": "BLOCKED"
+  "deployment": "BLOCKED",
+  "repair_base_sha": "e1913eeeb9c2196c4dd998c36808bec2bcbc4e9c",
+  "global_manifest_repair": "IMPLEMENTED; verification recorded in REVISION.md",
+  "candidate_ci": "PENDING for repaired content",
+  "historical_ci": {
+    "run": 43752941253,
+    "tested_commit": "2259ab32de1c177c06094d6205912aa03e64f23d",
+    "scope": "merge-test UI/build, not literal repaired HEAD"
+  }
 }

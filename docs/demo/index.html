@@ -248,19 +248,22 @@
         <li>Si hay una discrepancia, <a href="https://github.com/Traky12/castuo-e3-001/issues/new?template=reproduction_report.yml">abre un informe de reproducción</a>.</li>
         <li>¿Ya tienes un paquete? <a href="paquete.html">Verifícalo en esta página</a>, sin subirlo.</li>
       </ol>
+      <p class="body-2">Estos comandos reproducen el CLI histórico fijado en <code>55cba4500daf7b5cc803c63ccaff01985e4d965f</code>; no prueban el HEAD de este PR. Elige el bloque correspondiente a tu terminal.</p>
+      <h3>Linux / macOS · shell POSIX</h3>
       <pre class="terminal">git clone https://github.com/Traky12/castuo-e3-001
 cd castuo-e3-001
 git checkout 55cba4500daf7b5cc803c63ccaff01985e4d965f
-python -m venv .venv
-# Linux / macOS:
+python3 -m venv .venv
 .venv/bin/python -m pip install .
-# Windows (PowerShell), alternativa:
-# .venv\\Scripts\\python.exe -m pip install .
-# Linux / macOS (en Windows usa .venv\\Scripts\\e3bundle.exe):
-.venv/bin/e3bundle verify examples/bundles/valid \
-  --min-signatures 2 \
-  --trusted-keys examples/bundles/trusted-keys.json \
-  --format text</pre>
+.venv/bin/e3bundle verify examples/bundles/valid --min-signatures 2 --trusted-keys examples/bundles/trusted-keys.json --format text</pre>
+      <h3>Windows · PowerShell</h3>
+      <pre class="terminal">git clone https://github.com/Traky12/castuo-e3-001
+Set-Location castuo-e3-001
+git checkout 55cba4500daf7b5cc803c63ccaff01985e4d965f
+py -3 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install .
+.\.venv\Scripts\e3bundle.exe verify examples/bundles/valid --min-signatures 2 --trusted-keys examples/bundles/trusted-keys.json --format text</pre>
+      <p class="hint">Requiere Git y Python compatibles con la revisión elegida. Estas instrucciones separan las plataformas; su reproducción limpia en cada sistema sigue pendiente.</p>
     </section>
     <section class="card" aria-labelledby="contrib-title">
       <p class="kicker">Contribuye</p>
@@ -277,7 +280,7 @@ python -m venv .venv
         <li><a href="https://github.com/Traky12/castuo-e3-001/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">Más tareas para empezar</a> · <a href="https://github.com/Traky12/castuo-e3-001/blob/main/PROTOCOL.md">revisar el protocolo E3-001</a> · <a href="https://github.com/Traky12/castuo-e3-001/issues/new?template=feature_request.yml">proponer un caso de uso</a></li>
       </ul>
       <p class="body-2"><strong>Contribuciones externas aceptadas a 10 de octubre de 2026: 2.</strong> la salida legible de <code>verify --format text</code> (<a href="https://github.com/Traky12/castuo-e3-001/pull/32">#32</a>) y los mensajes de error accionables del CLI (<a href="https://github.com/Traky12/castuo-e3-001/pull/72">#72</a>, integrada en <a href="https://github.com/Traky12/castuo-e3-001/pull/73">#73</a>).</p>
-      <p class="body-2">Una reproducción o una contribución no es una validación independiente: la revisión E3-001 exige dos revisores externos que firmen, y cuyo estado debe comprobarse en el expediente vigente. Si te interesa ser uno de ellos, pregunta en <a href="https://github.com/Traky12/castuo-e3-001/discussions">Discussions</a>.</p>
+      <p class="body-2">Una reproducción o una contribución no es una validación independiente: la revisión E3-001 exige dos revisores externos que firmen. Su estado debe comprobarse en el expediente vigente. Si te interesa ser uno de ellos, pregunta en <a href="https://github.com/Traky12/castuo-e3-001/discussions">Discussions</a>.</p>
       <p class="body-2"><strong>Vulnerabilidades:</strong> nunca en una issue pública. Repórtalas en privado desde <a href="https://github.com/Traky12/castuo-e3-001/security/advisories/new">Security → Report a vulnerability</a>, con descripción, pasos para reproducir, versión, impacto y, si la tienes, una prueba de concepto. Ver <a href="https://github.com/Traky12/castuo-e3-001/blob/main/SECURITY.md">SECURITY.md</a>.</p>
     </section>
   </div>

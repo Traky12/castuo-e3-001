@@ -1,15 +1,12 @@
 {
   "schema": "castuo.sha256-manifest.v1",
   "scope": "complete_repository_tree_candidate",
-  "source_base_commit": "975f76cf3d261d34df7c5386098bad4625e7740f",
+  "source_base_commit": "e1913eeeb9c2196c4dd998c36808bec2bcbc4e9c",
   "source_refs": {
-    "main": "4e41c5c58e2e02361a2118768df9ee83a78038c9",
-    "pr85": "16bfe53cfcb1f916b29800e81a725071f0d79851",
-    "pr91": "fc6886057bbe68a7095eaa4b3e19839dab071056",
-    "pr109": "02d8dba32b2e67355eec1f11b67d609f79a1dd8c"
+    "repair_parent": "e1913eeeb9c2196c4dd998c36808bec2bcbc4e9c"
   },
-  "file_count": 118,
-  "global_sha256": "6050f083941eb2b619602b5f4e58e9a7847aff6dd7b7e8a4c70ba072518f3ef0",
+  "file_count": 122,
+  "global_sha256": "d32414aeedabeec08d222e312560a8912d05d8618ffe64f2dcde37cf75f5997d",
   "algorithm": "SHA-256",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
@@ -86,7 +83,7 @@
     },
     {
       "path": ".github/workflows/publish-pypi.yml",
-      "sha256": "bb986a0fe41f8fce4c8fa79f31ba119f62d64aa20cd7201f32ec36d1a52a7acd"
+      "sha256": "ae90bcc2f2098126119eeb7c56e45d737ee8193a4b157d65b50ac6704c8c4800"
     },
     {
       "path": ".github/workflows/secret-scan.yml",
@@ -226,7 +223,7 @@
     },
     {
       "path": "docs/demo/crear.html",
-      "sha256": "da7584fa346d5a9c3c7dcbbc4bb179d3fbaf06d81973040c4b3afb1e367dfbd8"
+      "sha256": "897a5f93ed8fb1db6944c43f8f12b30b39e412c880f8541f1793157596c7cad9"
     },
     {
       "path": "docs/demo/crear.js",
@@ -242,7 +239,7 @@
     },
     {
       "path": "docs/demo/index.html",
-      "sha256": "bb76c819174bc27746a493cc20b19bb22386fb83bb33ccc33118339be11356d3"
+      "sha256": "e6731b5656b0716ef64a4cb179a93870b1c1851679b3e4e1ec20467cb553ef62"
     },
     {
       "path": "docs/demo/input.js",
@@ -254,7 +251,7 @@
     },
     {
       "path": "docs/demo/paquete.html",
-      "sha256": "d8d03f7300bf4a302874271fb69bb85f2cf628b5b416e7e001bba87969bbfa35"
+      "sha256": "8a926ccde8ad9597e1f1db366752c9d90fbea594453b743812ab8393db045b46"
     },
     {
       "path": "docs/demo/paquete.js",
@@ -262,7 +259,7 @@
     },
     {
       "path": "docs/demo/styles.css",
-      "sha256": "de222e8516c0d1c9daa238e75d49d1342ad1d45684f1fb955a1c208331841ece"
+      "sha256": "a18e4fc48e40c90247edfcaaddd5bb1442a93e62ce36d7af5435a8bc0cf1e54a"
     },
     {
       "path": "docs/demo/tests/conformance.mjs",
@@ -303,6 +300,22 @@
     {
       "path": "docs/demo/verifier.js",
       "sha256": "4b0655904071d35ccc46251f44a4be0060c0dd8b41a42cb9dbe9766e42393675"
+    },
+    {
+      "path": "docs/evidence/demo-process-20261115/ESTADO.json",
+      "sha256": "e5d398996802b95b268f382ad6ac66232345b27deb7358f1e2065fc80709ddbf"
+    },
+    {
+      "path": "docs/evidence/demo-process-20261115/EXPORTACION.json",
+      "sha256": "66f744e5e7c06a5753872b1ccba9bc997841b180022419837c61f0ee01f000a3"
+    },
+    {
+      "path": "docs/evidence/demo-process-20261115/MANIFEST.json",
+      "sha256": "19967193ef2b5e39ff90a60f1b31ff92ce80490d190520ae21bcbc3e42fe5077"
+    },
+    {
+      "path": "docs/evidence/demo-process-20261115/REVISION.md",
+      "sha256": "2c1cf67eb06748a7756a1a59fa986cc30d314529b239543b0f4bb3617048a8ec"
     },
     {
       "path": "docs/governance/CASTUO-ECOSYSTEM-SYNC-2026-08-22.md",
