@@ -9,7 +9,7 @@
     "pr109": "02d8dba32b2e67355eec1f11b67d609f79a1dd8c"
   },
   "file_count": 120,
-  "global_sha256": "60831c494e6af59a476e5d0bb3e347032e1a6e8e4071be3f245006e860654068",
+  "global_sha256": "d268117513543a39a5d65d8d79f85fef170821bb9dc570fcddabd813bd628ed8",
   "algorithm": "SHA-256",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
@@ -314,7 +314,7 @@
     },
     {
       "path": "docs/governance/PROPOSED-HANDOFF-GOVERNANCE.md",
-      "sha256": "6bbad3432f4c3a64855493b0fd08f809048ec2d961e646914382320e8ce070f1"
+      "sha256": "53e743d243e6bc8606350cad75a531875626101b650ab7d91b6f1f6d8f2e9bb2"
     },
     {
       "path": "docs/tutorial-dataset-tampering.es.md",
