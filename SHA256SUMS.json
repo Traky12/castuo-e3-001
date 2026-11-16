@@ -9,7 +9,7 @@
     "pr109": "02d8dba32b2e67355eec1f11b67d609f79a1dd8c"
   },
   "file_count": 118,
-  "global_sha256": "6050f083941eb2b619602b5f4e58e9a7847aff6dd7b7e8a4c70ba072518f3ef0",
+  "global_sha256": "a648c8eb0a3e3273be254f508ba591f6b8a885ef08924451154d37826b5d5430",
   "algorithm": "SHA-256",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
@@ -86,7 +86,7 @@
     },
     {
       "path": ".github/workflows/publish-pypi.yml",
-      "sha256": "bb986a0fe41f8fce4c8fa79f31ba119f62d64aa20cd7201f32ec36d1a52a7acd"
+      "sha256": "ae90bcc2f2098126119eeb7c56e45d737ee8193a4b157d65b50ac6704c8c4800"
     },
     {
       "path": ".github/workflows/secret-scan.yml",
