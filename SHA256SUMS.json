@@ -8,8 +8,8 @@
     "pr91": "fc6886057bbe68a7095eaa4b3e19839dab071056",
     "pr109": "02d8dba32b2e67355eec1f11b67d609f79a1dd8c"
   },
-  "file_count": 119,
-  "global_sha256": "cf6c2622833676dad67f3a0c28cfafbfb35ee9ea8aba1f8d518b741999143024",
+  "file_count": 120,
+  "global_sha256": "60831c494e6af59a476e5d0bb3e347032e1a6e8e4071be3f245006e860654068",
   "algorithm": "SHA-256",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
@@ -311,6 +311,10 @@
     {
       "path": "docs/governance/CASTUO-ECOSYSTEM-SYNC-2026-08-22.md",
       "sha256": "735d7ef0182b8d21e8f4410bcb775034813a2339481e9b4f30bd405fb170e292"
+    },
+    {
+      "path": "docs/governance/PROPOSED-HANDOFF-GOVERNANCE.md",
+      "sha256": "6bbad3432f4c3a64855493b0fd08f809048ec2d961e646914382320e8ce070f1"
     },
     {
       "path": "docs/tutorial-dataset-tampering.es.md",
