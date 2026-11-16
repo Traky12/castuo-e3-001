@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "tasks": [
+    {
+      "id": "EVID-001",
+      "title": "Revisar y sanear evidencias",
+      "owner_role": "Proyecto",
+      "assignee": null,
+      "status": "PLAN",
+      "depends_on": [],
+      "acceptance": "Originales conservados; copias publicables revisadas.",
+      "remote_issue": null
+    },
+    {
+      "id": "TRACE-001",
+      "title": "Confirmar destinos de seguimiento",
+      "owner_role": "Proyecto",
+      "assignee": null,
+      "status": "PLAN",
+      "depends_on": [],
+      "acceptance": "PR #122, issue #123 y GOVERNANCE-001 localizados sin duplicados.",
+      "remote_issue": null
+    },
+    {
+      "id": "PUB-001",
+      "title": "Autorizar y publicar evidencias",
+      "owner_role": "Propietario",
+      "assignee": null,
+      "status": "PLAN",
+      "depends_on": [
+        "EVID-001",
+        "TRACE-001"
+      ],
+      "acceptance": "Destinos, contenido y adjuntos aprobados; publicación registrada.",
+      "remote_issue": null
+    },
+    {
+      "id": "REVIEW-001",
+      "title": "Revisión independiente",
+      "owner_role": "Revisor independiente",
+      "assignee": null,
+      "status": "PLAN",
+      "depends_on": [
+        "EVID-001"
+      ],
+      "acceptance": "SHA revisado y resultados independientes registrados.",
+      "remote_issue": null
+    },
+    {
+      "id": "VISUAL-001",
+      "title": "Aceptación visual",
+      "owner_role": "Revisor visual",
+      "assignee": null,
+      "status": "PLAN",
+      "depends_on": [],
+      "acceptance": "Matriz móvil/escritorio, SHA y límites de demo aceptados.",
+      "remote_issue": null
+    },
+    {
+      "id": "ACTIONS-001",
+      "title": "Actualizar diagnóstico de Actions",
+      "owner_role": "Ejecutor",
+      "assignee": null,
+      "status": "PLAN",
+      "depends_on": [],
+      "acceptance": "Runs, SHA y mensajes exactos registrados por repositorio.",
+      "remote_issue": null
+    },
+    {
+      "id": "BILLING-001",
+      "title": "Resolver bloqueo si sigue vigente",
+      "owner_role": "Administrador de facturación",
+      "assignee": null,
+      "status": "PLAN",
+      "depends_on": [
+        "ACTIONS-001"
+      ],
+      "acceptance": "Causa resuelta con presupuesto autorizado, o no aplicable explicado.",
+      "remote_issue": null
+    },
+    {
+      "id": "CI-001",
+      "title": "Ejecutar controles oficiales",
+      "owner_role": "Ejecutor autorizado",
+      "assignee": null,
+      "status": "PLAN",
+      "depends_on": [
+        "BILLING-001"
+      ],
+      "acceptance": "Resultados por SHA; fallos y omisiones clasificados.",
+      "remote_issue": null
+    },
+    {
+      "id": "FIX-001",
+      "title": "Reparar solo fallos demostrados",
+      "owner_role": "Ejecutor y revisor",
+      "assignee": null,
+      "status": "PLAN",
+      "depends_on": [
+        "CI-001"
+      ],
+      "acceptance": "Cambios mínimos autorizados y regresiones verificadas, o no aplicable.",
+      "remote_issue": null
+    },
+    {
+      "id": "STAGING-001",
+      "title": "Definir y aprobar staging",
+      "owner_role": "Responsable de staging",
+      "assignee": null,
+      "status": "PLAN",
+      "depends_on": [],
+      "acceptance": "Ficha completa con coste, datos, permisos, artefacto y reversión.",
+      "remote_issue": null
+    },
+    {
+      "id": "STAGING-002",
+      "title": "Validar staging autorizado",
+      "owner_role": "Ejecutor y aceptador",
+      "assignee": null,
+      "status": "PLAN",
+      "depends_on": [
+        "STAGING-001",
+        "CI-001",
+        "FIX-001",
+        "REVIEW-001",
+        "VISUAL-001"
+      ],
+      "acceptance": "Pruebas acordadas y aceptación registradas; sin GO de producción.",
+      "remote_issue": null
+    }
+  ]
+}

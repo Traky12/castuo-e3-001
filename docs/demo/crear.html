@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<a class="skip-link" href="#main-content">Saltar al contenido</a>
 <div class="dark">
   <header class="topbar"><div class="wrap">
     <a class="brand" href="./"><img src="assets/logo.jpg" alt="">CASTÚO-SYSTEM</a>
@@ -23,7 +24,7 @@
     <div class="text">
       <p class="eyebrow">e3bundle v0.1.1 · demo ejecutable · fase 2 de 2</p>
       <h1>Crea, firma y verifica tu propio paquete.</h1>
-      <p class="lede">Las cuatro órdenes de e3bundle —keygen, manifest, sign y verify— ejecutadas en tu navegador. El resultado es un paquete e3.bundle.v1 que la herramienta de terminal verifica igual: la integración continua lo comprueba en cada cambio.</p>
+      <p class="lede">Las cuatro órdenes de e3bundle —keygen, manifest, sign y verify— ejecutadas en tu navegador. El resultado es un paquete e3.bundle.v1 para contrastar con el CLI. La equivalencia debe acreditarse con pruebas sobre la misma revisión; crear una firma aquí no constituye revisión independiente.</p>
       <p class="small-dark">La clave privada se genera en la memoria de esta pestaña y no se envía a ningún servidor. No se conserva al cerrar o recargar la página. Usa solo datos de prueba.</p>
     </div>
     <img src="assets/logo.jpg" alt="Logotipo oficial de CASTÚO-SYSTEM" width="190" height="190">
@@ -31,7 +32,7 @@
   <div class="wrap"><ol class="progress" id="progress" aria-label="Progreso"></ol></div>
 </div>
 
-<main class="wrap">
+<main class="wrap" id="main-content" tabindex="-1">
   <div class="alert" id="unsupported" hidden>Tu navegador no admite Ed25519 en WebCrypto, así que no puede generar ni comprobar firmas aquí. Puedes hacerlo con el CLI: <code>e3bundle keygen</code>, <code>manifest</code>, <code>sign</code> y <code>verify</code>.</div>
 
   <article class="card">
@@ -110,3 +111,4 @@ Dos lecturas de humedad de un lote ficticio.
 <script src="crear.js"></script>
 </body>
 </html>
+

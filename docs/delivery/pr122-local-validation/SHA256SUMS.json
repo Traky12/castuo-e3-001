@@ -1,0 +1,13 @@
+{
+  "algorithm": "SHA-256",
+  "scope": "Files in this documentation package, excluding this manifest.",
+  "authenticity_claim": false,
+  "files": {
+    "LOCAL-VALIDATION.md": "10b166c9fc639d798ff9d3daac37f234125571b73b22a722a3ac0364262fab52",
+    "PROCESS.md": "2618db07ce95f894170eefddb37d871e8b59dc9fef7a011e285e073eee120ca9",
+    "README.md": "4195fbe12985889931eaae2056cf14990baba6c04ccd8f0eb4a70e5bd5b25bbf",
+    "STAGING-APPROVAL.md": "0fb02b2d851859b90330acf09006011dc5f59944956a63416b3161414d219583",
+    "tasks.json": "8374ccacb74745bde675c972e471f7bd5bb37b7b20f3a8e1248af43150d41e15",
+    "validation.json": "11f3e915dc96943864163d9e0fbf8e0802e87b495b6efdadb85de5ccad1e126b"
+  }
+}
