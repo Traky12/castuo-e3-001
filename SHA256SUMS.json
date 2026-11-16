@@ -5,8 +5,8 @@
   "source_refs": {
     "repair_parent": "26fb34d1094b136824a067795c884999e513331d"
   },
-  "file_count": 122,
-  "global_sha256": "1ae5739f9152837efc1a93efc394eac4f8fae674030358b234989f0f0161f639",
+  "file_count": 129,
+  "global_sha256": "32ad48786748d01d315b7019bd057904c33d4b06f2ab62736540216b35a46bc9",
   "algorithm": "SHA-256",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
@@ -204,6 +204,34 @@
     {
       "path": "docs/assets/demo.svg",
       "sha256": "1f0628ff2ff7f65fdea5ef5e7d84e786713416a96da1c808908c01ec87d3fbf8"
+    },
+    {
+      "path": "docs/delivery/pr122-local-validation/LOCAL-VALIDATION.md",
+      "sha256": "10b166c9fc639d798ff9d3daac37f234125571b73b22a722a3ac0364262fab52"
+    },
+    {
+      "path": "docs/delivery/pr122-local-validation/PROCESS.md",
+      "sha256": "2618db07ce95f894170eefddb37d871e8b59dc9fef7a011e285e073eee120ca9"
+    },
+    {
+      "path": "docs/delivery/pr122-local-validation/README.md",
+      "sha256": "4195fbe12985889931eaae2056cf14990baba6c04ccd8f0eb4a70e5bd5b25bbf"
+    },
+    {
+      "path": "docs/delivery/pr122-local-validation/SHA256SUMS.json",
+      "sha256": "25045977ada2619eb610c58aecd6ee18bf3b7d7b35314558564c2844e19724b2"
+    },
+    {
+      "path": "docs/delivery/pr122-local-validation/STAGING-APPROVAL.md",
+      "sha256": "0fb02b2d851859b90330acf09006011dc5f59944956a63416b3161414d219583"
+    },
+    {
+      "path": "docs/delivery/pr122-local-validation/tasks.json",
+      "sha256": "8374ccacb74745bde675c972e471f7bd5bb37b7b20f3a8e1248af43150d41e15"
+    },
+    {
+      "path": "docs/delivery/pr122-local-validation/validation.json",
+      "sha256": "11f3e915dc96943864163d9e0fbf8e0802e87b495b6efdadb85de5ccad1e126b"
     },
     {
       "path": "docs/demo/INTEGRACION_SEGURIDAD_ECOSISTEMA.md",
