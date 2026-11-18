@@ -8,8 +8,8 @@
     "pr91": "fc6886057bbe68a7095eaa4b3e19839dab071056",
     "pr109": "02d8dba32b2e67355eec1f11b67d609f79a1dd8c"
   },
-  "file_count": 120,
-  "global_sha256": "d268117513543a39a5d65d8d79f85fef170821bb9dc570fcddabd813bd628ed8",
+  "file_count": 121,
+  "global_sha256": "dcd94770423b7effbe1aa260428535cbf53f2d216f752a891147d7edf5b17e8a",
   "algorithm": "SHA-256",
   "aggregation": "SHA256(concat(sorted(relative UTF-8 path + NUL + file SHA256 lowercase hex + LF)))",
   "self_excluded": true,
@@ -315,6 +315,10 @@
     {
       "path": "docs/governance/PROPOSED-HANDOFF-GOVERNANCE.md",
       "sha256": "53e743d243e6bc8606350cad75a531875626101b650ab7d91b6f1f6d8f2e9bb2"
+    },
+    {
+      "path": "docs/integrations/DATAROBOT-JDBC-POLICY.md",
+      "sha256": "19ed11fc45d638f174d9ca4c0c6b37023cb0d508111f711a12c57c6e2d8e6838"
     },
     {
       "path": "docs/tutorial-dataset-tampering.es.md",
