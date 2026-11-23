@@ -78,6 +78,13 @@ jobs:
         env:
           VERSION: ${{ steps.src.outputs.version }}
         run: docker build -f Dockerfile -t e3bundle:test --build-arg VERSION="$VERSION" --build-arg REVISION="$(git -C src rev-parse HEAD)" src
+      - name: Trivy image scan (informational)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: e3bundle:test
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: '0'
       - name: Smoke test (valid passes, tampered fails, non-root)
         run: |
           set -u
